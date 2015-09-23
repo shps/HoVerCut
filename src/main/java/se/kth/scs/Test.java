@@ -7,6 +7,7 @@ import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.graph.Graph;
 import se.kth.scs.partitioning.Partition;
+import se.kth.scs.partitioning.PartitionsStatistics;
 import se.kth.scs.partitioning.UniformRandomPartitioner;
 
 /**
@@ -34,11 +35,20 @@ public class Test {
 
     final int k = 4; // number of partitions
     Partition[] partitions = UniformRandomPartitioner.partition(edges, k);
-
+    PartitionsStatistics ps = new PartitionsStatistics(partitions);
+    System.out.println("*********** Statistics ***********");
     System.out.println(String.format("N=%d\t M=%d", n, m));
     for (int i = 0; i < k; i++) {
-      System.out.println(String.format("Partition %d\tn=%d\tm=%d", i, partitions[i].vertexSize(), partitions[i].edgeSize()));
+      System.out.println(String.format("Partition %d\tn=%d\tm=%d", 
+          i,
+          partitions[i].vertexSize(), 
+          partitions[i].edgeSize()));
     }
+    System.out.println(String.format("RF=%f\tLRSD=%f\tMEC=%d\tMVC=%d",
+        ps.replicationFactor(),
+        ps.loadRelativeStandardDeviation(),
+        ps.maxEdgeCardinality(),
+        ps.maxVertexCardinality()));
   }
 
 //  public static final class SelfRepliesFilter implements FilterFunction<Tuple3<Long, Long, Double>> {
