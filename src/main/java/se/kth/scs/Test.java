@@ -1,17 +1,13 @@
 package se.kth.scs;
 
-import java.security.SecureRandom;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
-import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.graph.Graph;
+import se.kth.scs.partitioning.Partition;
+import se.kth.scs.partitioning.UniformRandomPartitioner;
 
 /**
  *
@@ -37,24 +33,11 @@ public class Test {
     List<Tuple3<Long, Long, Double>> edges = citation.collect();
 
     final int k = 4; // number of partitions
-    final HashSet<Long>[] vPartitions = new HashSet[k];
-    final HashSet<Tuple3<Long, Long, Double>>[] ePartitions = new HashSet[k];
-    for (int i = 0; i < k; i++) {
-      vPartitions[i] = new HashSet<>();
-      ePartitions[i] = new HashSet<>();
-    }
-
-    SecureRandom r = new SecureRandom();
-    for (Tuple3<Long, Long, Double> e : edges) {
-      int p = r.nextInt(k);
-      ePartitions[p].add(e);
-      vPartitions[p].add(e.f0);
-      vPartitions[p].add(e.f1);
-    }
+    Partition[] partitions = UniformRandomPartitioner.partition(edges, k);
 
     System.out.println(String.format("N=%d\t M=%d", n, m));
     for (int i = 0; i < k; i++) {
-      System.out.println(String.format("Partition %d\tn=%d\tm=%d", i, vPartitions[i].size(), ePartitions[i].size()));
+      System.out.println(String.format("Partition %d\tn=%d\tm=%d", i, partitions[i].vertexSize(), partitions[i].edgeSize()));
     }
   }
 
@@ -65,7 +48,6 @@ public class Test {
 //      return Objects.equals(tuple.f0, tuple.f1);
 //    }
 //  }
-
   public static final class InitVertices implements MapFunction<Long, Double> {
 
     @Override
