@@ -8,7 +8,8 @@ import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.graph.Graph;
 import se.kth.scs.partitioning.Partition;
 import se.kth.scs.partitioning.PartitionsStatistics;
-import se.kth.scs.partitioning.UniformRandomPartitioner;
+import se.kth.scs.partitioning.algorithms.HdrfPartitioner;
+import se.kth.scs.partitioning.algorithms.UniformRandomPartitioner;
 
 /**
  *
@@ -33,15 +34,28 @@ public class Test {
     long m = graph.getEdges().count();
     List<Tuple3<Long, Long, Double>> edges = citation.collect();
 
+    // Partition graph.
     final int k = 4; // number of partitions
-    Partition[] partitions = UniformRandomPartitioner.partition(edges, k);
+    Partition[] uPartitions = UniformRandomPartitioner.partition(edges, k);
+
+    double lambda = 0.5;
+    double epsilon = 0.01;
+    Partition[] hPartitions = HdrfPartitioner.partition(edges, k, lambda, epsilon);
+
+    printResults(n, m, k, uPartitions, "UniformRandomPartitioner");
+    printResults(n, m, k, hPartitions, String.format("HdrfPartitioner lambda=%f\tepsilon=%f", lambda, epsilon));
+
+  }
+
+  private static void printResults(long n, long m, int k, Partition[] partitions, String message) {
     PartitionsStatistics ps = new PartitionsStatistics(partitions);
     System.out.println("*********** Statistics ***********");
+    System.out.println(message);
     System.out.println(String.format("N=%d\t M=%d", n, m));
     for (int i = 0; i < k; i++) {
-      System.out.println(String.format("Partition %d\tn=%d\tm=%d", 
+      System.out.println(String.format("Partition %d\tn=%d\tm=%d",
           i,
-          partitions[i].vertexSize(), 
+          partitions[i].vertexSize(),
           partitions[i].edgeSize()));
     }
     System.out.println(String.format("RF=%f\tLRSD=%f\tMEC=%d\tMVC=%d",

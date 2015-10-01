@@ -51,4 +51,8 @@ public class Partition {
   public int vertexSize() {
     return vertices.size();
   }
+
+  public boolean containsVertex(long vId) {
+    return vertices.contains(vId);
+  }
 }

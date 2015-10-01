@@ -1,8 +1,9 @@
-package se.kth.scs.partitioning;
+package se.kth.scs.partitioning.algorithms;
 
 import java.security.SecureRandom;
 import java.util.List;
 import org.apache.flink.api.java.tuple.Tuple3;
+import se.kth.scs.partitioning.Partition;
 
 /**
  *
