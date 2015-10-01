@@ -55,8 +55,8 @@ public class HdrfPartitioner {
       // Compute C score for each partition.
       double maxChdrf = Long.MIN_VALUE;
       Partition maxPartition = null;
-      int maxSize = Integer.MIN_VALUE;
-      int minSize = Integer.MAX_VALUE;
+      int maxSize = 0;
+      int minSize = 0;
 
       for (Partition p : partitions) {
         double cRep = computeCReplication(p, v1, v2, thetaV1, thetaV2);
