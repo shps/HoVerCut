@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import org.apache.flink.api.java.tuple.Tuple3;
 import se.kth.scs.partitioning.Partition;
+import utils.HashMapUtil;
 
 /**
  * This class is an implementation of the HDRF partitioning algorithm. Paper: Petroni, Fabio, et al. "HDRF: Stream-Based
@@ -47,8 +48,8 @@ public class HdrfPartitioner {
       long v1 = t.f0;
       long v2 = t.f1;
 
-      int deltaV1 = updateVertexDegree(vDegrees, v1);
-      int deltaV2 = updateVertexDegree(vDegrees, v2);
+      int deltaV1 = HashMapUtil.increaseValueByOne(vDegrees, v1);
+      int deltaV2 = HashMapUtil.increaseValueByOne(vDegrees, v2);
       double thetaV1 = (double) deltaV1 / (double) (deltaV1 + deltaV2);
       double thetaV2 = 1 - thetaV1;
 
@@ -83,16 +84,6 @@ public class HdrfPartitioner {
     }
 
     return partitions;
-  }
-
-  private static int updateVertexDegree(HashMap<Long, Integer> vDegrees, long v) {
-    if (!vDegrees.containsKey(v)) {
-      vDegrees.put(v, 1);
-    } else {
-      vDegrees.put(v, vDegrees.get(v) + 1);
-    }
-
-    return vDegrees.get(v);
   }
 
   private static double computeCReplication(Partition p, long v1, long v2, double thetaV1, double thetaV2) {
