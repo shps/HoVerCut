@@ -1,5 +1,6 @@
 package se.kth.scs.partitioning.algorithms;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.flink.api.java.tuple.Tuple3;
@@ -36,7 +37,7 @@ public class HdrfPartitioner {
    * @param epsilon
    * @return
    */
-  public static Partition[] partition(List<Tuple3<Long, Long, Double>> edges, int k, double lambda, double epsilon) {
+  public static Partition[] partition(Collection<Tuple3<Long, Long, Double>> edges, int k, double lambda, double epsilon) {
     final HashMap<Long, Integer> vDegrees = new HashMap<>(); // Holds partial degree of each vertex.
     final Partition[] partitions = new Partition[k];
     for (int i = 0; i < k; i++) {
