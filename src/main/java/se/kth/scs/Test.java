@@ -21,9 +21,9 @@ public class Test {
 
   public static void main(String[] args) throws Exception {
     String file = "./data/Cit-HepTh.txt";
+    boolean flink = false;
 
     // set up the execution environment
-//    final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
     EdgeFileReader reader = new EdgeFileReader();
     Collection<Tuple3<Long, Long, Double>> edges = reader.read(file);
 
@@ -38,8 +38,12 @@ public class Test {
 //    Graph<Long, Double, Double> graph = Graph.fromTupleDataSet(dataset, new InitVertices(), env);
 //    long n = graph.getVertices().count();
 //    long m = graph.getEdges().count();
-//    List<Tuple3<Long, Long, Double>> edges = dataset.collect();
-    
+    if (flink) {
+      final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
+      DataSet<Tuple3<Long, Long, Double>> dataset = env.fromCollection(edges);
+      edges = dataset.collect();
+    }
+
     // Partition graph.
     final int k = 4; // number of partitions
     Partition[] uPartitions = UniformRandomPartitioner.partition(edges, k);
