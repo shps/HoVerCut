@@ -9,50 +9,61 @@ import org.apache.flink.api.java.tuple.Tuple3;
  */
 public class Partition {
 
-  private final HashSet<Long> vertices;
-  private final HashSet<Tuple3<Long, Long, Double>> edges;
+    private final HashSet<Long> vertices;
+//    private final HashSet<Tuple3<Long, Long, Double>> edges;
+    private int edgeSize = 0;
+    private final int id;
 
-  public Partition() {
-    vertices = new HashSet<>();
-    edges = new HashSet<>();
-  }
+    public Partition(int id) {
+        this.id = id;
+        vertices = new HashSet<>();
+//        edges = new HashSet<>();
+    }
 
-  /**
-   * Adds an edge to this partition while cloning end-point vertices in this partition (Vertex-Cut).
-   *
-   * @param edge
-   */
-  public void addEdge(Tuple3<Long, Long, Double> edge) {
-    edges.add(edge);
-    vertices.add(edge.f0);
-    vertices.add(edge.f1);
-  }
+    /**
+     * Adds an edge to this partition while cloning end-point vertices in this
+     * partition (Vertex-Cut).
+     *
+     * @param edge
+     */
+    public void addEdge(Tuple3<Long, Long, Double> edge) {
+//        edges.add(edge);
+        edgeSize++;
+        vertices.add(edge.f0);
+        vertices.add(edge.f1);
+    }
 
-  /**
-   * @return the vertices
-   */
-  public Long[] getVertices() {
-    Long[] copy = new Long[vertices.size()];
-    return vertices.toArray(copy);
-  }
+    /**
+     * @return the vertices
+     */
+    public Long[] getVertices() {
+        Long[] copy = new Long[vertices.size()];
+        return vertices.toArray(copy);
+    }
 
-  /**
-   * @return the edges
-   */
-  public Tuple3<Long, Long, Double>[] getEdges() {
-    Tuple3<Long, Long, Double>[] copy = new Tuple3[edges.size()];
-    return edges.toArray(copy);
-  }
+    public int edgeSize() {
+        return edgeSize;
+    }
 
-  public int edgeSize() {
-    return edges.size();
-  }
+    public int vertexSize() {
+        return vertices.size();
+    }
 
-  public int vertexSize() {
-    return vertices.size();
-  }
+    public boolean containsVertex(long vId) {
+        return vertices.contains(vId);
+    }
 
-  public boolean containsVertex(long vId) {
-    return vertices.contains(vId);
-  }
+    /**
+     * @return the id
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * @param edgeSize the edgeSize to set
+     */
+    public void setEdgeSize(int edgeSize) {
+        this.edgeSize = edgeSize;
+    }
 }

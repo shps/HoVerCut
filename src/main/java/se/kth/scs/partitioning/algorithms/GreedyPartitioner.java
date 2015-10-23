@@ -17,7 +17,7 @@ public class GreedyPartitioner {
   public static Partition[] partition(List<Tuple3<Long, Long, Double>> edges, int k) {
     final Partition[] partitions = new Partition[k];
     for (int i = 0; i < k; i++) {
-      partitions[i] = new Partition();
+      partitions[i] = new Partition(i);
     }
     
     for (Tuple3<Long, Long, Double> e : edges) {
