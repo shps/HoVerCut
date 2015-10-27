@@ -26,7 +26,7 @@ public class Vertex {
      * @return true if partition does not exist and false if it already exists.
      */
     public boolean addPartition(int p) {
-        if (!partitions.contains(p)) {
+        if (!this.containsPartition(p)) {
             getPartitionsDelta().add(p);
             return true;
         }

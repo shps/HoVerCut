@@ -37,15 +37,13 @@ public class HdrfPartitioner {
         Set<Long> vertices = new HashSet();
         for (Tuple3<Long, Long, Double> e : edges) {
             System.out.println(String.format("%d Received %d -> %d.", counter, e.f0, e.f1));
+            edgeWindow.add(e);
+            vertices.add(e.f0);
+            vertices.add(e.f1);
             if (counter % windowSize == 0) {
-
                 allocateNextWindow(edgeWindow, vertices, state, lambda, epsilon);
                 edgeWindow.clear();
                 vertices.clear();
-            } else {
-                edgeWindow.add(e);
-                vertices.add(e.f0);
-                vertices.add(e.f1);
             }
             counter++;
         }

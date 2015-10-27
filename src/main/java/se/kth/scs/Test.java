@@ -6,6 +6,7 @@ import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple3;
 import se.kth.scs.partitioning.PartitionsStatistics;
+import se.kth.scs.partitioning.algorithms.HdrfInMemoryState;
 import se.kth.scs.partitioning.algorithms.HdrfMySqlQueries;
 import se.kth.scs.partitioning.algorithms.HdrfMysqlState;
 import se.kth.scs.partitioning.algorithms.HdrfPartitioner;
@@ -38,10 +39,11 @@ public class Test {
 //        UniformRandomPartitioner.partition(urState, edges);
 //        printResults(k, urState, String.format("UinformRandomPartitioner"));
         
-        int windowSize = 100;
+        int windowSize = 1000;
         double lambda = 1;
         double epsilon = 1;
-        PartitionState hState = new HdrfMysqlState(k, 1, HdrfMySqlQueries.DEFAULT_DB_URL, HdrfMySqlQueries.DEFAULT_USER, HdrfMySqlQueries.DEFAULT_PASS, true);
+        PartitionState hState = new HdrfInMemoryState(k);
+//        PartitionState hState = new HdrfMysqlState(k, 1, HdrfMySqlQueries.DEFAULT_DB_URL, HdrfMySqlQueries.DEFAULT_USER, HdrfMySqlQueries.DEFAULT_PASS, true);
         HdrfPartitioner.partitionWithWindow(hState, edges, lambda, epsilon, windowSize);
 
 //        printResults(k, uPartitions, "UniformRandomPartitioner");
