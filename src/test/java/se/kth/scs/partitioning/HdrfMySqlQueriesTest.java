@@ -4,7 +4,15 @@ import se.kth.scs.partitioning.algorithms.HdrfMySqlQueries;
 import com.mysql.jdbc.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import junit.framework.TestCase;
+import se.kth.scs.partitioning.algorithms.Vertex;
+import se.kth.scs.partitioning.algorithms.Partition;
 
 /**
  *
@@ -18,21 +26,42 @@ public class HdrfMySqlQueriesTest extends TestCase {
 
     /**
      * Test of addVertexPartition method, of class HdrfMySqlQueries.
+     *
+     * @throws java.lang.Exception
      */
     public void testAddVertexAndGetVertices() throws Exception {
 
         try (Connection con = init()) {
-            long vid = 1;
-            long vid2 = 2;
-            int pid = 1;
-            HdrfMySqlQueries.addVertexPartition(vid, pid, con);
-            HdrfMySqlQueries.addVertexPartition(vid2, pid, con);
-            con.commit();
+            Vertex v1 = new Vertex(1, new HashSet<Integer>());
+            v1.addPartition(1);
+            HdrfMySqlQueries.putVertex(v1, con);
+            Vertex stored = HdrfMySqlQueries.getVertex(v1.getId(), con);
+            assert stored != null;
+            assert stored.getId() == v1.getId();
+            assert stored.getPartitions().containsAll(v1.getPartitions());
 
-            Long[] vs = HdrfMySqlQueries.getVerticesForPartition(pid, con);
-            assert vs.length == 2;
-            assert (vs[0] == vid && vs[1] == vid2) || (vs[0] == vid2 && vs[1] == vid);
-            assert HdrfMySqlQueries.getVertexSizeForPartition(pid, con) == 2;
+            v1.addPartition(2);
+            v1.incrementDegree();
+            HdrfMySqlQueries.putVertex(v1, con);
+            stored = HdrfMySqlQueries.getVertex(v1.getId(), con);
+            assert stored != null;
+            assert stored.getId() == v1.getId();
+            assert stored.getPartitions().containsAll(v1.getPartitions());
+            assert stored.getpDegree() == v1.getpDegree() && stored.getpDegree() == 1;
+
+            Vertex v2 = new Vertex(2, new HashSet<Integer>());
+            Vertex v3 = new Vertex(3, new HashSet<Integer>());
+            Collection<Vertex> vertices = new HashSet<>();
+            vertices.add(v2);
+            vertices.add(v3);
+            HdrfMySqlQueries.putVertices(vertices, con);
+            Set<Long> vids = new HashSet();
+            vids.add(v2.getId());
+            vids.add(v3.getId());
+            Map<Long, Vertex> vMap = HdrfMySqlQueries.getVertices(vids, con);
+            assert vMap.size() == 2;
+            assert vMap.containsKey(v2.getId());
+            assert vMap.containsKey(v3.getId());
         }
     }
 
@@ -40,81 +69,45 @@ public class HdrfMySqlQueriesTest extends TestCase {
         Class.forName(HdrfMySqlQueries.JDBC_DRIVER).newInstance();
         Connection con = (Connection) DriverManager.getConnection(
                 String.format("%s?user=%s&password=%s", HdrfMySqlQueries.DEFAULT_DB_URL, HdrfMySqlQueries.DEFAULT_USER, HdrfMySqlQueries.DEFAULT_PASS));
-        con.setAutoCommit(false);
         HdrfMySqlQueries.clearAllTables(con);
-        con.commit();
         return con;
     }
 
     /**
      * Test of incrementPartitionSize method, of class HdrfMySqlQueries.
+     *
+     * @throws java.lang.Exception
      */
     public void testIncrementPartitionSize() throws Exception {
         try (Connection con = init()) {
-            HdrfMySqlQueries.incrementPartitionSize(1, con);
-            HdrfMySqlQueries.incrementPartitionSize(1, con);
-            con.commit();
-
-            assert HdrfMySqlQueries.getEdgeSizeForPartition(1, con) == 2;
-        }
-
-    }
-
-    /**
-     * Test of incrementVertexDegree method, of class HdrfMySqlQueries.
-     */
-    public void testIncrementVertexDegree() throws Exception {
-
-        try (Connection con = init()) {
-            HdrfMySqlQueries.incrementVertexDegree(1, con);
-            HdrfMySqlQueries.incrementVertexDegree(1, con);
-            con.commit();
-
-            assert HdrfMySqlQueries.getVertexDegree(1, con) == 2;
-        }
-    }
-
-    /**
-     * Test of partitionContainsVertex method, of class HdrfMySqlQueries.
-     */
-    public void testPartitionContainsVertex() throws Exception {
-    }
-
-    public void testMaxMinPartitionSize() throws Exception {
-        try (Connection con = init()) {
-            HdrfMySqlQueries.incrementPartitionSize(1, con);
-            HdrfMySqlQueries.incrementPartitionSize(1, con);
-            HdrfMySqlQueries.incrementPartitionSize(2, con);
-            con.commit();
-
-            assert HdrfMySqlQueries.getMaxPartitionEdgeSize(con) == 2;
-            assert HdrfMySqlQueries.getMinPartitionEdgeSize(con) == 1;
+            Partition p1 = new Partition(1);
+            HdrfMySqlQueries.putPartition(p1, con);
+            Partition storedP1 = HdrfMySqlQueries.getPartition(p1.getId(), con);
+            assert storedP1 != null;
+            assert storedP1.getId() == p1.getId();
+            p1.incrementESize();
+            p1.incrementVSize();
+            HdrfMySqlQueries.putPartition(p1, con);
+            storedP1 = HdrfMySqlQueries.getPartition(p1.getId(), con);
+            assert storedP1 != null;
+            assert storedP1.getId() == p1.getId();
+            assert storedP1.getVSize() == p1.getVSize();
+            assert storedP1.getESize() == p1.getESize();
+            HdrfMySqlQueries.putPartition(p1, con);
+            Partition p2 = new Partition(2);
+            Partition p3 = new Partition(3);
+            List<Partition> ps = new ArrayList(2);
+            ps.add(p2);
+            ps.add(p3);
+            HdrfMySqlQueries.putPartitions(ps, con);
+            List<Partition> partitions = HdrfMySqlQueries.getPartitions(new int[]{p2.getId(), p3.getId()}, con);
+            assert partitions.size() == 2;
+            assert partitions.contains(p2);
+            assert partitions.contains(p3);
+            for (Partition p : partitions) {
+                assert p.getESize() == 0;
+                assert p.getVSize() == 0;
+            }
         }
     }
-
-    public void testTotalSizes() throws Exception {
-        try (Connection con = init()) {
-            HdrfMySqlQueries.incrementVertexDegree(1, con);
-            HdrfMySqlQueries.incrementVertexDegree(2, con);
-            con.commit();
-
-            assert HdrfMySqlQueries.getTotalNumberOfVertices(con) == 2;
-
-            HdrfMySqlQueries.addVertexPartition(1, 1, con);
-            HdrfMySqlQueries.addVertexPartition(2, 2, con);
-            HdrfMySqlQueries.addVertexPartition(2, 1, con);
-            con.commit();
-
-            assert HdrfMySqlQueries.getTotalNumberOfReplicas(con) == 3;
-
-            HdrfMySqlQueries.incrementPartitionSize(1, con);
-            HdrfMySqlQueries.incrementPartitionSize(1, con);
-            HdrfMySqlQueries.incrementPartitionSize(2, con);
-            con.commit();
-
-            assert HdrfMySqlQueries.getTotalNumberOfEdges(con) == 3;
-
-        }
-    }
-
 }

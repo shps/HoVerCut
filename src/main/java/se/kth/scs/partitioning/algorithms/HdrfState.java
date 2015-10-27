@@ -11,4 +11,5 @@ public interface HdrfState extends PartitionState {
     public int getMinPartitionEdgeSize();
 
     public boolean partitionContainsVertex(int p, long v);
+
 }

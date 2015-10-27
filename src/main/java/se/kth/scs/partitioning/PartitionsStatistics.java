@@ -1,7 +1,10 @@
 package se.kth.scs.partitioning;
 
-import se.kth.scs.partitioning.algorithms.HdrfState;
+import java.util.List;
+import java.util.Map;
+import se.kth.scs.partitioning.algorithms.Partition;
 import se.kth.scs.partitioning.algorithms.PartitionState;
+import se.kth.scs.partitioning.algorithms.Vertex;
 
 /**
  *
@@ -20,23 +23,30 @@ public class PartitionsStatistics {
      * @param state
      */
     public PartitionsStatistics(PartitionState state) {
-        avgReplicationFactor = calculateReplicationFactor(state);
-        loadRelativeStandardDeviation = calculateRelativeStandardDeviation(state);
-        //find max edge and vertex cardinality.
-//    int maxV = 0;
-//    int maxE = 0;
-//    for (Partition p : partitions) {
-//      if (p.vertexSize() > maxV) {
-//        maxV = p.vertexSize();
-//      }
-//      if (p.edgeSize() > maxE) {
-//        maxE = p.edgeSize();
-//      }
-//    }
+        Map<Long, Vertex> vertices = state.getAllVertices();
+        List<Partition> partitions = state.getAllPartitions();
 
-        maxVertexCardinality = state.getMaxPartitionVertexSize();
-        maxEdgeCardinality = state.getMaxPartitionEdgeSize();
-        state.applyState();
+        int totalReplicas = 0;
+        int nVertices = vertices.size();
+        for (Vertex v : vertices.values()) {
+            totalReplicas += v.getPartitions().size();
+        }
+        avgReplicationFactor = calculateReplicationFactor(totalReplicas, nVertices);
+        loadRelativeStandardDeviation = calculateRelativeStandardDeviation(partitions);
+        //find max edge and vertex cardinality.
+        int maxV = 0;
+        int maxE = 0;
+        for (Partition p : partitions) {
+            if (p.getVSize() > maxV) {
+                maxV = p.getVSize();
+            }
+            if (p.getESize() > maxE) {
+                maxE = p.getESize();
+            }
+        }
+
+        maxVertexCardinality = maxV;
+        maxEdgeCardinality = maxE;
     }
 
     /**
@@ -48,65 +58,23 @@ public class PartitionsStatistics {
         return avgReplicationFactor;
     }
 
-//    private float calculateReplicationFactor(Partition[] partitions) {
-//        HashMap<Long, Integer> vReplicas = new HashMap<>();
-//        for (Partition p : partitions) {
-//            for (Long vertexId : p.getVertices()) {
-//                if (!vReplicas.containsKey(vertexId)) {
-//                    vReplicas.put(vertexId, 1);
-//                } else {
-//                    vReplicas.put(vertexId, vReplicas.get(vertexId) + 1);
-//                }
-//            }
-//        }
-//
-//        int sum = 0;
-//        Collection<Integer> rFactors = vReplicas.values();
-//        for (Integer rf : rFactors) {
-//            sum += rf;
-//        }
-//
-//        float averageReplicationFactor = (float) sum / (float) rFactors.size();
-//
-//        return averageReplicationFactor;
-//    }
-    private float calculateReplicationFactor(PartitionState state) {
-        int totalReplicas = state.getTotalNumberOfReplicas();
-        int nVertices = state.getTotalNumberOfVertices();
-        state.applyState();
-
+    private float calculateReplicationFactor(int totalReplicas, int nVertices) {
         float averageReplicationFactor = (float) totalReplicas / (float) nVertices;
 
         return averageReplicationFactor;
     }
 
-//    private float calculateRelativeStandardDeviation(Partition[] partitions) {
-//        int sum = 0;
-//        for (Partition p : partitions) {
-//            sum += p.edgeSize();
-//        }
-//        int n = partitions.length;
-//        float mean = (float) sum / (float) n;
-//
-//        float sumSqr = 0;
-//        for (Partition p : partitions) {
-//            sumSqr += Math.pow(p.edgeSize() - mean, 2);
-//        }
-//
-//        float sdv = (float) Math.sqrt(sumSqr / (float) (n - 1));
-//
-//        return sdv * 100 / mean;
-//    }
-    private float calculateRelativeStandardDeviation(PartitionState state) {
-        int sum = state.getTotalNumberOfEdges();
-        int n = state.getNumberOfPartitions();
-        state.applyState();
+    private float calculateRelativeStandardDeviation(List<Partition> partitions) {
+        int sum = 0;
+        int n = partitions.size();
+        for (Partition p : partitions) {
+            sum += p.getESize();
+        }
         float mean = (float) sum / (float) n;
 
         float sumSqr = 0;
-        for (int p = 0; p < n; p++) {
-            sumSqr += Math.pow(state.getPartitionEdgeSize(p) - mean, 2);
-            state.applyState();
+        for (Partition p : partitions) {
+            sumSqr += Math.pow(p.getESize() - mean, 2);
         }
 
         float sdv = (float) Math.sqrt(sumSqr / (float) (n - 1));

@@ -22,7 +22,8 @@ public class UniformRandomPartitioner {
         SecureRandom r = new SecureRandom();
         for (Tuple3<Long, Long, Double> e : edges) {
             int p = r.nextInt(k);
-            state.addEdgeToPartition(p, e);
+//            state.addEdgeToPartition(p, e);
+            //TODO: Implement this partitioner.
         }
 
         return state;
