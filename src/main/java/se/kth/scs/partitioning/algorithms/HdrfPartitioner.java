@@ -1,5 +1,6 @@
 package se.kth.scs.partitioning.algorithms;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -52,6 +53,44 @@ public class HdrfPartitioner {
             allocateNextWindow(edgeWindow, vertices, state, lambda, epsilon);
             edgeWindow.clear();
             vertices.clear();
+        }
+
+        System.out.println("******** Partitioning Finished **********");
+        return state;
+    }
+
+    /**
+     * Partitions without using any window to buffer vertices.
+     * @param state
+     * @param edges
+     * @param lambda
+     * @param epsilon
+     * @return 
+     */
+    public static PartitionState partition(PartitionState state, Collection<Tuple3<Long, Long, Double>> edges, double lambda, double epsilon) {
+
+        int counter = 1;
+        for (Tuple3<Long, Long, Double> e : edges) {
+            System.out.println(String.format("%d Received %d -> %d.", counter, e.f0, e.f1));
+            Vertex u = state.getVertex(e.f0);
+            Vertex v = state.getVertex(e.f1);
+            List<Partition> partitions = state.getAllPartitions();
+            if (u == null) {
+                u = new Vertex(e.f0, new HashSet<Integer>());
+            }
+            if (v == null) {
+                v = new Vertex(e.f1, new HashSet<Integer>());
+            }
+            u.incrementDegree();
+            v.incrementDegree();
+            allocateNextEdge(u, v, partitions, lambda, epsilon);
+            //TODO: Inconsistency if update partitions and vertices separately.
+            state.putPartitions(partitions);
+            Collection<Vertex> vertices = new ArrayList<>(2);
+            vertices.add(u);
+            vertices.add(v);
+            state.putVertices(vertices);
+            counter++;
         }
 
         System.out.println("******** Partitioning Finished **********");
@@ -142,7 +181,7 @@ public class HdrfPartitioner {
     }
 
     private static double g(Partition p, Vertex v1, double thetaV1) {
-        if (v1.containsPartition(p.getId())) {
+        if (!v1.containsPartition(p.getId())) {
             return 0;
         }
 

@@ -7,8 +7,8 @@ package se.kth.scs.partitioning.algorithms;
 public class Partition {
 
     private final int id;
-    private int eSize;
-    private int vSize;
+    private int eSize = 0;
+    private int vSize = 0;
 
     private int eSizeDelta = 0;
     private int vSizeDelta = 0;
