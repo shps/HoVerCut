@@ -102,8 +102,8 @@ public class PartitionsStatistics {
     }
 
     /**
-     * * The number of vertices in the Partition with the max vertex
-     * cardinality.
+     * ** The number of vertices in the Partition with the max vertex
+ cardinality.
      *
      * @return
      */

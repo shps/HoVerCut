@@ -92,5 +92,4 @@ public class Partition {
         hash = 73 * hash + this.id;
         return hash;
     }
-
 }
