@@ -1,15 +1,10 @@
 package se.kth.scs;
 
-import java.util.Collection;
 import java.util.Set;
 import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.java.DataSet;
-import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple3;
 import se.kth.scs.partitioning.PartitionsStatistics;
 import se.kth.scs.partitioning.algorithms.HdrfInMemoryState;
-import se.kth.scs.partitioning.algorithms.HdrfMySqlQueries;
-import se.kth.scs.partitioning.algorithms.HdrfMysqlState;
 import se.kth.scs.partitioning.algorithms.HdrfPartitioner;
 import se.kth.scs.partitioning.algorithms.PartitionState;
 import utils.EdgeFileReader;
@@ -23,7 +18,7 @@ public class Test {
     public static void main(String[] args) throws Exception {
         String file = "./data/datasets/Cit-HepTh.txt";
         boolean flink = false;
-        int windowSize = 10000;
+        int windowSize = 1000;
         double lambda = 1;
         double epsilon = 1;
         final int k = 4;

@@ -25,7 +25,7 @@ public class HdrfPartitioner {
         int nTasks = edges.length;
         HdrfPartitionerTask[] tasks = new HdrfPartitionerTask[nTasks];
         Thread[] threads = new Thread[nTasks];
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < nTasks; i++) {
             tasks[i] = new HdrfPartitionerTask(hState, edges[i], lambda, epsilon, windowSize);
             threads[i] = new Thread(tasks[i]);
         }
@@ -42,5 +42,7 @@ public class HdrfPartitioner {
                 System.out.println(ex.getMessage());
             }
         }
+
+        System.out.println("******** Partitioning Finished **********");
     }
 }

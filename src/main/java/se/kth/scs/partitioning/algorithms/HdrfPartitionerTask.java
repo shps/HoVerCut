@@ -58,7 +58,7 @@ public class HdrfPartitionerTask implements Runnable {
             vertices.clear();
         }
 
-        System.out.println("******** Partitioning Finished **********");
+        System.out.println("******** Task Finished **********");
         return state;
     }
 
