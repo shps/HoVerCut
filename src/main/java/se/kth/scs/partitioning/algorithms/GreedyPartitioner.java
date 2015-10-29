@@ -1,8 +1,8 @@
 package se.kth.scs.partitioning.algorithms;
 
+import se.kth.scs.partitioning.Partition;
 import java.util.List;
 import org.apache.flink.api.java.tuple.Tuple3;
-import se.kth.scs.partitioning.Partition;
 
 /**
  * The implementation of the Greedy Vertex-Cuts algorithm.

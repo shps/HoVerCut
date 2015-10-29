@@ -1,4 +1,4 @@
-package se.kth.scs.partitioning.algorithms;
+package se.kth.scs.partitioning.algorithms.hdrf;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,6 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import se.kth.scs.partitioning.ConcurrentPartition;
+import se.kth.scs.partitioning.ConcurrentVertex;
+import se.kth.scs.partitioning.Partition;
+import se.kth.scs.partitioning.PartitionState;
+import se.kth.scs.partitioning.Vertex;
 
 /**
  *

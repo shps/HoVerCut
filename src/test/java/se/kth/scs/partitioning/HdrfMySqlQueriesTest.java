@@ -1,6 +1,6 @@
 package se.kth.scs.partitioning;
 
-import se.kth.scs.partitioning.algorithms.HdrfMySqlQueries;
+import se.kth.scs.partitioning.algorithms.hdrf.HdrfMySqlQueries;
 import com.mysql.jdbc.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import junit.framework.TestCase;
-import se.kth.scs.partitioning.algorithms.Vertex;
-import se.kth.scs.partitioning.algorithms.Partition;
 
 /**
  *

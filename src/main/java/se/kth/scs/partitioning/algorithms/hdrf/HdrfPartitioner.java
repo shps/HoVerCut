@@ -1,9 +1,10 @@
-package se.kth.scs.partitioning.algorithms;
+package se.kth.scs.partitioning.algorithms.hdrf;
 
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.flink.api.java.tuple.Tuple3;
+import se.kth.scs.partitioning.PartitionState;
 
 /**
  * This class is an implementation of the HDRF partitioning algorithm. Paper:

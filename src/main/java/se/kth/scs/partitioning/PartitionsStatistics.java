@@ -2,9 +2,6 @@ package se.kth.scs.partitioning;
 
 import java.util.List;
 import java.util.Map;
-import se.kth.scs.partitioning.algorithms.Partition;
-import se.kth.scs.partitioning.algorithms.PartitionState;
-import se.kth.scs.partitioning.algorithms.Vertex;
 
 /**
  *

@@ -4,11 +4,11 @@ import java.util.Set;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple3;
 import se.kth.scs.partitioning.PartitionsStatistics;
-import se.kth.scs.partitioning.algorithms.HdrfInMemoryState;
-import se.kth.scs.partitioning.algorithms.HdrfMySqlQueries;
-import se.kth.scs.partitioning.algorithms.HdrfMysqlState;
-import se.kth.scs.partitioning.algorithms.HdrfPartitioner;
-import se.kth.scs.partitioning.algorithms.PartitionState;
+import se.kth.scs.partitioning.algorithms.hdrf.HdrfInMemoryState;
+import se.kth.scs.partitioning.algorithms.hdrf.HdrfMySqlQueries;
+import se.kth.scs.partitioning.algorithms.hdrf.HdrfMysqlState;
+import se.kth.scs.partitioning.algorithms.hdrf.HdrfPartitioner;
+import se.kth.scs.partitioning.PartitionState;
 import utils.EdgeFileReader;
 
 /**

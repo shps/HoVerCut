@@ -1,4 +1,4 @@
-package se.kth.scs.partitioning.algorithms;
+package se.kth.scs.partitioning;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -12,21 +12,12 @@ public class ConcurrentPartition {
     private final AtomicInteger eSize;
     private final AtomicInteger vSize;
 
-//    private int eSizeDelta = 0;
-//    private int vSizeDelta = 0;
     public ConcurrentPartition(int id) {
         eSize = new AtomicInteger();
         vSize = new AtomicInteger();
         this.id = id;
     }
 
-//    public void incrementESize() {
-//        this.eSizeDelta++;
-//    }
-//
-//    public void incrementVSize() {
-//        this.vSizeDelta++;
-//    }
     /**
      * @return the id
      */
@@ -67,19 +58,6 @@ public class ConcurrentPartition {
         this.vSize.set(vSize);
     }
 
-//    /**
-//     * @return the eSizeDelta
-//     */
-//    public int getESizeDelta() {
-//        return eSizeDelta;
-//    }
-//
-//    /**
-//     * @return the vSizeDelta
-//     */
-//    public int getVSizeDelta() {
-//        return vSizeDelta;
-//    }
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -100,7 +78,7 @@ public class ConcurrentPartition {
     }
 
     @Override
-    protected synchronized Partition clone() {
+    public synchronized Partition clone() {
         Partition clone = new Partition(id);
         clone.setESize(this.getESize());
         clone.setVSize(this.getVSize());

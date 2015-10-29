@@ -1,4 +1,4 @@
-package se.kth.scs.partitioning.algorithms;
+package se.kth.scs.partitioning.algorithms.hdrf;
 
 import com.mysql.jdbc.Connection;
 import java.sql.DriverManager;
@@ -8,6 +8,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import se.kth.scs.partitioning.Partition;
+import se.kth.scs.partitioning.PartitionState;
+import se.kth.scs.partitioning.Vertex;
 
 /**
  *

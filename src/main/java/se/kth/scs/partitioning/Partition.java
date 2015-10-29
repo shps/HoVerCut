@@ -1,56 +1,28 @@
 package se.kth.scs.partitioning;
 
-import java.util.HashSet;
-import org.apache.flink.api.java.tuple.Tuple3;
-
 /**
  *
  * @author Hooman
  */
 public class Partition {
 
-    private final HashSet<Long> vertices;
-//    private final HashSet<Tuple3<Long, Long, Double>> edges;
-    private int edgeSize = 0;
     private final int id;
+    private int eSize = 0;
+    private int vSize = 0;
+
+    private int eSizeDelta = 0;
+    private int vSizeDelta = 0;
 
     public Partition(int id) {
         this.id = id;
-        vertices = new HashSet<>();
-//        edges = new HashSet<>();
     }
 
-    /**
-     * Adds an edge to this partition while cloning end-point vertices in this
-     * partition (Vertex-Cut).
-     *
-     * @param edge
-     */
-    public void addEdge(Tuple3<Long, Long, Double> edge) {
-//        edges.add(edge);
-        edgeSize++;
-        vertices.add(edge.f0);
-        vertices.add(edge.f1);
+    public void incrementESize() {
+        this.eSizeDelta++;
     }
 
-    /**
-     * @return the vertices
-     */
-    public Long[] getVertices() {
-        Long[] copy = new Long[vertices.size()];
-        return vertices.toArray(copy);
-    }
-
-    public int edgeSize() {
-        return edgeSize;
-    }
-
-    public int vertexSize() {
-        return vertices.size();
-    }
-
-    public boolean containsVertex(long vId) {
-        return vertices.contains(vId);
+    public void incrementVSize() {
+        this.vSizeDelta++;
     }
 
     /**
@@ -61,9 +33,63 @@ public class Partition {
     }
 
     /**
-     * @param edgeSize the edgeSize to set
+     * @return the eSize
      */
-    public void setEdgeSize(int edgeSize) {
-        this.edgeSize = edgeSize;
+    public int getESize() {
+        return eSize + eSizeDelta;
+    }
+
+    /**
+     * @param eSize the eSize to set
+     */
+    public void setESize(int eSize) {
+        this.eSize = eSize;
+    }
+
+    /**
+     * @return the vSize
+     */
+    public int getVSize() {
+        return vSize + vSizeDelta;
+    }
+
+    /**
+     * @param vSize the vSize to set
+     */
+    public void setVSize(int vSize) {
+        this.vSize = vSize;
+    }
+
+    /**
+     * @return the eSizeDelta
+     */
+    public int getESizeDelta() {
+        return eSizeDelta;
+    }
+
+    /**
+     * @return the vSizeDelta
+     */
+    public int getVSizeDelta() {
+        return vSizeDelta;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof Partition)) {
+            return false;
+        }
+        Partition other = (Partition) obj;
+        return other.getId() == this.getId();
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 73 * hash + this.id;
+        return hash;
     }
 }

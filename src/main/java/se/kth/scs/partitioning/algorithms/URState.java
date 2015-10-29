@@ -1,5 +1,8 @@
 package se.kth.scs.partitioning.algorithms;
 
+import se.kth.scs.partitioning.Vertex;
+import se.kth.scs.partitioning.Partition;
+import se.kth.scs.partitioning.PartitionState;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;

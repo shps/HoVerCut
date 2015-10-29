@@ -1,4 +1,4 @@
-package se.kth.scs.partitioning.algorithms;
+package se.kth.scs.partitioning.algorithms.hdrf;
 
 import com.mysql.jdbc.Connection;
 import java.sql.ResultSet;
@@ -12,6 +12,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import se.kth.scs.partitioning.Partition;
+import se.kth.scs.partitioning.Vertex;
 
 /**
  *

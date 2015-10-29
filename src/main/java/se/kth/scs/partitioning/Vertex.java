@@ -1,4 +1,4 @@
-package se.kth.scs.partitioning.algorithms;
+package se.kth.scs.partitioning;
 
 import java.util.HashSet;
 import java.util.Set;
