@@ -18,7 +18,8 @@
 --
 -- Table structure for table `partitions`
 --
-
+CREATE DATABASE hdrf;
+USE hdrf;
 DROP TABLE IF EXISTS `partitions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -27,20 +28,6 @@ CREATE TABLE `partitions` (
   `edge_size` int(11) DEFAULT NULL,
   `vertex_size` int(11) DEFAULT NULL,
   PRIMARY KEY (`pid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `vertex_partition`
---
-
-DROP TABLE IF EXISTS `vertex_partition`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `vertex_partition` (
-  `vid` bigint(20) NOT NULL DEFAULT '0',
-  `pid` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`vid`,`pid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -54,6 +41,8 @@ DROP TABLE IF EXISTS `vertices`;
 CREATE TABLE `vertices` (
   `vid` bigint(20) NOT NULL DEFAULT '0',
   `partial_degree` int(11) DEFAULT NULL,
+-- Based on the number of partitions this set need to be increased.
+  `partitions` set('0','1','2','3') DEFAULT NULL,
   PRIMARY KEY (`vid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -67,4 +56,4 @@ CREATE TABLE `vertices` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-10-19 14:48:26
+-- Dump completed on 2015-10-29 16:23:13

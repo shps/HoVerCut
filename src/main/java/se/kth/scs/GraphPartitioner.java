@@ -28,7 +28,7 @@ public class GraphPartitioner {
 //            "-p", "4",
 //            "-t", "4",
 //            "-s", "mysql",
-//            "-db", "jdbc:mysql://localhost/hdrf2",
+//            "-db", "jdbc:mysql://localhost/hdrf",
 //            "-user", "root",
 //            "-pass", ""};
         InputCommands commands = new InputCommands();
@@ -67,7 +67,7 @@ public class GraphPartitioner {
             commander = new JCommander(commands);
             commander.usage();
             System.out.println(String.format("A valid command is like: %s",
-                    "-f ./data/datasets/Cit-HepTh.txt -w 1000 -m hdrf -p 4 -t 4 -s mysql -db jdbc:mysql://localhost/hdrf2 -user root"));
+                    "-f ./data/datasets/Cit-HepTh.txt -w 1000 -m hdrf -p 4 -t 4 -s mysql -db jdbc:mysql://localhost/hdrf -user root"));
         }
 
     }

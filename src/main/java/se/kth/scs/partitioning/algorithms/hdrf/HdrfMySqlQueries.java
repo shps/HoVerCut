@@ -22,7 +22,7 @@ import se.kth.scs.partitioning.Vertex;
 public class HdrfMySqlQueries {
 
     public static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-    public static final String DEFAULT_DB_URL = "jdbc:mysql://localhost/hdrf2";
+    public static final String DEFAULT_DB_URL = "jdbc:mysql://localhost/hdrf";
     public static final String DEFAULT_USER = "root";
     public static final String DEFAULT_PASS = "";
     // Database structure
