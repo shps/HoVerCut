@@ -156,4 +156,9 @@ public class HdrfInMemoryState implements PartitionState {
         }
     }
 
+    @Override
+    public void releaseTaskResources() {
+        // No data is stored per thread.
+    }
+
 }

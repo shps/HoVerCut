@@ -96,7 +96,6 @@ public class HdrfPartitionerTask implements Runnable {
 //        System.out.println("******** Partitioning Finished **********");
 //        return state;
 //    }
-
     private void allocateNextWindow(List<Tuple3<Long, Long, Double>> edgeWindow, Set<Long> vIds, PartitionState state, double lambda, double epsilon) {
         Map<Long, Vertex> vertices = state.getVertices(vIds);
         List<Partition> partitions = state.getAllPartitions();
@@ -188,6 +187,7 @@ public class HdrfPartitionerTask implements Runnable {
     @Override
     public void run() {
         partitionWithWindow();
+        state.releaseTaskResources();
     }
 
 }

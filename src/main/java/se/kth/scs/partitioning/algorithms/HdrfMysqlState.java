@@ -15,13 +15,19 @@ import java.util.Set;
  */
 public class HdrfMysqlState implements PartitionState {
 
-    private final Connection con; // TODO: Support for multiple connections, one per thread.
+//    private final Connection con; // TODO: Support for multiple connections, one per thread.
     private final int k; // Number of partitions. The partition ID must be from 0 up to k.
+    private final String dbUrl;
+    private final String dbUser;
+    private final String dbPass;
+    private final ThreadLocal<Connection> cons = new ThreadLocal<>();
 
-    public HdrfMysqlState(int k, int nConnections, String dbUrl, String dbUser, String dbPass, boolean clearDb) throws SQLException {
+    public HdrfMysqlState(int k, String dbUrl, String dbUser, String dbPass, boolean clearDb) throws SQLException {
         this.k = k;
-        con = (Connection) DriverManager.getConnection(
-                String.format("%s?user=%s&password=%s", dbUrl, dbUser, dbPass));
+        this.dbUrl = dbUrl;
+        this.dbUser = dbUser;
+        this.dbPass = dbPass;
+        Connection con = createConnection(dbUrl, dbUser, dbPass);
 //        con.setAutoCommit(false);
         if (clearDb) {
             HdrfMySqlQueries.clearAllTables(con);
@@ -31,8 +37,24 @@ public class HdrfMysqlState implements PartitionState {
                 partitions.add(p);
             }
             HdrfMySqlQueries.putPartitions(partitions, con);
+            con.close();
 //            con.commit();
         }
+    }
+
+    private Connection createConnection(String dbUrl, String dbUser, String dbPass) throws SQLException {
+        return (Connection) DriverManager.getConnection(
+                String.format("%s?user=%s&password=%s", dbUrl, dbUser, dbPass));
+    }
+
+    private Connection getConnection() throws SQLException {
+        Connection con = cons.get();
+        if (con == null) {
+            con = createConnection(dbUrl, dbUser, dbPass);
+            cons.set(con);
+        }
+
+        return con;
     }
 
     @Override
@@ -43,6 +65,7 @@ public class HdrfMysqlState implements PartitionState {
     @Override
     public void applyState() {
         try {
+            Connection con = getConnection();
             con.commit();
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -51,17 +74,14 @@ public class HdrfMysqlState implements PartitionState {
 
     @Override
     public void releaseResources() {
-        try {
-            con.close();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
+        // No overall resource is used.
     }
 
     @Override
     public Vertex getVertex(long vid) {
         Vertex v = null;
         try {
+            Connection con = getConnection();
             v = HdrfMySqlQueries.getVertex(vid, con);
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -74,6 +94,7 @@ public class HdrfMysqlState implements PartitionState {
     public Map<Long, Vertex> getVertices(Set<Long> vids) {
         Map<Long, Vertex> vertices = null;
         try {
+            Connection con = getConnection();
             vertices = HdrfMySqlQueries.getVertices(vids, con);
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -86,6 +107,7 @@ public class HdrfMysqlState implements PartitionState {
     public Map<Long, Vertex> getAllVertices() {
         Map<Long, Vertex> vertices = null;
         try {
+            Connection con = getConnection();
             vertices = HdrfMySqlQueries.getAllVertices(con);
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -97,6 +119,7 @@ public class HdrfMysqlState implements PartitionState {
     @Override
     public void putVertex(Vertex v) {
         try {
+            Connection con = getConnection();
             HdrfMySqlQueries.putVertex(v, con);
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -106,6 +129,7 @@ public class HdrfMysqlState implements PartitionState {
     @Override
     public void putVertices(Collection<Vertex> vs) {
         try {
+            Connection con = getConnection();
             HdrfMySqlQueries.putVertices(vs, con);
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -116,6 +140,7 @@ public class HdrfMysqlState implements PartitionState {
     public Partition getPartition(int pid) {
         Partition p = null;
         try {
+            Connection con = getConnection();
             p = HdrfMySqlQueries.getPartition(pid, con);
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -128,6 +153,7 @@ public class HdrfMysqlState implements PartitionState {
     public List<Partition> getPartions(int[] pids) {
         List<Partition> partitions = null;
         try {
+            Connection con = getConnection();
             partitions = HdrfMySqlQueries.getPartitions(pids, con);
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -140,6 +166,7 @@ public class HdrfMysqlState implements PartitionState {
     public List<Partition> getAllPartitions() {
         List<Partition> partitions = null;
         try {
+            Connection con = getConnection();
             partitions = HdrfMySqlQueries.getAllPartitions(con);
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -151,6 +178,7 @@ public class HdrfMysqlState implements PartitionState {
     @Override
     public void putPartition(Partition p) {
         try {
+            Connection con = getConnection();
             HdrfMySqlQueries.putPartition(p, con);
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -160,7 +188,18 @@ public class HdrfMysqlState implements PartitionState {
     @Override
     public void putPartitions(List<Partition> p) {
         try {
+            Connection con = getConnection();
             HdrfMySqlQueries.putPartitions(p, con);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void releaseTaskResources() {
+        try {
+            Connection con = getConnection();
+            con.close();
         } catch (SQLException ex) {
             ex.printStackTrace();
         }

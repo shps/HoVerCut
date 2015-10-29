@@ -16,6 +16,8 @@ public interface PartitionState {
     public void applyState();
 
     public void releaseResources();
+    
+    public void releaseTaskResources();
 
     public Vertex getVertex(long vid);
 

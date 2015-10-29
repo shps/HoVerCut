@@ -5,6 +5,8 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple3;
 import se.kth.scs.partitioning.PartitionsStatistics;
 import se.kth.scs.partitioning.algorithms.HdrfInMemoryState;
+import se.kth.scs.partitioning.algorithms.HdrfMySqlQueries;
+import se.kth.scs.partitioning.algorithms.HdrfMysqlState;
 import se.kth.scs.partitioning.algorithms.HdrfPartitioner;
 import se.kth.scs.partitioning.algorithms.PartitionState;
 import utils.EdgeFileReader;
@@ -22,7 +24,7 @@ public class Test {
         double lambda = 1;
         double epsilon = 1;
         final int k = 4;
-        final int nTasks = 6;
+        final int nTasks = 10;
         // set up the execution environment
         EdgeFileReader reader = new EdgeFileReader();
 //        Set<Tuple3<Long, Long, Double>> edges = reader.read(file);
@@ -38,8 +40,8 @@ public class Test {
 //        URState urState = new URState(k);
 //        UniformRandomPartitioner.partition(urState, edges);
 //        printResults(k, urState, String.format("UinformRandomPartitioner"));
-        PartitionState hState = new HdrfInMemoryState(k);
-//        PartitionState hState = new HdrfMysqlState(k, 1, HdrfMySqlQueries.DEFAULT_DB_URL, HdrfMySqlQueries.DEFAULT_USER, HdrfMySqlQueries.DEFAULT_PASS, true);
+//        PartitionState hState = new HdrfInMemoryState(k);
+        PartitionState hState = new HdrfMysqlState(k, HdrfMySqlQueries.DEFAULT_DB_URL, HdrfMySqlQueries.DEFAULT_USER, HdrfMySqlQueries.DEFAULT_PASS, true);
         HdrfPartitioner.partitionWithWindow(hState, splits, lambda, epsilon, windowSize);
 //        HdrfPartitioner.partition(hState, edges, lambda, epsilon);
 
