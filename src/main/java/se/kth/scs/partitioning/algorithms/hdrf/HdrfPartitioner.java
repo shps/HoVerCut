@@ -23,6 +23,7 @@ public class HdrfPartitioner {
             double lambda,
             double epsilon,
             int windowSize) {
+        System.out.println("Starts partitioning...");
         int nTasks = edges.length;
         HdrfPartitionerTask[] tasks = new HdrfPartitionerTask[nTasks];
         Thread[] threads = new Thread[nTasks];
@@ -31,6 +32,7 @@ public class HdrfPartitioner {
             threads[i] = new Thread(tasks[i]);
         }
 
+        long start = System.currentTimeMillis();
         System.out.println("Start Running Tasks!");
         for (Thread t : threads) {
             t.start();
@@ -44,6 +46,6 @@ public class HdrfPartitioner {
             }
         }
 
-        System.out.println("******** Partitioning Finished **********");
+        System.out.println(String.format("******** Partitioning finished in %d seconds **********", (System.currentTimeMillis() - start) / 1000));
     }
 }

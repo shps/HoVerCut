@@ -42,8 +42,9 @@ public class HdrfPartitionerTask implements Runnable {
         int counter = 1;
         List<Tuple3<Long, Long, Double>> edgeWindow = new LinkedList<>();
         Set<Long> vertices = new HashSet();
+        long start = System.currentTimeMillis();
         for (Tuple3<Long, Long, Double> e : edges) {
-            System.out.println(String.format("%d Received %d -> %d.", counter, e.f0, e.f1));
+//            System.out.println(String.format("%d Received %d -> %d.", counter, e.f0, e.f1));
             edgeWindow.add(e);
             vertices.add(e.f0);
             vertices.add(e.f1);
@@ -61,7 +62,7 @@ public class HdrfPartitionerTask implements Runnable {
             vertices.clear();
         }
 
-        System.out.println("******** Task Finished **********");
+        System.out.println(String.format("******** Task %d finished in %d seconds.", Thread.currentThread().getId(), (System.currentTimeMillis()-start)/1000));
         return state;
     }
 

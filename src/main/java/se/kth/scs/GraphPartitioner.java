@@ -27,7 +27,8 @@ public class GraphPartitioner {
             "-m", "hdrf",
             "-p", "4",
             "-t", "4",
-            "-s", "memory",
+//            "-reset", "true",
+            "-s", "mysql",
             "-db", "jdbc:mysql://localhost/hdrf",
             "-user", "root",
             "-pass", ""};
@@ -39,8 +40,11 @@ public class GraphPartitioner {
             if (!commands.method.equals(InputCommands.HDRF)) {
                 throw new ParameterException("");
             }
+            System.out.println(String.format("Reading file %s", commands.file));
+            long start = System.currentTimeMillis();
             EdgeFileReader reader = new EdgeFileReader();
             Set<Tuple3<Long, Long, Double>>[] splits = reader.readSplitFile(commands.file, commands.nTasks);
+            System.out.println(String.format("Finished reading in %d seconds.", (System.currentTimeMillis()-start)/1000));
             PartitionState state = null;
             switch (commands.storage) {
                 case InputCommands.IN_MEMORY:
