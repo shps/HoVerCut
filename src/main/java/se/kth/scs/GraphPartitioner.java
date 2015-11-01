@@ -21,16 +21,16 @@ import utils.InputCommands;
 public class GraphPartitioner {
 
     public static void main(String[] args) throws SQLException {
-//        args = new String[]{
-//            "-f", "./data/datasets/Cit-HepTh.txt",
-//            "-w", "1000",
-//            "-m", "hdrf",
-//            "-p", "4",
-//            "-t", "4",
-//            "-s", "mysql",
-//            "-db", "jdbc:mysql://localhost/hdrf",
-//            "-user", "root",
-//            "-pass", ""};
+        args = new String[]{
+            "-f", "./data/datasets/Cit-HepTh.txt",
+            "-w", "1000",
+            "-m", "hdrf",
+            "-p", "4",
+            "-t", "4",
+            "-s", "memory",
+            "-db", "jdbc:mysql://localhost/hdrf",
+            "-user", "root",
+            "-pass", ""};
         InputCommands commands = new InputCommands();
         JCommander commander;
         try {
@@ -52,7 +52,7 @@ public class GraphPartitioner {
                             commands.dbUrl,
                             commands.user,
                             commands.pass,
-                            true);
+                            commands.reset);
                     break;
                 default:
                     throw new ParameterException("");
@@ -76,6 +76,14 @@ public class GraphPartitioner {
         PartitionsStatistics ps = new PartitionsStatistics(state);
         System.out.println("*********** Statistics ***********");
         System.out.println(message);
+        System.out.println(String.format("Partitions:\t%d", k));
+        System.out.println(String.format("Vertices:\t%d", ps.getNVertices()));
+        System.out.println(String.format("Edges:\t%d", ps.getNEdges()));
+        int[] vp = ps.getNVerticesPartitions();
+        int[] ep = ps.getNEdgesPartitions();
+        for (int i = 0; i < vp.length; i++) {
+            System.out.println(String.format("P%d:\tv=%d\te=%d", i, vp[i], ep[i]));
+        }
         System.out.println("RF: Replication Factor.");
         System.out.println("LRSD: Load Relative Standard Deviation");
         System.out.println("MEC: Max Edge Cardinality.");
@@ -101,6 +109,7 @@ public class GraphPartitioner {
             sb.append("epsilon:\t").append(commands.epsilon).append(newLine);
         }
         sb.append("storage:\t").append(commands.storage).append(newLine);
+        sb.append("reset storage:\t").append(commands.reset).append(newLine);
         if (commands.storage.contentEquals(InputCommands.MYSQL)) {
             sb.append("db:\t").append(commands.dbUrl).append(newLine);
             sb.append("db user:\t").append(commands.user).append(newLine);

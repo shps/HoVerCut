@@ -13,6 +13,10 @@ public class PartitionsStatistics {
     private final int maxVertexCardinality;
     private final int maxEdgeCardinality;
     private final float loadRelativeStandardDeviation;
+    private final int nVertices;
+    private final int nEdges;
+    private final int[] nEdgePartitions;
+    private final int[] nVertexPartitions;
 
     /**
      * Eagerly calculates some metrics about a list of partitions.
@@ -22,9 +26,11 @@ public class PartitionsStatistics {
     public PartitionsStatistics(PartitionState state) {
         Map<Long, Vertex> vertices = state.getAllVertices();
         List<Partition> partitions = state.getAllPartitions();
+        nEdgePartitions = new int[partitions.size()];
+        nVertexPartitions = new int[partitions.size()];
 
         int totalReplicas = 0;
-        int nVertices = vertices.size();
+        nVertices = vertices.size();
         for (Vertex v : vertices.values()) {
             totalReplicas += v.getPartitions().size();
         }
@@ -33,15 +39,21 @@ public class PartitionsStatistics {
         //find max edge and vertex cardinality.
         int maxV = 0;
         int maxE = 0;
+        int i = 0;
+        int eSize = 0;
         for (Partition p : partitions) {
+            nEdgePartitions[i] = p.getESize();
+            nVertexPartitions[i] = p.getVSize();
+            eSize += p.getESize();
             if (p.getVSize() > maxV) {
                 maxV = p.getVSize();
             }
             if (p.getESize() > maxE) {
                 maxE = p.getESize();
             }
+            i++;
         }
-
+        nEdges = eSize;
         maxVertexCardinality = maxV;
         maxEdgeCardinality = maxE;
     }
@@ -100,11 +112,39 @@ public class PartitionsStatistics {
 
     /**
      * ** The number of vertices in the Partition with the max vertex
- cardinality.
+     * cardinality.
      *
      * @return
      */
     public int maxVertexCardinality() {
         return maxVertexCardinality;
+    }
+
+    /**
+     * @return the nVertices
+     */
+    public int getNVertices() {
+        return nVertices;
+    }
+
+    /**
+     * @return the nEdges
+     */
+    public int getNEdges() {
+        return nEdges;
+    }
+
+    /**
+     * @return the nEdgePartitions
+     */
+    public int[] getNEdgesPartitions() {
+        return nEdgePartitions;
+    }
+
+    /**
+     * @return the nEdgePartitions
+     */
+    public int[] getNVerticesPartitions() {
+        return nVertexPartitions;
     }
 }

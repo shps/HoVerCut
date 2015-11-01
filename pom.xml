@@ -65,11 +65,11 @@
             <artifactId>flink-clients</artifactId>
             <version>0.10-SNAPSHOT</version>
         </dependency>
-        <dependency>
+<!--        <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-gelly</artifactId>
             <version>0.10-SNAPSHOT</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
