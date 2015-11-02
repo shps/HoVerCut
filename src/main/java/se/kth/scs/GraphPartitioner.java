@@ -2,6 +2,10 @@ package se.kth.scs;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Set;
@@ -27,11 +31,13 @@ public class GraphPartitioner {
             "-m", "hdrf",
             "-p", "4",
             "-t", "4",
-//            "-reset", "true",
-            "-s", "mysql",
+            //            "-reset", "true",
+            "-s", "memory",
             "-db", "jdbc:mysql://localhost/hdrf",
             "-user", "root",
-            "-pass", ""};
+            "-pass", "",
+            "-output", "/Users/Ganymedian/Desktop/hdrf",
+            "-append", "true"};
         InputCommands commands = new InputCommands();
         JCommander commander;
         try {
@@ -44,7 +50,7 @@ public class GraphPartitioner {
             long start = System.currentTimeMillis();
             EdgeFileReader reader = new EdgeFileReader();
             Set<Tuple3<Long, Long, Double>>[] splits = reader.readSplitFile(commands.file, commands.nTasks);
-            System.out.println(String.format("Finished reading in %d seconds.", (System.currentTimeMillis()-start)/1000));
+            System.out.println(String.format("Finished reading in %d seconds.", (System.currentTimeMillis() - start) / 1000));
             PartitionState state = null;
             switch (commands.storage) {
                 case InputCommands.IN_MEMORY:
@@ -63,7 +69,15 @@ public class GraphPartitioner {
             }
 
             HdrfPartitioner.partitionWithWindow(state, splits, commands.lambda, commands.epsilon, commands.window);
-            printResults(commands.nPartitions, state, String.format("HdrfPartitioner lambda=%f\tepsilon=%f", commands.lambda, commands.epsilon));
+            PartitionsStatistics ps = new PartitionsStatistics(state);
+            printResults(commands.nPartitions, ps, String.format("HdrfPartitioner lambda=%f\tepsilon=%f", commands.lambda, commands.epsilon));
+            if (!commands.output.isEmpty()) {
+                try {
+                    writeToFile(ps, commands);
+                } catch (FileNotFoundException ex) {
+                    ex.printStackTrace();
+                }
+            }
             state.releaseResources();
         } catch (ParameterException ex) {
             System.out.println(ex.getMessage());
@@ -76,8 +90,7 @@ public class GraphPartitioner {
 
     }
 
-    private static void printResults(int k, PartitionState state, String message) {
-        PartitionsStatistics ps = new PartitionsStatistics(state);
+    private static void printResults(int k, PartitionsStatistics ps, String message) {
         System.out.println("*********** Statistics ***********");
         System.out.println(message);
         System.out.println(String.format("Partitions:\t%d", k));
@@ -119,7 +132,53 @@ public class GraphPartitioner {
             sb.append("db user:\t").append(commands.user).append(newLine);
             sb.append("db pass:\t").append(commands.pass).append(newLine);
         }
-
+        sb.append("Output:\t").append(commands.output).append(newLine);
+        sb.append("Append to output:\t").append(commands.append).append(newLine);
         System.out.println(sb.toString());
+    }
+
+    public static void writeToFile(PartitionsStatistics ps, InputCommands commands) throws FileNotFoundException{
+//        File f1 = new File(commands.output + "-partitions.csv");
+//        boolean append = false;
+//        if (f1.exists() && !f1.isDirectory()) {
+//            append = commands.append;
+//        }
+//        try (PrintWriter writer = new PrintWriter(new FileOutputStream(
+//                f1,
+//                append))) {
+//            Collection<Vertex> vertices = ps.getVertices().values();
+//            for (Vertex v : vertices) {
+//                writer.append(String.format("%d,", v.getId()));
+//                for (int p : v.getPartitions()) {
+//                    writer.append(String.format("%d,", p));
+//                }
+//                writer.append("\n");
+//            }
+//
+//            writer.flush();
+//        }
+        boolean append = false;
+        String file = commands.output + "-result.csv";
+        File f2 = new File(file);
+        if (f2.exists() && !f2.isDirectory()) {
+            append = commands.append;
+        }
+        try (PrintWriter writer = new PrintWriter(new FileOutputStream(
+                f2,
+                commands.append))) {
+            if (!append) {
+                writer.write("nTasks,nPartitions,window,rf,lrsd,mec,mvc\n");
+            }
+            writer.append(String.format("%d,%d,%d,%f,%f,%d,%d",
+                    commands.nTasks,
+                    commands.nPartitions,
+                    commands.window,
+                    ps.replicationFactor(),
+                    ps.loadRelativeStandardDeviation(),
+                    ps.maxEdgeCardinality(),
+                    ps.maxVertexCardinality()));
+            writer.append("\n");
+            writer.flush();
+        }
     }
 }

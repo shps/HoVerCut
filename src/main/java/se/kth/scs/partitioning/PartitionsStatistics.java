@@ -17,6 +17,7 @@ public class PartitionsStatistics {
     private final int nEdges;
     private final int[] nEdgePartitions;
     private final int[] nVertexPartitions;
+    private final Map<Long, Vertex> vertices;
 
     /**
      * Eagerly calculates some metrics about a list of partitions.
@@ -24,7 +25,7 @@ public class PartitionsStatistics {
      * @param state
      */
     public PartitionsStatistics(PartitionState state) {
-        Map<Long, Vertex> vertices = state.getAllVertices();
+        vertices = state.getAllVertices();
         List<Partition> partitions = state.getAllPartitions();
         nEdgePartitions = new int[partitions.size()];
         nVertexPartitions = new int[partitions.size()];
@@ -146,5 +147,12 @@ public class PartitionsStatistics {
      */
     public int[] getNVerticesPartitions() {
         return nVertexPartitions;
+    }
+
+    /**
+     * @return the vertices
+     */
+    public Map<Long, Vertex> getVertices() {
+        return vertices;
     }
 }

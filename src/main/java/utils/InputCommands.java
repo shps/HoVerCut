@@ -48,9 +48,15 @@ public class InputCommands {
 
     @Parameter(names = {"-pass"}, description = "Database password.")
     public String pass = "";
-    
-    @Parameter(names = {"-reset"}, description = "Reset storage.")
+
+    @Parameter(names = {"-reset"}, description = "Reset storage.", arity = 1)
     public boolean reset = true;
+
+    @Parameter(names = {"-output"}, description = "Output file.")
+    public String output = "";
+
+    @Parameter(names = {"-append"}, description = "Append to the output file.", arity = 1)
+    public boolean append = true;
 
     public static class PartitionerValidator implements IParameterValidator {
 
