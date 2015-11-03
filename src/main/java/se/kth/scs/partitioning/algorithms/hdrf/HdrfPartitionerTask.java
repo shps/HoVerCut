@@ -1,7 +1,6 @@
 package se.kth.scs.partitioning.algorithms.hdrf;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.security.SecureRandom;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,6 +22,9 @@ public class HdrfPartitionerTask implements Runnable {
     private final double epsilon;
     private final int windowSize;
     private final PartitionState state;
+    private final SecureRandom r;
+    private final int minDelay;
+    private final int maxDelay;
 
     public HdrfPartitionerTask(PartitionState state, Set<Tuple3<Long, Long, Double>> edges, double lambda, double epsilon, int windowSize) {
         this.edges = edges;
@@ -30,6 +32,27 @@ public class HdrfPartitionerTask implements Runnable {
         this.epsilon = epsilon;
         this.windowSize = windowSize;
         this.state = state;
+        this.minDelay = 0;
+        this.maxDelay = 0;
+        r = null;
+    }
+
+    public HdrfPartitionerTask(
+            PartitionState state,
+            Set<Tuple3<Long, Long, Double>> edges,
+            double lambda,
+            double epsilon,
+            int windowSize,
+            int minDelay,
+            int maxDelay) {
+        this.edges = edges;
+        this.lambda = lambda;
+        this.epsilon = epsilon;
+        this.windowSize = windowSize;
+        this.state = state;
+        this.minDelay = minDelay;
+        this.maxDelay = maxDelay;
+        r = new SecureRandom();
     }
 
     /**
@@ -62,7 +85,7 @@ public class HdrfPartitionerTask implements Runnable {
             vertices.clear();
         }
 
-        System.out.println(String.format("******** Task %d finished in %d seconds.", Thread.currentThread().getId(), (System.currentTimeMillis()-start)/1000));
+        System.out.println(String.format("******** Task %d finished in %d seconds.", Thread.currentThread().getId(), (System.currentTimeMillis() - start) / 1000));
         return state;
     }
 
@@ -102,7 +125,9 @@ public class HdrfPartitionerTask implements Runnable {
 //    }
     private void allocateNextWindow(List<Tuple3<Long, Long, Double>> edgeWindow, Set<Long> vIds, PartitionState state, double lambda, double epsilon) {
         Map<Long, Vertex> vertices = state.getVertices(vIds);
+        delay(minDelay, maxDelay, r);
         List<Partition> partitions = state.getAllPartitions();
+        delay(minDelay, maxDelay, r);
 
         for (Tuple3<Long, Long, Double> e : edgeWindow) {
             Vertex u = vertices.get(e.f0);
@@ -122,7 +147,19 @@ public class HdrfPartitionerTask implements Runnable {
 
         //TODO: Inconsistency if update partitions and vertices separately.
         state.putPartitions(partitions);
+        delay(minDelay, maxDelay, r);
         state.putVertices(vertices.values());
+        delay(minDelay, maxDelay, r);
+    }
+
+    private void delay(int min, int max, SecureRandom r) {
+        if (maxDelay > 0) {
+            try {
+                Thread.sleep(min + r.nextInt(max));
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 
     private Partition allocateNextEdge(Vertex v1, Vertex v2, List<Partition> partitions, double lambda, double epsilon) {
@@ -192,6 +229,20 @@ public class HdrfPartitionerTask implements Runnable {
     public void run() {
         partitionWithWindow();
         state.releaseTaskResources();
+    }
+
+    /**
+     * @return the minDelay
+     */
+    public int getMinDelay() {
+        return minDelay;
+    }
+
+    /**
+     * @return the maxDelay
+     */
+    public int getMaxDelay() {
+        return maxDelay;
     }
 
 }

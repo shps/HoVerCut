@@ -42,7 +42,7 @@ public class Test {
 //        printResults(k, urState, String.format("UinformRandomPartitioner"));
 //        PartitionState hState = new HdrfInMemoryState(k);
         PartitionState hState = new HdrfMysqlState(k, HdrfMySqlQueries.DEFAULT_DB_URL, HdrfMySqlQueries.DEFAULT_USER, HdrfMySqlQueries.DEFAULT_PASS, true);
-        HdrfPartitioner.partitionWithWindow(hState, splits, lambda, epsilon, windowSize);
+        HdrfPartitioner.partitionWithWindow(hState, splits, lambda, epsilon, windowSize, 0, 0);
 //        HdrfPartitioner.partition(hState, edges, lambda, epsilon);
 
 //        printResults(k, uPartitions, "UniformRandomPartitioner");

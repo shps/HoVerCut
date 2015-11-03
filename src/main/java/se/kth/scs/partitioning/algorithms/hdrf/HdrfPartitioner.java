@@ -1,8 +1,6 @@
 package se.kth.scs.partitioning.algorithms.hdrf;
 
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.flink.api.java.tuple.Tuple3;
 import se.kth.scs.partitioning.PartitionState;
 
@@ -22,13 +20,15 @@ public class HdrfPartitioner {
             PartitionState hState, Set<Tuple3<Long, Long, Double>> edges[],
             double lambda,
             double epsilon,
-            int windowSize) {
+            int windowSize,
+            int minDelay,
+            int maxDelay) {
         System.out.println("Starts partitioning...");
         int nTasks = edges.length;
         HdrfPartitionerTask[] tasks = new HdrfPartitionerTask[nTasks];
         Thread[] threads = new Thread[nTasks];
         for (int i = 0; i < nTasks; i++) {
-            tasks[i] = new HdrfPartitionerTask(hState, edges[i], lambda, epsilon, windowSize);
+            tasks[i] = new HdrfPartitionerTask(hState, edges[i], lambda, epsilon, windowSize, minDelay, maxDelay);
             threads[i] = new Thread(tasks[i]);
         }
 

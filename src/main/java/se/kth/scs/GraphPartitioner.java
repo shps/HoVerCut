@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 import org.apache.flink.api.java.tuple.Tuple3;
@@ -37,11 +38,23 @@ public class GraphPartitioner {
             "-user", "root",
             "-pass", "",
             "-output", "/Users/Ganymedian/Desktop/hdrf",
-            "-append", "true"};
+            "-append", "true",
+            "-delay", "10", "20"};
         InputCommands commands = new InputCommands();
         JCommander commander;
         try {
+            int minDelay = 0;
+            int maxDelay = 0;
             commander = new JCommander(commands, args);
+            if (commands.delay != null && commands.delay.size() > 0) {
+                if (commands.delay.get(0) > commands.delay.get(1)) {
+                    throw new ParameterException("delay max time cannot be less than min time!");
+                }
+
+                minDelay = commands.delay.get(0);
+                maxDelay = commands.delay.get(1);
+
+            }
             printCommandSetup(commands);
             if (!commands.method.equals(InputCommands.HDRF)) {
                 throw new ParameterException("");
@@ -68,7 +81,7 @@ public class GraphPartitioner {
                     throw new ParameterException("");
             }
 
-            HdrfPartitioner.partitionWithWindow(state, splits, commands.lambda, commands.epsilon, commands.window);
+            HdrfPartitioner.partitionWithWindow(state, splits, commands.lambda, commands.epsilon, commands.window, minDelay, maxDelay);
             PartitionsStatistics ps = new PartitionsStatistics(state);
             printResults(commands.nPartitions, ps, String.format("HdrfPartitioner lambda=%f\tepsilon=%f", commands.lambda, commands.epsilon));
             if (!commands.output.isEmpty()) {
@@ -133,11 +146,12 @@ public class GraphPartitioner {
             sb.append("db pass:\t").append(commands.pass).append(newLine);
         }
         sb.append("Output:\t").append(commands.output).append(newLine);
+        sb.append(String.format("Delay:\t min:%d\tmax=%d", commands.delay.get(0), commands.delay.get(1))).append(newLine);
         sb.append("Append to output:\t").append(commands.append).append(newLine);
         System.out.println(sb.toString());
     }
 
-    public static void writeToFile(PartitionsStatistics ps, InputCommands commands) throws FileNotFoundException{
+    public static void writeToFile(PartitionsStatistics ps, InputCommands commands) throws FileNotFoundException {
 //        File f1 = new File(commands.output + "-partitions.csv");
 //        boolean append = false;
 //        if (f1.exists() && !f1.isDirectory()) {

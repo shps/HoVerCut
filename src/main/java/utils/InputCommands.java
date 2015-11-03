@@ -3,6 +3,9 @@ package utils;
 import com.beust.jcommander.IParameterValidator;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.avro.generic.GenericData;
 
 /**
  *
@@ -57,6 +60,10 @@ public class InputCommands {
 
     @Parameter(names = {"-append"}, description = "Append to the output file.", arity = 1)
     public boolean append = true;
+    
+    @Parameter(names = {"-delay"}, description = "Delay to add after every transaction with storage.", arity = 2)
+    public List<Integer> delay;
+    
 
     public static class PartitionerValidator implements IParameterValidator {
 
