@@ -1,6 +1,7 @@
 package se.kth.scs.partitioning.algorithms.hdrf;
 
 import com.mysql.jdbc.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -36,22 +37,6 @@ public class HdrfMySqlQueries {
     public static final String EDGE_SIZE = "edge_size";
     public static final String VERTEX_SIZE = "vertex_size";
     public static final String PARTIAL_DEGREE = "partial_degree";
-    // Queries
-    private static final String INSERT_VERTEX_PARTITION = String.format("insert ignore into %s (%s, %s) values (?,?)", VERTEX_PARTITION, VID, PID);
-    // This query just counts the number of edges. It keeps the number of partitions zero. 
-    // This is because, we can count the number of partitions by counting on vertex_partition table.
-    private static final String UPDATE_PARTITION = String.format("insert into %s (%s, %s, %s) values (?, 1, 0) on duplicate key update %s=%s+1",
-            PARTITIONS, PID, EDGE_SIZE, VERTEX_SIZE, EDGE_SIZE, EDGE_SIZE);
-    private static final String UPDATE_VERTEX = String.format("insert into %s (%s, %s) values (?, 1) on duplicate key update %s=%s+1",
-            VERTICES, VID, PARTIAL_DEGREE, PARTIAL_DEGREE, PARTIAL_DEGREE);
-    private static final String QUERY_EDGE_SIZE = String.format("select %s from %s where %s=?", EDGE_SIZE, PARTITIONS, PID);
-    private static final String QUERY_VERTEX_SIZE = String.format("select count(*) from %s where %s=?", VERTEX_PARTITION, PID);
-    private static final String CONTAINS_VERTEX = String.format("select count(*) from %s where %s=? and %s=?", VERTEX_PARTITION, VID, PID);
-    private static final String QUERY_VERTICES = String.format("select %s from %s where %s=?", VID, VERTEX_PARTITION, PID);
-    private static final String QUERY_PARTITIONS = String.format("select %s from %s where %s=?", PID, VERTEX_PARTITION, VID);
-    private static final String QUERY_VERTEX_DEGREE = String.format("select %s from %s where %s=?", PARTIAL_DEGREE, VERTICES, VID);
-    private static final String MAX_PARTITION_VERTEX_SIZE = String.format("select MAX(%s) from %s", VERTEX_SIZE, PARTITIONS);
-    private static final String MAX_PARTITION_EDGE_SIZE = String.format("select MAX(%s) from %s", EDGE_SIZE, PARTITIONS);
 
     public static Vertex getVertex(long vid, Connection con) throws SQLException {
         String query = String.format("select * from %s where vid=%d", VERTICES, vid);
@@ -203,10 +188,16 @@ public class HdrfMySqlQueries {
     }
 
     public static int[] putVertices(Collection<Vertex> vertices, Connection con) throws SQLException {
-        Statement s = con.createStatement();
+        PreparedStatement s = con.prepareStatement(String.format("insert ignore into %s (vid, partial_degree, partitions) values (?, ?, ?) "
+                + "on duplicate key update partial_degree=partial_degree+?, partitions=concat(partitions,\",\",?)",
+                VERTICES));
         for (Vertex v : vertices) {
-            String query = createPutVertexQuery(v);
-            s.addBatch(query);
+            s.setLong(1, v.getId());
+            s.setInt(2, v.getpDegree());
+            s.setString(3, serialize(v.getPartitions()));
+            s.setInt(4, v.getDegreeDelta());
+            s.setString(5, serialize(v.getPartitionsDelta()));
+            s.addBatch();
         }
         int[] r = s.executeBatch();
         s.closeOnCompletion();
@@ -215,10 +206,16 @@ public class HdrfMySqlQueries {
     }
 
     public static int[] putPartitions(List<Partition> partitions, Connection con) throws SQLException {
-        Statement s = con.createStatement();
+        PreparedStatement s = con.prepareStatement(String.format("insert into %s (pid, vertex_size, edge_size) values (?, ?, ?) "
+                + "on duplicate key update vertex_size=vertex_size+?, edge_size=edge_size+?",
+                PARTITIONS));
         for (Partition p : partitions) {
-            String query = createPutPartitionQuery(p);
-            s.addBatch(query);
+            s.setInt(1, p.getId());
+            s.setInt(2, p.getVSize());
+            s.setInt(3, p.getESize());
+            s.setInt(4, p.getVSizeDelta());
+            s.setInt(5, p.getESizeDelta());
+            s.addBatch();
         }
         int[] r = s.executeBatch();
         s.closeOnCompletion();
