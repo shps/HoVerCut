@@ -60,6 +60,25 @@ public class HdrfMySqlQueriesTest extends TestCase {
             assert vMap.size() == 2;
             assert vMap.containsKey(v2.getId());
             assert vMap.containsKey(v3.getId());
+
+            v2.addPartition(1);
+            v3.addPartition(2);
+            vertices.clear();
+            vertices.add(v2);
+            vertices.add(v3);
+            
+                HdrfMySqlQueries.putVertices(vertices, con);
+
+                vids.clear();
+                vids.add(v2.getId());
+                vids.add(v3.getId());
+                vMap = HdrfMySqlQueries.getVertices(vids, con);
+                assert vMap.size() == 2;
+                assert vMap.containsKey(v2.getId());
+                assert vMap.get(v2.getId()).getPartitions().contains(1);
+                assert vMap.containsKey(v3.getId());
+                assert vMap.get(v3.getId()).getPartitions().contains(2);
+            
         }
     }
 
