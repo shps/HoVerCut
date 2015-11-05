@@ -124,9 +124,12 @@ public class HdrfPartitionerTask implements Runnable {
 //        return state;
 //    }
     private void allocateNextWindow(List<Tuple3<Long, Long, Double>> edgeWindow, Set<Long> vIds, PartitionState state, double lambda, double epsilon) {
+        long taskId = Thread.currentThread().getId();
         Map<Long, Vertex> vertices = state.getVertices(vIds);
+        System.out.println(String.format("Task-%d has read %d vertices.", taskId, vertices.size()));
         delay(minDelay, maxDelay, r);
         List<Partition> partitions = state.getAllPartitions();
+        System.out.println(String.format("Task-%d has read %d partitions.", taskId, partitions.size()));
         delay(minDelay, maxDelay, r);
 
         for (Tuple3<Long, Long, Double> e : edgeWindow) {
@@ -147,8 +150,10 @@ public class HdrfPartitionerTask implements Runnable {
 
         //TODO: Inconsistency if update partitions and vertices separately.
         state.putPartitions(partitions);
+        System.out.println(String.format("Task-%d updated %d partitions.", taskId, partitions.size()));
         delay(minDelay, maxDelay, r);
         state.putVertices(vertices.values());
+        System.out.println(String.format("Task-%d updated %d vertices.", taskId, vertices.size()));
         delay(minDelay, maxDelay, r);
     }
 

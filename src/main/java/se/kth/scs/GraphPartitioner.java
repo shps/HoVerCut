@@ -34,6 +34,9 @@ public class GraphPartitioner {
 
     private static final Map<Integer, List<Float>> windowRf = new LinkedHashMap<>();
     private static final Map<Integer, List<Float>> taskRf = new LinkedHashMap<>();
+    private static final String DELIMITER = " ";
+    private static final String dbUrl = "jdbc:mysql://130.237.214.75:3306/hdrf";
+//    private static final String dbUrl = "jdbc:mysql://localhost/hdrf";
 
     public static void main(String[] args) throws SQLException {
 //        args = new String[]{
@@ -54,30 +57,31 @@ public class GraphPartitioner {
         int p = 4;
         int tb = 2;
         int nEdges = 352285;
-        String file = "/Users/Ganymedian/Desktop/hdrf";
+        String outputFile = "/Users/Ganymedian/Desktop/results/hdrf";
+        String inputFile = "./data/datasets/facebook_combined.txt";
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 3; i < 5; i++) {
             int t = (int) Math.pow(tb, i);
-            int j = 0;
+            int j = 4;
             int w;
             while ((w = (int) Math.pow(wb, j)) * t < nEdges) {
                 InputCommands commands = new InputCommands();
                 JCommander commander;
                 try {
                     args = new String[]{
-                        "-f", "./data/datasets/Cit-HepTh.txt",
+                        "-f", inputFile,
                         "-w", String.valueOf(w),
                         "-m", "hdrf",
                         "-p", "4",
                         "-t", String.valueOf(t),
-                        //            "-reset", "true",
-                        "-s", "memory",
-                        "-db", "jdbc:mysql://localhost/hdrf",
+                        "-reset", "true",
+                        "-s", "mysql",
+                        "-db", dbUrl,
                         "-user", "root",
                         "-pass", "",
-                        "-output", file,
+                        "-output", outputFile,
                         "-append", "true",
-                        "-delay", "0", "2"};
+                        "-delay", "0", "0"};
                     commander = new JCommander(commands, args);
                     runPartitioner(commands);
                 } catch (ParameterException ex) {
@@ -92,7 +96,7 @@ public class GraphPartitioner {
             }
         }
 
-        writeToFile(windowRf, taskRf, file);
+        writeToFile(windowRf, taskRf, outputFile);
 
     }
 
@@ -114,7 +118,7 @@ public class GraphPartitioner {
         }
         System.out.println(String.format("Reading file %s", commands.file));
         long start = System.currentTimeMillis();
-        EdgeFileReader reader = new EdgeFileReader();
+        EdgeFileReader reader = new EdgeFileReader(DELIMITER);
         Set<Tuple3<Long, Long, Double>>[] splits = reader.readSplitFile(commands.file, commands.nTasks);
         System.out.println(String.format("Finished reading in %d seconds.", (System.currentTimeMillis() - start) / 1000));
         PartitionState state = null;
