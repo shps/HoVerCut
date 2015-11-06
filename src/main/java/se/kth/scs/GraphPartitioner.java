@@ -8,7 +8,6 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -35,7 +34,7 @@ public class GraphPartitioner {
     private static final Map<Integer, List<Float>> windowRf = new LinkedHashMap<>();
     private static final Map<Integer, List<Float>> taskRf = new LinkedHashMap<>();
     private static final String DELIMITER = " ";
-    private static final String dbUrl = "jdbc:mysql://130.237.214.75:3306/hdrf";
+    private static final String dbUrl = "jdbc:mysql://104.155.65.24:3306/hdrf";
 //    private static final String dbUrl = "jdbc:mysql://localhost/hdrf";
 
     public static void main(String[] args) throws SQLException {
@@ -56,14 +55,19 @@ public class GraphPartitioner {
         int wb = 10;
         int p = 4;
         int tb = 2;
-        int nEdges = 352285;
         String outputFile = "/Users/Ganymedian/Desktop/results/hdrf";
-        String inputFile = "./data/datasets/facebook_combined.txt";
+        String inputFile = "./data/datasets/twitter_combined.txt";
 
         for (int i = 3; i < 5; i++) {
             int t = (int) Math.pow(tb, i);
             int j = 4;
             int w;
+            System.out.println(String.format("Reading file %s", inputFile));
+            long start = System.currentTimeMillis();
+            EdgeFileReader reader = new EdgeFileReader(DELIMITER);
+            Set<Tuple3<Long, Long, Double>>[] splits = reader.readSplitFile(inputFile, t);
+            int nEdges = reader.getnEdges();
+            System.out.println(String.format("Finished reading in %d seconds.", (System.currentTimeMillis() - start) / 1000));
             while ((w = (int) Math.pow(wb, j)) * t < nEdges) {
                 InputCommands commands = new InputCommands();
                 JCommander commander;
@@ -78,12 +82,12 @@ public class GraphPartitioner {
                         "-s", "mysql",
                         "-db", dbUrl,
                         "-user", "root",
-                        "-pass", "",
+                        "-pass", "root",
                         "-output", outputFile,
                         "-append", "true",
                         "-delay", "0", "0"};
                     commander = new JCommander(commands, args);
-                    runPartitioner(commands);
+                    runPartitioner(commands, splits);
                 } catch (ParameterException ex) {
                     System.out.println(ex.getMessage());
                     System.out.println(Arrays.toString(args));
@@ -100,7 +104,7 @@ public class GraphPartitioner {
 
     }
 
-    public static void runPartitioner(InputCommands commands) throws SQLException {
+    public static void runPartitioner(InputCommands commands, Set<Tuple3<Long, Long, Double>>[] splits) throws SQLException {
         int minDelay = 0;
         int maxDelay = 0;
         if (commands.nTasks > 1 && commands.delay != null && commands.delay.size() > 0) {
@@ -116,11 +120,6 @@ public class GraphPartitioner {
         if (!commands.method.equals(InputCommands.HDRF)) {
             throw new ParameterException("");
         }
-        System.out.println(String.format("Reading file %s", commands.file));
-        long start = System.currentTimeMillis();
-        EdgeFileReader reader = new EdgeFileReader(DELIMITER);
-        Set<Tuple3<Long, Long, Double>>[] splits = reader.readSplitFile(commands.file, commands.nTasks);
-        System.out.println(String.format("Finished reading in %d seconds.", (System.currentTimeMillis() - start) / 1000));
         PartitionState state = null;
         switch (commands.storage) {
             case InputCommands.IN_MEMORY:

@@ -20,6 +20,7 @@ public class EdgeFileReader {
     private final String DEFAULT_DELIMITER = "\t";
     private final String COMMENT = "#";
     private final String delimiter;
+    private int nEdges;
 
     public EdgeFileReader() {
         this.delimiter = DEFAULT_DELIMITER;
@@ -120,6 +121,7 @@ public class EdgeFileReader {
 
     public Set[] readSplitFile(String file, int nSplit) {
         Set<Tuple3<Long, Long, Double>> allEdges = read(file);
+        nEdges = allEdges.size();
         Set<Tuple3<Long, Long, Double>>[] splits = new HashSet[nSplit];
         int splitSize = allEdges.size() / nSplit + 1;
         int j = -1;
@@ -127,8 +129,7 @@ public class EdgeFileReader {
         for (Tuple3<Long, Long, Double> e : allEdges) {
             if (i % splitSize == 0) {
                 j++;
-                if (j == 4)
-                {
+                if (j == 4) {
                     System.out.println();
                 }
                 splits[j] = new HashSet<>();
@@ -181,4 +182,10 @@ public class EdgeFileReader {
 //    }
 //
 //  }
+    /**
+     * @return the nEdges
+     */
+    public int getnEdges() {
+        return nEdges;
+    }
 }

@@ -46,8 +46,10 @@ public class HdrfMysqlState implements PartitionState {
     }
 
     private Connection createConnection(String dbUrl, String dbUser, String dbPass) throws SQLException {
+//        + "cachePrepStmts=true&prepStmtCacheSize=250&prepStmtCacheSqlLimit=2048&"
+//                        + "useUnbufferedIO=false&useReadAheadInput=false"
         return (Connection) DriverManager.getConnection(
-                String.format("%s?user=%s&password=%s", dbUrl, dbUser, dbPass));
+                String.format("%s?user=%s&password=%s&rewriteBatchedStatements=true", dbUrl, dbUser, dbPass));
     }
 
     private Connection getConnection() throws SQLException {
