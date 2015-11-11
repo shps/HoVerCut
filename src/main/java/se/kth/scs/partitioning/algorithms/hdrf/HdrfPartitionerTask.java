@@ -61,7 +61,7 @@ public class HdrfPartitionerTask implements Runnable {
      * @return
      */
     public PartitionState partitionWithWindow() {
-
+      long tId = Thread.currentThread().getId();
         int counter = 1;
         List<Tuple3<Long, Long, Double>> edgeWindow = new LinkedList<>();
         Set<Long> vertices = new HashSet();
@@ -72,7 +72,10 @@ public class HdrfPartitionerTask implements Runnable {
             vertices.add(e.f0);
             vertices.add(e.f1);
             if (counter % windowSize == 0) {
+//                long start2 = System.currentTimeMillis();
+//                System.out.println(String.format("Task %d started allocating next window.", tId));
                 allocateNextWindow(edgeWindow, vertices, state, lambda, epsilon);
+//                System.out.println(String.format("Task %d finsihed allocating a window in %d.", tId, (System.currentTimeMillis()-start2)/1000));
                 edgeWindow.clear();
                 vertices.clear();
             }
@@ -125,13 +128,19 @@ public class HdrfPartitionerTask implements Runnable {
 //    }
     private void allocateNextWindow(List<Tuple3<Long, Long, Double>> edgeWindow, Set<Long> vIds, PartitionState state, double lambda, double epsilon) {
         long taskId = Thread.currentThread().getId();
+//        System.out.println(String.format("Task-%d started reading %d vertices.", taskId,vIds.size()));
+//        long start = System.currentTimeMillis();
         Map<Long, Vertex> vertices = state.getVertices(vIds);
-        System.out.println(String.format("Task-%d has read %d vertices.", taskId, vertices.size()));
+//        System.out.println(String.format("Task-%d has read %d vertices in %d seconds.", taskId, vertices.size(), (System.currentTimeMillis()-start)/1000));
         delay(minDelay, maxDelay, r);
+//        start = System.currentTimeMillis();
+//        System.out.println(String.format("Task-%d started reading partitions.", taskId));
         List<Partition> partitions = state.getAllPartitions();
-        System.out.println(String.format("Task-%d has read %d partitions.", taskId, partitions.size()));
+//        System.out.println(String.format("Task-%d has read %d partitions in %d seconds.", taskId, partitions.size(), (System.currentTimeMillis()-start)/1000));
         delay(minDelay, maxDelay, r);
 
+//        start = System.currentTimeMillis();
+//        System.out.println(String.format("Task-%d started in-memory partitioning.", taskId));
         for (Tuple3<Long, Long, Double> e : edgeWindow) {
             Vertex u = vertices.get(e.f0);
             Vertex v = vertices.get(e.f1);
@@ -147,13 +156,17 @@ public class HdrfPartitionerTask implements Runnable {
             v.incrementDegree();
             allocateNextEdge(u, v, partitions, lambda, epsilon);
         }
-
+//        System.out.println(String.format("Task-%d finished in-memory partitioning in %d seconds.", taskId, (System.currentTimeMillis()-start)/1000));
         //TODO: Inconsistency if update partitions and vertices separately.
+//        start = System.currentTimeMillis();
+//        System.out.println(String.format("Task-%d started updating %d partitions.", taskId, partitions.size()));
         state.putPartitions(partitions);
-        System.out.println(String.format("Task-%d updated %d partitions.", taskId, partitions.size()));
+//        System.out.println(String.format("Task-%d updated %d partitions in %d seconds.", taskId, partitions.size(), (System.currentTimeMillis()-start)/1000));
         delay(minDelay, maxDelay, r);
+//        start = System.currentTimeMillis();
+//        System.out.println(String.format("Task-%d started updating %d vertices.", taskId, vertices.size()));
         state.putVertices(vertices.values());
-        System.out.println(String.format("Task-%d updated %d vertices.", taskId, vertices.size()));
+//        System.out.println(String.format("Task-%d updated %d vertices in %d seconds.", taskId, vertices.size(), (System.currentTimeMillis()-start)/1000));
         delay(minDelay, maxDelay, r);
     }
 

@@ -36,20 +36,19 @@ public class GraphPartitioner {
     private static final Map<Integer, List<Integer>> windowTime = new LinkedHashMap<>();
     private static final Map<Integer, List<Integer>> taskTime = new LinkedHashMap<>();
     private static final String DELIMITER = " ";
-    private static final String storage = "mysql";
-//  private static final String dbUrl = "jdbc:mysql://104.155.65.24:3306/hdrf";
-    private static final String outputFile = "/Users/Ganymedian/Desktop/results/hdrf";
-    private static final String inputFile = "./data/datasets/twitter_combined.txt";
-    private static final int minT = 3;
-    private static final int maxT = 3;
+    private static final String storage = "memory";
+  private static final String dbUrl = "jdbc:mysql://130.211.66.108:3306/hdrf";
+   private static final String outputFile = "/home/ganymedian/Desktop/results/hdrf";
+  private static final String inputFile = "./data/datasets/twitter_combined.txt";
+    private static final int minT = 0;
+    private static final int maxT = 0;
     private static final int tBase = 2;
-    private static final int minW = 3;
-    private static final int maxW = -1;
+    private static final int minW = 0;
+    private static final int maxW = 0;
     private static final int wBase = 10;
 //  private static final int maxW = 5;
-    private static final String dbUrl = "jdbc:mysql://localhost/hdrf";
     private static final String USER = "root";
-    private static final String PASS = "";
+    private static final String PASS = "root";
 
     public static void main(String[] args) throws SQLException {
 //        args = new String[]{
