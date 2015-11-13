@@ -22,253 +22,247 @@ import se.kth.scs.partitioning.Vertex;
  */
 public class HdrfMySqlQueries {
 
-    public static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-    public static final String DEFAULT_DB_URL = "jdbc:mysql://localhost/hdrf";
-    public static final String DEFAULT_USER = "root";
-    public static final String DEFAULT_PASS = "";
-    // Database structure
+  public static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
+  public static final String DEFAULT_DB_URL = "jdbc:mysql://localhost/hdrf";
+  public static final String DEFAULT_USER = "root";
+  public static final String DEFAULT_PASS = "";
+  // Database structure
 
-    public static final String DB = "hdrf";
-    public static final String VERTEX_PARTITION = "vertex_partition";
-    public static final String PARTITIONS = "partitions";
-    public static final String VERTICES = "vertices";
-    public static final String VID = "vid";
-    public static final String PID = "pid";
-    public static final String EDGE_SIZE = "edge_size";
-    public static final String VERTEX_SIZE = "vertex_size";
-    public static final String PARTIAL_DEGREE = "partial_degree";
+  public static final String DB = "hdrf";
+  public static final String VERTEX_PARTITION = "vertex_partition";
+  public static final String PARTITIONS = "partitions";
+  public static final String VERTICES = "vertices";
+  public static final String VID = "vid";
+  public static final String PID = "pid";
+  public static final String EDGE_SIZE = "edge_size";
+  public static final String VERTEX_SIZE = "vertex_size";
+  public static final String PARTIAL_DEGREE = "partial_degree";
 
-    public static Vertex getVertex(long vid, Connection con) throws SQLException {
-        String query = String.format("select * from %s where vid=%d", VERTICES, vid);
-        Statement s = con.createStatement();
-        ResultSet r = s.executeQuery(query);
-        Vertex v = null;
-        if (r.next()) {
-            int degree = r.getInt(PARTIAL_DEGREE);
-            Set<Integer> partitions = deserialize(r.getString(PARTITIONS));
-            v = new Vertex(vid, partitions);
-            v.setpDegree(degree);
-        }
-
-        return v;
+  public static Vertex getVertex(long vid, Connection con) throws SQLException {
+    String query = String.format("select * from %s where vid=%d", VERTICES, vid);
+    Statement s = con.createStatement();
+    ResultSet r = s.executeQuery(query);
+    Vertex v = null;
+    if (r.next()) {
+      int degree = r.getInt(PARTIAL_DEGREE);
+      byte partitions = r.getByte(PARTITIONS);
+      v = new Vertex(vid, partitions);
+      v.setpDegree(degree);
     }
 
-    public static Partition getPartition(int pid, Connection con) throws SQLException {
-        String query = String.format("select * from %s where pid=%d", PARTITIONS, pid);
-        Statement s = con.createStatement();
-        ResultSet r = s.executeQuery(query);
-        Partition p = null;
-        if (r.next()) {
-            int vSize = r.getInt(VERTEX_SIZE);
-            int eSize = r.getInt(EDGE_SIZE);
-            p = new Partition(pid);
-            p.setVSize(vSize);
-            p.setESize(eSize);
-        }
+    return v;
+  }
 
-        return p;
+  public static Partition getPartition(int pid, Connection con) throws SQLException {
+    String query = String.format("select * from %s where pid=%d", PARTITIONS, pid);
+    Statement s = con.createStatement();
+    ResultSet r = s.executeQuery(query);
+    Partition p = null;
+    if (r.next()) {
+      int vSize = r.getInt(VERTEX_SIZE);
+      int eSize = r.getInt(EDGE_SIZE);
+      p = new Partition(pid);
+      p.setVSize(vSize);
+      p.setESize(eSize);
     }
 
-    public static Map<Long, Vertex> getVertices(Set<Long> vids, Connection con) throws SQLException {
-        StringBuilder query = new StringBuilder(String.format("select * from %s where ", VERTICES));
-        int i = 0;
-        for (long vid : vids) {
-            query.append(String.format(" vid=%d ", vid));
-            if (i + 1 < vids.size()) {
-                query.append("or");
-            }
-            i++;
-        }
-        Statement s = con.createStatement();
-        ResultSet r = s.executeQuery(query.toString());
-        Map<Long, Vertex> vertices = new HashMap();
-        while (r.next()) {
-            long vid = r.getLong(VID);
-            int degree = r.getInt(PARTIAL_DEGREE);
-            Set<Integer> partitions = deserialize(r.getString(PARTITIONS));
-            Vertex v = new Vertex(vid, partitions);
-            v.setpDegree(degree);
-            vertices.put(vid, v);
-        }
+    return p;
+  }
 
-        return vertices;
+  public static Map<Long, Vertex> getVertices(Set<Long> vids, Connection con) throws SQLException {
+    StringBuilder query = new StringBuilder(String.format("select * from %s where ", VERTICES));
+    int i = 0;
+    for (long vid : vids) {
+      query.append(String.format(" vid=%d ", vid));
+      if (i + 1 < vids.size()) {
+        query.append("or");
+      }
+      i++;
+    }
+    Statement s = con.createStatement();
+    ResultSet r = s.executeQuery(query.toString());
+    Map<Long, Vertex> vertices = new HashMap();
+    while (r.next()) {
+      long vid = r.getLong(VID);
+      int degree = r.getInt(PARTIAL_DEGREE);
+      byte partitions = r.getByte(PARTITIONS);
+      Vertex v = new Vertex(vid, partitions);
+      v.setpDegree(degree);
+      vertices.put(vid, v);
     }
 
-    public static Map<Long, Vertex> getAllVertices(Connection con) throws SQLException {
-        String query = String.format("select * from %s", VERTICES);
+    return vertices;
+  }
 
-        Statement s = con.createStatement();
-        ResultSet r = s.executeQuery(query);
-        Map<Long, Vertex> vertices = new HashMap();
-        while (r.next()) {
-            long vid = r.getLong(VID);
-            int degree = r.getInt(PARTIAL_DEGREE);
-            Set<Integer> partitions = deserialize(r.getString(PARTITIONS));
-            Vertex v = new Vertex(vid, partitions);
-            v.setpDegree(degree);
-            vertices.put(vid, v);
-        }
+  public static Map<Long, Vertex> getAllVertices(Connection con) throws SQLException {
+    String query = String.format("select * from %s", VERTICES);
 
-        return vertices;
+    Statement s = con.createStatement();
+    ResultSet r = s.executeQuery(query);
+    Map<Long, Vertex> vertices = new HashMap();
+    while (r.next()) {
+      long vid = r.getLong(VID);
+      int degree = r.getInt(PARTIAL_DEGREE);
+      byte partitions = r.getByte(PARTITIONS);
+      Vertex v = new Vertex(vid, partitions);
+      v.setpDegree(degree);
+      vertices.put(vid, v);
     }
 
-    public static List<Partition> getPartitions(int[] pids, Connection con) throws SQLException {
-        StringBuilder query = new StringBuilder(String.format("select * from %s where ", PARTITIONS));
-        for (int i = 0; i < pids.length; i++) {
-            query.append(String.format(" pid=%d ", pids[i]));
-            if (i + 1 < pids.length) {
-                query.append("or");
-            }
-        }
-        Statement s = con.createStatement();
-        ResultSet r = s.executeQuery(query.toString());
-        LinkedList<Partition> partitions = new LinkedList<>();
-        while (r.next()) {
-            int pid = r.getInt(PID);
-            int vSize = r.getInt(VERTEX_SIZE);
-            int eSize = r.getInt(EDGE_SIZE);
-            Partition p = new Partition(pid);
-            p.setESize(eSize);
-            p.setVSize(vSize);
-            partitions.add(p);
-        }
+    return vertices;
+  }
 
-        return partitions;
+  public static List<Partition> getPartitions(int[] pids, Connection con) throws SQLException {
+    StringBuilder query = new StringBuilder(String.format("select * from %s where ", PARTITIONS));
+    for (int i = 0; i < pids.length; i++) {
+      query.append(String.format(" pid=%d ", pids[i]));
+      if (i + 1 < pids.length) {
+        query.append("or");
+      }
+    }
+    Statement s = con.createStatement();
+    ResultSet r = s.executeQuery(query.toString());
+    LinkedList<Partition> partitions = new LinkedList<>();
+    while (r.next()) {
+      int pid = r.getInt(PID);
+      int vSize = r.getInt(VERTEX_SIZE);
+      int eSize = r.getInt(EDGE_SIZE);
+      Partition p = new Partition(pid);
+      p.setESize(eSize);
+      p.setVSize(vSize);
+      partitions.add(p);
     }
 
-    public static List<Partition> getAllPartitions(Connection con) throws SQLException {
-        String query = String.format("select * from %s", PARTITIONS);
-        Statement s = con.createStatement();
-        ResultSet r = s.executeQuery(query);
-        ArrayList<Partition> partitions = new ArrayList<>();
-        while (r.next()) {
-            int pid = r.getInt(PID);
-            int vSize = r.getInt(VERTEX_SIZE);
-            int eSize = r.getInt(EDGE_SIZE);
-            Partition p = new Partition(pid);
-            p.setESize(eSize);
-            p.setVSize(vSize);
-            partitions.add(p);
-        }
+    return partitions;
+  }
 
-        return partitions;
+  public static List<Partition> getAllPartitions(Connection con) throws SQLException {
+    String query = String.format("select * from %s", PARTITIONS);
+    Statement s = con.createStatement();
+    ResultSet r = s.executeQuery(query);
+    ArrayList<Partition> partitions = new ArrayList<>();
+    while (r.next()) {
+      int pid = r.getInt(PID);
+      int vSize = r.getInt(VERTEX_SIZE);
+      int eSize = r.getInt(EDGE_SIZE);
+      Partition p = new Partition(pid);
+      p.setESize(eSize);
+      p.setVSize(vSize);
+      partitions.add(p);
     }
 
-    public static int putVertex(Vertex v, Connection con) throws SQLException {
-        String query = createPutVertexQuery(v);
-        System.out.println(query);
-        Statement s = con.createStatement();
-        int r = s.executeUpdate(query);
-        s.closeOnCompletion();
-        return r;
+    return partitions;
+  }
+
+  public static int putVertex(Vertex v, Connection con) throws SQLException {
+    String query = createPutVertexQuery(v);
+    System.out.println(query);
+    Statement s = con.createStatement();
+    int r = s.executeUpdate(query);
+    s.closeOnCompletion();
+    return r;
+  }
+
+  public static int putPartition(Partition p, Connection con) throws SQLException {
+    String query = createPutPartitionQuery(p);
+    Statement s = con.createStatement();
+    int r = s.executeUpdate(query);
+    s.closeOnCompletion();
+    return r;
+  }
+
+  private static String createPutVertexQuery(Vertex v) {
+    long vid = v.getId();
+    int pDegree = v.getpDegree();
+    String partitions = String.format("%8s", Integer.toBinaryString(v.getPartitions() & 0xFF)).replace(' ', '0');
+    String deltaPartitions = String.format("%8s", Integer.toBinaryString(v.getPartitionsDelta() & 0xFF)).replace(' ', '0');
+    return String.format("insert into %s (vid, partial_degree, partitions) values (%d, %d, b\'%s\') "
+      + "on duplicate key update partial_degree=partial_degree+%d, partitions=partitions | b\'%s\'",
+      VERTICES, vid, pDegree, partitions, v.getDegreeDelta(), deltaPartitions);
+  }
+
+  public static int[] putVertices(Collection<Vertex> vertices, Connection con) throws SQLException {
+    PreparedStatement s = con.prepareStatement(String.format("insert ignore into %s (vid, partial_degree, partitions) values (?, ?, ?) "
+      + "on duplicate key update partial_degree=partial_degree+?, partitions=partitions | ?",
+      VERTICES));
+    for (Vertex v : vertices) {
+      s.setLong(1, v.getId());
+      s.setInt(2, v.getpDegree());
+      s.setByte(3, v.getPartitions());
+      s.setInt(4, v.getDegreeDelta());
+      s.setByte(5, v.getPartitionsDelta());
+      s.addBatch();
+    }
+    int[] r = s.executeBatch();
+    s.closeOnCompletion();
+
+    return r;
+  }
+
+  public static int[] putPartitions(List<Partition> partitions, Connection con) throws SQLException {
+    PreparedStatement s = con.prepareStatement(String.format("insert into %s (pid, vertex_size, edge_size) values (?, ?, ?) "
+      + "on duplicate key update vertex_size=vertex_size+?, edge_size=edge_size+?",
+      PARTITIONS));
+    for (Partition p : partitions) {
+      s.setInt(1, p.getId());
+      s.setInt(2, p.getVSize());
+      s.setInt(3, p.getESize());
+      s.setInt(4, p.getVSizeDelta());
+      s.setInt(5, p.getESizeDelta());
+      s.addBatch();
+    }
+    int[] r = s.executeBatch();
+    s.closeOnCompletion();
+
+    return r;
+
+  }
+
+  private static Set<Integer> deserialize(String partitions) {
+    Set<Integer> pSet = new HashSet<>();
+    if (!partitions.isEmpty()) {
+      String[] items = partitions.split(",");
+      for (String item : items) {
+        pSet.add(Integer.valueOf(item));
+      }
     }
 
-    public static int putPartition(Partition p, Connection con) throws SQLException {
-        String query = createPutPartitionQuery(p);
-        Statement s = con.createStatement();
-        int r = s.executeUpdate(query);
-        s.closeOnCompletion();
-        return r;
+    return pSet;
+  }
+
+  private static String serialize(Set<Integer> partitions) {
+    StringBuilder sb = new StringBuilder("");
+    int i = 0;
+    for (int p : partitions) {
+      sb.append(p);
+      if (i + 1 < partitions.size()) {
+        sb.append(",");
+      }
+      i++;
     }
 
-    private static String createPutVertexQuery(Vertex v) {
-        long vid = v.getId();
-        int pDegree = v.getpDegree();
-        String partitions = serialize(v.getPartitions());
-        StringBuilder query
-                = new StringBuilder(String.format("insert into %s (vid, partial_degree, partitions) values (%d, %d, \"%s\") "
-                                + "on duplicate key update partial_degree=partial_degree+%d",
-                                VERTICES, vid, pDegree, partitions, v.getDegreeDelta()));
-        if (!v.getPartitionsDelta().isEmpty()) {
-            String partitionsDelta = serialize(v.getPartitionsDelta());
-            query.append(String.format(", partitions=concat(partitions,\",\",\"%s\")", partitionsDelta));
-        }
+    return sb.toString();
+  }
 
-        return query.toString();
-    }
+  private static String createPutPartitionQuery(Partition p) {
+    int pid = p.getId();
+    int vSize = p.getVSize();
+    int eSize = p.getESize();
+    int vDelta = p.getVSizeDelta();
+    int eDelta = p.getESizeDelta();
+    String query
+      = String.format("insert into %s (pid, vertex_size, edge_size) values (%d, %d, %d) "
+        + "on duplicate key update vertex_size=vertex_size+%d, edge_size=edge_size+%d",
+        PARTITIONS, pid, vSize, eSize, vDelta, eDelta);
+    return query;
+  }
 
-    public static int[] putVertices(Collection<Vertex> vertices, Connection con) throws SQLException {
-        PreparedStatement s = con.prepareStatement(String.format("insert ignore into %s (vid, partial_degree, partitions) values (?, ?, ?) "
-                + "on duplicate key update partial_degree=partial_degree+?, partitions=concat(partitions,\",\",?)",
-                VERTICES));
-        for (Vertex v : vertices) {
-            s.setLong(1, v.getId());
-            s.setInt(2, v.getpDegree());
-            s.setString(3, serialize(v.getPartitions()));
-            s.setInt(4, v.getDegreeDelta());
-            s.setString(5, serialize(v.getPartitionsDelta()));
-            s.addBatch();
-        }
-        int[] r = s.executeBatch();
-        s.closeOnCompletion();
-
-        return r;
-    }
-
-    public static int[] putPartitions(List<Partition> partitions, Connection con) throws SQLException {
-        PreparedStatement s = con.prepareStatement(String.format("insert into %s (pid, vertex_size, edge_size) values (?, ?, ?) "
-                + "on duplicate key update vertex_size=vertex_size+?, edge_size=edge_size+?",
-                PARTITIONS));
-        for (Partition p : partitions) {
-            s.setInt(1, p.getId());
-            s.setInt(2, p.getVSize());
-            s.setInt(3, p.getESize());
-            s.setInt(4, p.getVSizeDelta());
-            s.setInt(5, p.getESizeDelta());
-            s.addBatch();
-        }
-        int[] r = s.executeBatch();
-        s.closeOnCompletion();
-
-        return r;
-
-    }
-
-    private static Set<Integer> deserialize(String partitions) {
-        Set<Integer> pSet = new HashSet<>();
-        if (!partitions.isEmpty()) {
-            String[] items = partitions.split(",");
-            for (String item : items) {
-                pSet.add(Integer.valueOf(item));
-            }
-        }
-
-        return pSet;
-    }
-
-    private static String serialize(Set<Integer> partitions) {
-        StringBuilder sb = new StringBuilder("");
-        int i = 0;
-        for (int p : partitions) {
-            sb.append(p);
-            if (i + 1 < partitions.size()) {
-                sb.append(",");
-            }
-            i++;
-        }
-
-        return sb.toString();
-    }
-
-    private static String createPutPartitionQuery(Partition p) {
-        int pid = p.getId();
-        int vSize = p.getVSize();
-        int eSize = p.getESize();
-        int vDelta = p.getVSizeDelta();
-        int eDelta = p.getESizeDelta();
-        String query
-                = String.format("insert into %s (pid, vertex_size, edge_size) values (%d, %d, %d) "
-                        + "on duplicate key update vertex_size=vertex_size+%d, edge_size=edge_size+%d",
-                        PARTITIONS, pid, vSize, eSize, vDelta, eDelta);
-        return query;
-    }
-
-    public static int[] clearAllTables(Connection con) throws SQLException {
-        String truncVertices = String.format("truncate table %s", VERTICES);
-        String truncPartitions = String.format("truncate table %s", PARTITIONS);
-        Statement s = con.createStatement();
-        s.addBatch(truncVertices);
-        s.addBatch(truncPartitions);
-        return s.executeBatch();
-    }
+  public static int[] clearAllTables(Connection con) throws SQLException {
+    String truncVertices = String.format("truncate table %s", VERTICES);
+    String truncPartitions = String.format("truncate table %s", PARTITIONS);
+    Statement s = con.createStatement();
+    s.addBatch(truncVertices);
+    s.addBatch(truncPartitions);
+    return s.executeBatch();
+  }
 }

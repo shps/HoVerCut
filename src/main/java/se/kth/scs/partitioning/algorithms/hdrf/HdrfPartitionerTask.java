@@ -136,11 +136,11 @@ public class HdrfPartitionerTask implements Runnable {
             Vertex u = vertices.get(e.f0);
             Vertex v = vertices.get(e.f1);
             if (u == null) {
-                u = new Vertex(e.f0, new HashSet<Integer>());
+                u = new Vertex(e.f0, (byte)0);
                 vertices.put(u.getId(), u);
             }
             if (v == null) {
-                v = new Vertex(e.f1, new HashSet<Integer>());
+                v = new Vertex(e.f1, (byte)0);
                 vertices.put(v.getId(), v);
             }
             u.incrementDegree();

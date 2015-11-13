@@ -1,7 +1,5 @@
 package se.kth.scs.partitioning;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -10,11 +8,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ConcurrentVertex {
 
-    private final Set<Integer> partitions;
+    private byte partitions;
     private final long id;
     private final AtomicInteger pDegree;
 
-    public ConcurrentVertex(long id, Set<Integer> partitions) {
+    public ConcurrentVertex(long id, byte partitions) {
         this.partitions = partitions;
         pDegree = new AtomicInteger();
         this.id = id;
@@ -23,8 +21,8 @@ public class ConcurrentVertex {
     /**
      * @return the partitions
      */
-    public synchronized Set<Integer> getPartitions() {
-        return new HashSet<>(partitions);
+    public synchronized byte getPartitions() {
+        return partitions;
     }
 
     /**
@@ -50,11 +48,11 @@ public class ConcurrentVertex {
 
     public synchronized void accumulate(Vertex v) {
         this.pDegree.addAndGet(v.getDegreeDelta());
-        this.partitions.addAll(v.getPartitionsDelta());
+        this.partitions = (byte) (this.partitions | v.getPartitionsDelta());
     }
 
     public synchronized boolean containsPartition(int pid) {
-        return partitions.contains(pid);
+        return ((partitions >> pid) | 1) == 1;
     }
 
     @Override

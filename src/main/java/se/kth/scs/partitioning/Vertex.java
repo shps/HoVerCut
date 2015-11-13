@@ -1,21 +1,18 @@
 package se.kth.scs.partitioning;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  *
  * @author Hooman
  */
 public class Vertex {
 
-    private final Set<Integer> partitions;
+    private final byte partitions;
     private final long id;
     private int pDegree;
     private int degreeDelta = 0;
-    private final Set<Integer> partitionsDelta = new HashSet<>();
+    private byte partitionsDelta;
 
-    public Vertex(long id, Set<Integer> partitions) {
+    public Vertex(long id, byte partitions) {
         this.partitions = partitions;
         this.id = id;
     }
@@ -27,7 +24,7 @@ public class Vertex {
      */
     public boolean addPartition(int p) {
         if (!this.containsPartition(p)) {
-            getPartitionsDelta().add(p);
+            partitionsDelta = (byte) (partitionsDelta | (1 << p));
             return true;
         }
 
@@ -37,10 +34,8 @@ public class Vertex {
     /**
      * @return the partitions
      */
-    public Set<Integer> getPartitions() {
-        Set<Integer> ps = new HashSet<>(partitions);
-        ps.addAll(partitionsDelta);
-        return ps;
+    public byte getPartitions() {
+        return (byte) (partitions | partitionsDelta);
     }
 
     /**
@@ -78,12 +73,12 @@ public class Vertex {
     /**
      * @return the partitionsDelta
      */
-    public Set<Integer> getPartitionsDelta() {
+    public byte getPartitionsDelta() {
         return partitionsDelta;
     }
 
     public boolean containsPartition(int pid) {
-        return partitions.contains(pid) || partitionsDelta.contains(pid);
+        return (((partitions | partitionsDelta) >> pid) & 1) == 1;
     }
 
 }

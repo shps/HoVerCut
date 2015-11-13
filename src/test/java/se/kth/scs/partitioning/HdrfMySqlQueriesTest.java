@@ -30,13 +30,13 @@ public class HdrfMySqlQueriesTest extends TestCase {
     public void testAddVertexAndGetVertices() throws Exception {
 
         try (Connection con = init()) {
-            Vertex v1 = new Vertex(1, new HashSet<Integer>());
+            Vertex v1 = new Vertex(1, (byte)0);
             v1.addPartition(1);
             HdrfMySqlQueries.putVertex(v1, con);
             Vertex stored = HdrfMySqlQueries.getVertex(v1.getId(), con);
             assert stored != null;
             assert stored.getId() == v1.getId();
-            assert stored.getPartitions().containsAll(v1.getPartitions());
+            assert stored.getPartitions() == v1.getPartitions();
 
             v1.addPartition(2);
             v1.incrementDegree();
@@ -44,11 +44,11 @@ public class HdrfMySqlQueriesTest extends TestCase {
             stored = HdrfMySqlQueries.getVertex(v1.getId(), con);
             assert stored != null;
             assert stored.getId() == v1.getId();
-            assert stored.getPartitions().containsAll(v1.getPartitions());
+            assert stored.getPartitions() == v1.getPartitions();
             assert stored.getpDegree() == v1.getpDegree() && stored.getpDegree() == 1;
 
-            Vertex v2 = new Vertex(2, new HashSet<Integer>());
-            Vertex v3 = new Vertex(3, new HashSet<Integer>());
+            Vertex v2 = new Vertex(2, (byte)0);
+            Vertex v3 = new Vertex(3, (byte)0);
             Collection<Vertex> vertices = new HashSet<>();
             vertices.add(v2);
             vertices.add(v3);
@@ -75,9 +75,9 @@ public class HdrfMySqlQueriesTest extends TestCase {
                 vMap = HdrfMySqlQueries.getVertices(vids, con);
                 assert vMap.size() == 2;
                 assert vMap.containsKey(v2.getId());
-                assert vMap.get(v2.getId()).getPartitions().contains(1);
+                assert vMap.get(v2.getId()).containsPartition(1);
                 assert vMap.containsKey(v3.getId());
-                assert vMap.get(v3.getId()).getPartitions().contains(2);
+                assert vMap.get(v3.getId()).containsPartition(2);
             
         }
     }

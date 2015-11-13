@@ -43,8 +43,8 @@ public class GraphPartitioner {
     private static final int minT = 3;
     private static final int maxT = 3;
     private static final int tBase = 2;
-    private static final int minW = 3;
-    private static final int maxW = -1;
+    private static final int minW = 5;
+    private static final int maxW = 5;
     private static final int wBase = 10;
 //  private static final int maxW = 5;
     private static final String dbUrl = "jdbc:mysql://localhost/hdrf";

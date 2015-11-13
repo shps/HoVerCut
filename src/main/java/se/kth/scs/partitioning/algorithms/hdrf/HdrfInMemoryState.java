@@ -90,7 +90,7 @@ public class HdrfInMemoryState implements PartitionState {
         if (shared != null) {
             shared.accumulate(v);
         } else {
-            ConcurrentVertex newShared = new ConcurrentVertex(v.getId(), new HashSet<Integer>());
+            ConcurrentVertex newShared = new ConcurrentVertex(v.getId(), (byte)0);
             newShared.accumulate(v);
             newShared = vertices.putIfAbsent(v.getId(), newShared);
             // Double check if the entry does not exist.
