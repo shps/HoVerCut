@@ -92,4 +92,18 @@ public class Partition {
         hash = 73 * hash + this.id;
         return hash;
     }
+
+  /**
+   * @param eSizeDelta the eSizeDelta to set
+   */
+  public void seteSizeDelta(int eSizeDelta) {
+    this.eSizeDelta = eSizeDelta;
+  }
+
+  /**
+   * @param vSizeDelta the vSizeDelta to set
+   */
+  public void setvSizeDelta(int vSizeDelta) {
+    this.vSizeDelta = vSizeDelta;
+  }
 }
