@@ -37,6 +37,8 @@ public class GraphPartitioner {
 
   private static final Map<Integer, List<Float>> windowRf = new LinkedHashMap<>();
   private static final Map<Integer, List<Float>> taskRf = new LinkedHashMap<>();
+  private static final Map<Integer, List<Float>> windowLb = new LinkedHashMap<>();
+  private static final Map<Integer, List<Float>> taskLb = new LinkedHashMap<>();
   private static final Map<Integer, List<Integer>> windowTime = new LinkedHashMap<>();
   private static final Map<Integer, List<Integer>> taskTime = new LinkedHashMap<>();
   private static final String DELIMITER = " ";
@@ -139,7 +141,7 @@ public class GraphPartitioner {
         j++;
       }
     }
-    writeToFile(windowRf, taskRf, windowTime, taskTime, settings);
+    writeToFile(settings);
   }
 
   private static void runPartitioner(PartitionerSettings settings, Set<Tuple3<Long, Long, Double>>[] splits) throws SQLException, IOException {
@@ -194,6 +196,14 @@ public class GraphPartitioner {
       taskTime.put(settings.tasks, new LinkedList<Integer>());
     }
     taskTime.get(settings.tasks).add(duration);
+    if (!windowLb.containsKey(settings.window)) {
+      windowLb.put(settings.window, new LinkedList<Float>());
+    }
+    windowLb.get(settings.window).add(ps.loadRelativeStandardDeviation());
+    if (!taskLb.containsKey(settings.tasks)) {
+      taskLb.put(settings.tasks, new LinkedList<Float>());
+    }
+    taskLb.get(settings.tasks).add(ps.loadRelativeStandardDeviation());
     state.releaseResources();
   }
 
@@ -291,10 +301,6 @@ public class GraphPartitioner {
   }
 
   private static void writeToFile(
-      Map<Integer, List<Float>> windowRf,
-      Map<Integer, List<Float>> taskRf,
-      Map<Integer, List<Integer>> windowTime,
-      Map<Integer, List<Integer>> taskTime,
       PartitionerSettings settings) {
     boolean append = false;
     String fName = settings.output + "-window.csv";
@@ -335,6 +341,54 @@ public class GraphPartitioner {
         writer.append(entry.getKey().toString()).append(",");
         for (float rf : entry.getValue()) {
           writer.append(String.valueOf(rf)).append(",");
+        }
+        writer.append("\n");
+      }
+
+      writer.flush();
+    } catch (FileNotFoundException ex) {
+      Logger.getLogger(GraphPartitioner.class.getName()).log(Level.SEVERE, null, ex);
+    }
+
+    append = false;
+    fName = settings.output + "-tasks-lb.csv";
+    f1 = new File(fName);
+    if (f1.exists() && !f1.isDirectory()) {
+      append = settings.append;
+    }
+    try (PrintWriter writer = new PrintWriter(new FileOutputStream(
+        f1,
+        append))) {
+      Iterator<Map.Entry<Integer, List<Float>>> iterator = taskLb.entrySet().iterator();
+      while (iterator.hasNext()) {
+        Map.Entry<Integer, List<Float>> entry = iterator.next();
+        writer.append(entry.getKey().toString()).append(",");
+        for (float lb : entry.getValue()) {
+          writer.append(String.valueOf(lb)).append(",");
+        }
+        writer.append("\n");
+      }
+
+      writer.flush();
+    } catch (FileNotFoundException ex) {
+      Logger.getLogger(GraphPartitioner.class.getName()).log(Level.SEVERE, null, ex);
+    }
+
+    append = false;
+    fName = settings.output + "-windows-lb.csv";
+    f1 = new File(fName);
+    if (f1.exists() && !f1.isDirectory()) {
+      append = settings.append;
+    }
+    try (PrintWriter writer = new PrintWriter(new FileOutputStream(
+        f1,
+        append))) {
+      Iterator<Map.Entry<Integer, List<Float>>> iterator = windowLb.entrySet().iterator();
+      while (iterator.hasNext()) {
+        Map.Entry<Integer, List<Float>> entry = iterator.next();
+        writer.append(entry.getKey().toString()).append(",");
+        for (float lb : entry.getValue()) {
+          writer.append(String.valueOf(lb)).append(",");
         }
         writer.append("\n");
       }
