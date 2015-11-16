@@ -59,15 +59,14 @@ public class QueryHandler implements Runnable {
           throw new ClassNotFoundException(request.getClass().toString());
         }
       }
-    } catch (IOException | ClassNotFoundException ex) {
+    } catch (Exception ex) {
       ex.printStackTrace();
-    } finally {
-      try {
-        socket.close();
-      } catch (IOException ex) {
-        ex.printStackTrace();
-      }
     }
-
+    
+    try {
+      socket.close();
+    } catch (IOException ex) {
+      ex.printStackTrace();
+    }
   }
 }

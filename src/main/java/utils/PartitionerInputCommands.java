@@ -9,7 +9,7 @@ import java.util.List;
  *
  * @author Hooman
  */
-public class InputCommands {
+public class PartitionerInputCommands {
 
   public final static String HDRF = "hdrf";
   public final static String IN_MEMORY = "memory";
@@ -21,8 +21,11 @@ public class InputCommands {
   @Parameter(names = {"-file", "-f"}, description = "Directoy of the graph file.", required = true)
   public String file;
 
-  @Parameter(names = {"-window", "-w"}, description = "Window size.", required = true)
-  public int window;
+  @Parameter(names = {"-window", "-w"}, description = "Window size: (1)base (2)min exponent (3)max exponent.", arity = 3, required = true)
+  public List<Integer> window;
+
+  @Parameter(names = {"-tasks", "-t"}, description = "Number of tasks (threads): (1)base (2)min exponent (3)max exponent.", arity = 3, required = true)
+  public List<Integer> nTasks;
 
   @Parameter(names = {"-method", "-m"}, description = "Partitioning method.", validateWith = PartitionerValidator.class, required = true)
   public String method;
@@ -35,9 +38,6 @@ public class InputCommands {
 
   @Parameter(names = {"-partitions", "-p"}, description = "Number of partitions.", required = true)
   public int nPartitions = 1;
-
-  @Parameter(names = {"-tasks", "-t"}, description = "Number of tasks (threads).", required = true)
-  public int nTasks = 1;
 
   @Parameter(names = {"-storage", "-s"}, description = "State storage type.", validateWith = StateStorageValidator.class, required = true)
   public String storage;

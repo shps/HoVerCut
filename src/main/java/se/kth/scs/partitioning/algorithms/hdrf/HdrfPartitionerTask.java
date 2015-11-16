@@ -89,48 +89,14 @@ public class HdrfPartitionerTask implements Runnable {
         return state;
     }
 
-//    /**
-//     * Partitions without using any window to buffer vertices.
-//     *
-//     * @return
-//     */
-//    public PartitionState partition() {
-//
-//        int counter = 1;
-//        for (Tuple3<Long, Long, Double> e : edges) {
-//            System.out.println(String.format("%d Received %d -> %d.", counter, e.f0, e.f1));
-//            Vertex u = state.getVertex(e.f0);
-//            Vertex v = state.getVertex(e.f1);
-//            List<Partition> partitions = state.getAllPartitions();
-//            if (u == null) {
-//                u = new Vertex(e.f0, new HashSet<Integer>());
-//            }
-//            if (v == null) {
-//                v = new Vertex(e.f1, new HashSet<Integer>());
-//            }
-//            u.incrementDegree();
-//            v.incrementDegree();
-//            allocateNextEdge(u, v, partitions, lambda, epsilon);
-//            //TODO: Inconsistency if update partitions and vertices separately.
-//            state.putPartitions(partitions);
-//            Collection<Vertex> vertices = new ArrayList<>(2);
-//            vertices.add(u);
-//            vertices.add(v);
-//            state.putVertices(vertices);
-//            counter++;
-//        }
-//
-//        System.out.println("******** Partitioning Finished **********");
-//        return state;
-//    }
     private void allocateNextWindow(List<Tuple3<Long, Long, Double>> edgeWindow, Set<Long> vIds, PartitionState state, double lambda, double epsilon) {
-        long taskId = Thread.currentThread().getId();
+//        long taskId = Thread.currentThread().getId();
         Map<Long, Vertex> vertices = state.getVertices(vIds);
-        System.out.println(String.format("Task-%d has read %d vertices.", taskId, vertices.size()));
-        delay(minDelay, maxDelay, r);
+//        System.out.println(String.format("Task-%d has read %d vertices.", taskId, vertices.size()));
+//        delay(minDelay, maxDelay, r);
         List<Partition> partitions = state.getAllPartitions();
-        System.out.println(String.format("Task-%d has read %d partitions.", taskId, partitions.size()));
-        delay(minDelay, maxDelay, r);
+//        System.out.println(String.format("Task-%d has read %d partitions.", taskId, partitions.size()));
+//        delay(minDelay, maxDelay, r);
 
         for (Tuple3<Long, Long, Double> e : edgeWindow) {
             Vertex u = vertices.get(e.f0);
@@ -150,11 +116,11 @@ public class HdrfPartitionerTask implements Runnable {
 
         //TODO: Inconsistency if update partitions and vertices separately.
         state.putPartitions(partitions);
-        System.out.println(String.format("Task-%d updated %d partitions.", taskId, partitions.size()));
-        delay(minDelay, maxDelay, r);
+//        System.out.println(String.format("Task-%d updated %d partitions.", taskId, partitions.size()));
+//        delay(minDelay, maxDelay, r);
         state.putVertices(vertices.values());
-        System.out.println(String.format("Task-%d updated %d vertices.", taskId, vertices.size()));
-        delay(minDelay, maxDelay, r);
+//        System.out.println(String.format("Task-%d updated %d vertices.", taskId, vertices.size()));
+//        delay(minDelay, maxDelay, r);
     }
 
     private void delay(int min, int max, SecureRandom r) {
