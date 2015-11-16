@@ -57,20 +57,20 @@ public class GraphPartitioner {
 //  private static final String PASS = "";
 
   public static void main(String[] args) throws SQLException, IOException {
-    args = new String[]{
-      "-f", "./data/datasets/twitter_combined.txt",
-      "-w", "10", "3", "3",
-      "-m", "hdrf",
-      "-p", "4",
-      "-t", "2", "3", "3",
-      //            "-reset", "true",
-      "-s", "remote",
-      "-db", "localhost:4444",
-      "-user", "root",
-      "-pass", "",
-      "-output", "/home/ganymedian/Desktop/results/hdrf",
-      "-append", "false", //FIXME: if appends is true it throws exception.
-      "-delay", "0", "0"};
+//    args = new String[]{
+//      "-f", "./data/datasets/twitter_combined.txt",
+//      "-w", "10", "3", "3",
+//      "-m", "hdrf",
+//      "-p", "4",
+//      "-t", "2", "3", "3",
+//      //            "-reset", "true",
+//      "-s", "remote",
+//      "-db", "localhost:4444",
+//      "-user", "root",
+//      "-pass", "",
+//      "-output", "/home/ganymedian/Desktop/results/hdrf",
+//      "-append", "false", //FIXME: if appends is true it throws exception.
+//      "-delay", "0", "0"};
 
     PartitionerInputCommands commands = new PartitionerInputCommands();
     JCommander commander;

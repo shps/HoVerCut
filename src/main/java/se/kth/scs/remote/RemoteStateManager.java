@@ -20,9 +20,9 @@ public class RemoteStateManager {
   private final static String address = "127.0.0.1";
 
   public static void main(String[] args) {
-    args = new String[]{
-    "-p","4",
-    "-a", "localhost:4444"};
+//    args = new String[]{
+//    "-p","4",
+//    "-a", "localhost:4444"};
     StorageInputCommands commands = new StorageInputCommands();
     JCommander commander;
     try {
