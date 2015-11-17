@@ -57,6 +57,9 @@ public class PartitionerInputCommands {
   @Parameter(names = {"-output"}, description = "Output file.")
   public String output = "";
 
+  @Parameter(names = {"-d"}, description = "Delimiter. The default value is a space.")
+  public String delimiter = " ";
+
   @Parameter(names = {"-append"}, description = "Append to the output file.", arity = 1)
   public boolean append = true;
 

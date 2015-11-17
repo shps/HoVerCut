@@ -14,6 +14,7 @@ import java.util.List;
 public class PartitionerSettings {
 
   public String file;
+  public String delimiter;
   public int window;
   public String method;
   public double lambda;
@@ -54,7 +55,7 @@ public class PartitionerSettings {
 
   /**
    * @param window the window to set
-   * @return 
+   * @return
    */
   public PartitionerSettings setWindow(int window) {
     this.window = window;
@@ -70,7 +71,7 @@ public class PartitionerSettings {
 
   /**
    * @param method the method to set
-   * @return 
+   * @return
    */
   public PartitionerSettings setMethod(String method) {
     this.method = method;
@@ -86,7 +87,7 @@ public class PartitionerSettings {
 
   /**
    * @param lambda the lambda to set
-   * @return 
+   * @return
    */
   public PartitionerSettings setLambda(double lambda) {
     this.lambda = lambda;
@@ -102,7 +103,7 @@ public class PartitionerSettings {
 
   /**
    * @param epsilon the epsilon to set
-   * @return 
+   * @return
    */
   public PartitionerSettings setEpsilon(double epsilon) {
     this.epsilon = epsilon;
@@ -118,7 +119,7 @@ public class PartitionerSettings {
 
   /**
    * @param k the k to set
-   * @return 
+   * @return
    */
   public PartitionerSettings setK(int k) {
     this.k = k;
@@ -134,7 +135,7 @@ public class PartitionerSettings {
 
   /**
    * @param tasks the tasks to set
-   * @return 
+   * @return
    */
   public PartitionerSettings setTasks(int tasks) {
     this.tasks = tasks;
@@ -150,7 +151,7 @@ public class PartitionerSettings {
 
   /**
    * @param storage the storage to set
-   * @return 
+   * @return
    */
   public PartitionerSettings setStorage(String storage) {
     this.storage = storage;
@@ -166,7 +167,7 @@ public class PartitionerSettings {
 
   /**
    * @param dbUrl the dbUrl to set
-   * @return 
+   * @return
    */
   public PartitionerSettings setDbUrl(String dbUrl) {
     this.dbUrl = dbUrl;
@@ -182,7 +183,7 @@ public class PartitionerSettings {
 
   /**
    * @param user the user to set
-   * @return 
+   * @return
    */
   public PartitionerSettings setUser(String user) {
     this.user = user;
@@ -198,7 +199,7 @@ public class PartitionerSettings {
 
   /**
    * @param pass the pass to set
-   * @return 
+   * @return
    */
   public PartitionerSettings setPass(String pass) {
     this.pass = pass;
@@ -214,7 +215,7 @@ public class PartitionerSettings {
 
   /**
    * @param reset the reset to set
-   * @return 
+   * @return
    */
   public PartitionerSettings setReset(boolean reset) {
     this.reset = reset;
@@ -230,7 +231,7 @@ public class PartitionerSettings {
 
   /**
    * @param output the output to set
-   * @return 
+   * @return
    */
   public PartitionerSettings setOutput(String output) {
     this.output = output;
@@ -246,7 +247,7 @@ public class PartitionerSettings {
 
   /**
    * @param append the append to set
-   * @return 
+   * @return
    */
   public PartitionerSettings setAppend(boolean append) {
     this.append = append;
@@ -262,11 +263,25 @@ public class PartitionerSettings {
 
   /**
    * @param delay the delay to set
-   * @return 
+   * @return
    */
   public PartitionerSettings setDelay(List<Integer> delay) {
     this.delay = delay;
     return this;
+  }
+
+  /**
+   * @return the delimiter
+   */
+  public String getDelimiter() {
+    return delimiter;
+  }
+
+  /**
+   * @param delimiter the delimiter to set
+   */
+  public void setDelimiter(String delimiter) {
+    this.delimiter = delimiter;
   }
 
 }

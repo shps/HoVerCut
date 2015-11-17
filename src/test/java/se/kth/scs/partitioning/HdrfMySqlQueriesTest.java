@@ -30,7 +30,7 @@
 //    public void testAddVertexAndGetVertices() throws Exception {
 //
 //        try (Connection con = init()) {
-//            Vertex v1 = new Vertex(1, (byte)0);
+//            Vertex v1 = new Vertex(1, 0);
 //            v1.addPartition(1);
 //            HdrfMySqlQueries.putVertex(v1, con);
 //            Vertex stored = HdrfMySqlQueries.getVertex(v1.getId(), con);
@@ -47,8 +47,8 @@
 //            assert stored.getPartitions() == v1.getPartitions();
 //            assert stored.getpDegree() == v1.getpDegree() && stored.getpDegree() == 1;
 //
-//            Vertex v2 = new Vertex(2, (byte)0);
-//            Vertex v3 = new Vertex(3, (byte)0);
+//            Vertex v2 = new Vertex(2, 0);
+//            Vertex v3 = new Vertex(3, 0);
 //            Collection<Vertex> vertices = new HashSet<>();
 //            vertices.add(v2);
 //            vertices.add(v3);
