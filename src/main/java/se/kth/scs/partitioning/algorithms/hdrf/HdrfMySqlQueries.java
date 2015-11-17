@@ -45,7 +45,7 @@ public class HdrfMySqlQueries {
     Vertex v = null;
     if (r.next()) {
       int degree = r.getInt(PARTIAL_DEGREE);
-      byte partitions = r.getByte(PARTITIONS);
+      int partitions = r.getInt(PARTITIONS);
       v = new Vertex(vid, partitions);
       v.setpDegree(degree);
     }
@@ -85,7 +85,7 @@ public class HdrfMySqlQueries {
     while (r.next()) {
       long vid = r.getLong(VID);
       int degree = r.getInt(PARTIAL_DEGREE);
-      byte partitions = r.getByte(PARTITIONS);
+      int partitions = r.getInt(PARTITIONS);
       Vertex v = new Vertex(vid, partitions);
       v.setpDegree(degree);
       vertices.put(vid, v);
@@ -103,7 +103,7 @@ public class HdrfMySqlQueries {
     while (r.next()) {
       long vid = r.getLong(VID);
       int degree = r.getInt(PARTIAL_DEGREE);
-      byte partitions = r.getByte(PARTITIONS);
+      int partitions = r.getInt(PARTITIONS);
       Vertex v = new Vertex(vid, partitions);
       v.setpDegree(degree);
       vertices.put(vid, v);
@@ -188,9 +188,9 @@ public class HdrfMySqlQueries {
     for (Vertex v : vertices) {
       s.setLong(1, v.getId());
       s.setInt(2, v.getpDegree());
-      s.setByte(3, v.getPartitions());
+      s.setInt(3, v.getPartitions());
       s.setInt(4, v.getDegreeDelta());
-      s.setByte(5, v.getPartitionsDelta());
+      s.setInt(5, v.getPartitionsDelta());
       s.addBatch();
     }
     int[] r = s.executeBatch();
@@ -216,32 +216,6 @@ public class HdrfMySqlQueries {
 
     return r;
 
-  }
-
-  private static Set<Integer> deserialize(String partitions) {
-    Set<Integer> pSet = new HashSet<>();
-    if (!partitions.isEmpty()) {
-      String[] items = partitions.split(",");
-      for (String item : items) {
-        pSet.add(Integer.valueOf(item));
-      }
-    }
-
-    return pSet;
-  }
-
-  private static String serialize(Set<Integer> partitions) {
-    StringBuilder sb = new StringBuilder("");
-    int i = 0;
-    for (int p : partitions) {
-      sb.append(p);
-      if (i + 1 < partitions.size()) {
-        sb.append(",");
-      }
-      i++;
-    }
-
-    return sb.toString();
   }
 
   private static String createPutPartitionQuery(Partition p) {

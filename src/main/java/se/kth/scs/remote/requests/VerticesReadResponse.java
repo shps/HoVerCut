@@ -15,9 +15,9 @@ public class VerticesReadResponse implements Serializable {
 
   private final long[] vertices;
   private final int[] degrees;
-  private final byte[] partitions;
+  private final int[] partitions;
 
-  public VerticesReadResponse(long[] vertices, int[] degrees, byte[] partitions) {
+  public VerticesReadResponse(long[] vertices, int[] degrees, int[] partitions) {
     this.vertices = vertices;
     this.degrees = degrees;
     this.partitions = partitions;
@@ -40,7 +40,7 @@ public class VerticesReadResponse implements Serializable {
   /**
    * @return the partitions
    */
-  public byte[] getPartitions() {
+  public int[] getPartitions() {
     return partitions;
   }
 }

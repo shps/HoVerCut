@@ -15,9 +15,9 @@ public class VerticesWriteRequest implements Serializable{
 
   private final long[] vertices;
   private final int[] degreeDeltas;
-  private final byte[] partitionsDeltas;
+  private final int[] partitionsDeltas;
 
-  public VerticesWriteRequest(long[] vertices, int[] degreeDeltas, byte[] partitionsDeltas) {
+  public VerticesWriteRequest(long[] vertices, int[] degreeDeltas, int[] partitionsDeltas) {
     this.vertices = vertices;
     this.degreeDeltas = degreeDeltas;
     this.partitionsDeltas = partitionsDeltas;
@@ -40,7 +40,7 @@ public class VerticesWriteRequest implements Serializable{
   /**
    * @return the partitionsDeltas
    */
-  public byte[] getPartitionsDeltas() {
+  public int[] getPartitionsDeltas() {
     return partitionsDeltas;
   }
 

@@ -56,7 +56,7 @@ public class ServerStorage {
     int size = vertices.size();
     long[] vIds = new long[size];
     int[] degrees = new int[size];
-    byte[] ps = new byte[size];
+    int[] ps = new int[size];
     int i = 0;
     for (ConcurrentVertex v : vertices.values()) {
       vIds[i] = v.getId();
@@ -88,7 +88,7 @@ public class ServerStorage {
     }
     long[] vIds = new long[vs.size()];
     int[] degrees = new int[vs.size()];
-    byte[] ps = new byte[vs.size()];
+    int[] ps = new int[vs.size()];
     for (int i = 0; i < vs.size(); i++) {
       Vertex v = vs.get(i);
       vIds[i] = v.getId();
@@ -103,7 +103,7 @@ public class ServerStorage {
     if (shared != null) {
       shared.accumulate(v);
     } else {
-      ConcurrentVertex newShared = new ConcurrentVertex(v.getId(), (byte) 0);
+      ConcurrentVertex newShared = new ConcurrentVertex(v.getId(), 0);
       newShared.accumulate(v);
       newShared = vertices.putIfAbsent(v.getId(), newShared);
       // Double check if the entry does not exist.
@@ -116,7 +116,7 @@ public class ServerStorage {
   public void putVertices(VerticesWriteRequest request) {
     long[] vids = request.getVertices();
     int[] degrees = request.getDegreeDeltas();
-    byte[] ps = request.getPartitionsDeltas();
+    int[] ps = request.getPartitionsDeltas();
     for (int i = 0; i < vids.length; i++) {
       Vertex v = new Vertex(vids[i]);
       v.setDegreeDelta(degrees[i]);

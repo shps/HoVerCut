@@ -33,12 +33,12 @@ public class PartitionsStatistics {
     int totalReplicas = 0;
     nVertices = vertices.size();
     for (Vertex v : vertices.values()) {
-      byte ps = v.getPartitions();
+      int ps = v.getPartitions();
       for (int i = 0; i < partitions.size(); i++) {
         if ((ps & 1) == 1) {
           totalReplicas++;
         }
-        ps = (byte) (ps >> 1);
+        ps = ps >> 1;
       }
     }
     avgReplicationFactor = calculateReplicationFactor(totalReplicas, nVertices);

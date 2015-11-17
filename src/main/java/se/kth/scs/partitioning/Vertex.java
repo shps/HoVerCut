@@ -6,19 +6,19 @@ package se.kth.scs.partitioning;
  */
 public class Vertex {
 
-  private byte partitions;
+  private int partitions;
   private final long id;
   private int pDegree;
   private int degreeDelta = 0;
-  private byte partitionsDelta;
+  private int partitionsDelta;
 
-  public Vertex(long id, byte partitions) {
+  public Vertex(long id, int partitions) {
     this.partitions = partitions;
     this.id = id;
   }
 
   public Vertex(long id) {
-    this(id, (byte) 0);
+    this(id, 0);
   }
 
   /**
@@ -28,7 +28,7 @@ public class Vertex {
    */
   public boolean addPartition(int p) {
     if (!this.containsPartition(p)) {
-      setPartitionsDelta((byte) (partitionsDelta | (1 << p)));
+      setPartitionsDelta(partitionsDelta | (1 << p));
       return true;
     }
 
@@ -38,8 +38,8 @@ public class Vertex {
   /**
    * @return the partitions
    */
-  public byte getPartitions() {
-    return (byte) (partitions | partitionsDelta);
+  public int getPartitions() {
+    return (partitions | partitionsDelta);
   }
 
   /**
@@ -77,7 +77,7 @@ public class Vertex {
   /**
    * @return the partitionsDelta
    */
-  public byte getPartitionsDelta() {
+  public int getPartitionsDelta() {
     return partitionsDelta;
   }
 
@@ -95,14 +95,14 @@ public class Vertex {
   /**
    * @param partitionsDelta the partitionsDelta to set
    */
-  public void setPartitionsDelta(byte partitionsDelta) {
+  public void setPartitionsDelta(int partitionsDelta) {
     this.partitionsDelta = partitionsDelta;
   }
 
   /**
    * @param partitions the partitions to set
    */
-  public void setPartitions(byte partitions) {
+  public void setPartitions(int partitions) {
     this.partitions = partitions;
   }
 

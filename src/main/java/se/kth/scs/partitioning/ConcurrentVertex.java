@@ -8,11 +8,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ConcurrentVertex {
 
-    private byte partitions;
+    private int partitions;
     private final long id;
     private final AtomicInteger pDegree;
 
-    public ConcurrentVertex(long id, byte partitions) {
+    public ConcurrentVertex(long id, int partitions) {
         this.partitions = partitions;
         pDegree = new AtomicInteger();
         this.id = id;
@@ -21,7 +21,7 @@ public class ConcurrentVertex {
     /**
      * @return the partitions
      */
-    public synchronized byte getPartitions() {
+    public synchronized int getPartitions() {
         return partitions;
     }
 
@@ -48,7 +48,7 @@ public class ConcurrentVertex {
 
     public synchronized void accumulate(Vertex v) {
         this.pDegree.addAndGet(v.getDegreeDelta());
-        this.partitions = (byte) (this.partitions | v.getPartitionsDelta());
+        this.partitions = (this.partitions | v.getPartitionsDelta());
     }
 
     public synchronized boolean containsPartition(int pid) {

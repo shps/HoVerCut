@@ -103,7 +103,7 @@ public class HdrfRemoteState implements PartitionState {
     Map<Long, Vertex> vertices = new HashMap<>();
     long[] vIds = response.getVertices();
     int[] degrees = response.getDegrees();
-    byte[] partitions = response.getPartitions();
+    int[] partitions = response.getPartitions();
     for (int i = 0; i < vIds.length; i++) {
       Vertex v = new Vertex(vIds[i]);
       v.setpDegree(degrees[i]);
@@ -146,7 +146,7 @@ public class HdrfRemoteState implements PartitionState {
       ClientSocket c = getClient();
       long[] vids = new long[vs.size()];
       int[] degrees = new int[vs.size()];
-      byte[] ps = new byte[vs.size()];
+      int[] ps = new int[vs.size()];
       int i = 0;
       for (Vertex v : vs) {
         vids[i] = v.getId();
