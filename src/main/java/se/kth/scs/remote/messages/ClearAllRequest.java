@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package se.kth.scs.remote.requests;
+package se.kth.scs.remote.messages;
 
 import java.io.Serializable;
 
@@ -11,6 +11,6 @@ import java.io.Serializable;
  *
  * @author Hooman
  */
-public class PartitionsRequest implements Serializable {
+public class ClearAllRequest implements Serializable {
 
 }

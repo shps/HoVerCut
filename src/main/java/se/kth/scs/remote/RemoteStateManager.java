@@ -1,9 +1,13 @@
 package se.kth.scs.remote;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
+import utils.StorageInputCommands;
 
 /**
  *
@@ -16,9 +20,26 @@ public class RemoteStateManager {
   private final static String address = "127.0.0.1";
 
   public static void main(String[] args) {
+//    args = new String[]{
+//    "-p","4",
+//    "-a", "localhost:4444"};
+    StorageInputCommands commands = new StorageInputCommands();
+    JCommander commander;
     try {
-      ServerSocket server = new ServerSocket(port, 0, InetAddress.getByName(address));
-      ServerStorage state = new ServerStorage(k);
+      commander = new JCommander(commands, args);
+    } catch (ParameterException ex) {
+      System.out.println(ex.getMessage());
+      System.out.println(Arrays.toString(args));
+      commander = new JCommander(commands);
+      commander.usage();
+      System.out.println(String.format("A valid command is like: %s",
+          "-p 4 -a localhost:4444"));
+      System.exit(1);
+    }
+
+    String[] addr = commands.address.split(":");
+    try (ServerSocket server = new ServerSocket(Integer.valueOf(addr[1]), 0, InetAddress.getByName(addr[0]))) {
+      ServerStorage state = new ServerStorage(commands.nPartitions);
       System.out.println("Server is waiting for clients to connect...");
       int i = 1;
       while (true) {
@@ -33,5 +54,4 @@ public class RemoteStateManager {
       ex.printStackTrace();
     }
   }
-
 }

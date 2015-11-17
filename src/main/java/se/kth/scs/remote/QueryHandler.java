@@ -4,15 +4,15 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import se.kth.scs.remote.requests.AllVerticesRequest;
-import se.kth.scs.remote.requests.ClearAllRequest;
-import se.kth.scs.remote.requests.CloseSessionRequest;
-import se.kth.scs.remote.requests.PartitionsRequest;
-import se.kth.scs.remote.requests.PartitionsResponse;
-import se.kth.scs.remote.requests.PartitionsWriteRequest;
-import se.kth.scs.remote.requests.VerticesReadRequest;
-import se.kth.scs.remote.requests.VerticesReadResponse;
-import se.kth.scs.remote.requests.VerticesWriteRequest;
+import se.kth.scs.remote.messages.AllVerticesRequest;
+import se.kth.scs.remote.messages.ClearAllRequest;
+import se.kth.scs.remote.messages.CloseSessionRequest;
+import se.kth.scs.remote.messages.PartitionsRequest;
+import se.kth.scs.remote.messages.PartitionsResponse;
+import se.kth.scs.remote.messages.PartitionsWriteRequest;
+import se.kth.scs.remote.messages.VerticesReadRequest;
+import se.kth.scs.remote.messages.VerticesReadResponse;
+import se.kth.scs.remote.messages.VerticesWriteRequest;
 
 /**
  *
@@ -59,15 +59,14 @@ public class QueryHandler implements Runnable {
           throw new ClassNotFoundException(request.getClass().toString());
         }
       }
-    } catch (IOException | ClassNotFoundException ex) {
+    } catch (Exception ex) {
       ex.printStackTrace();
-    } finally {
-      try {
-        socket.close();
-      } catch (IOException ex) {
-        ex.printStackTrace();
-      }
     }
-
+    
+    try {
+      socket.close();
+    } catch (IOException ex) {
+      ex.printStackTrace();
+    }
   }
 }

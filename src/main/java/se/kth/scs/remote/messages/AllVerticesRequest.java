@@ -1,5 +1,5 @@
 
-package se.kth.scs.remote.requests;
+package se.kth.scs.remote.messages;
 
 import java.io.Serializable;
 

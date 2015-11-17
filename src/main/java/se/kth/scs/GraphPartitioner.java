@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -25,7 +26,8 @@ import se.kth.scs.partitioning.algorithms.hdrf.HdrfMysqlState;
 import se.kth.scs.partitioning.algorithms.hdrf.HdrfPartitioner;
 import se.kth.scs.partitioning.algorithms.hdrf.HdrfRemoteState;
 import utils.EdgeFileReader;
-import utils.InputCommands;
+import utils.PartitionerInputCommands;
+import utils.PartitionerSettings;
 
 /**
  *
@@ -35,52 +37,94 @@ public class GraphPartitioner {
 
   private static final Map<Integer, List<Float>> windowRf = new LinkedHashMap<>();
   private static final Map<Integer, List<Float>> taskRf = new LinkedHashMap<>();
+  private static final Map<Integer, List<Float>> windowLb = new LinkedHashMap<>();
+  private static final Map<Integer, List<Float>> taskLb = new LinkedHashMap<>();
   private static final Map<Integer, List<Integer>> windowTime = new LinkedHashMap<>();
   private static final Map<Integer, List<Integer>> taskTime = new LinkedHashMap<>();
   private static final String DELIMITER = " ";
-  private static final String storage = "remote";
+//  private static final String storage = "remote";
 //  private static final String dbUrl = "jdbc:mysql://104.155.65.24:3306/hdrf";
-  private static final String outputFile = "/Users/Ganymedian/Desktop/results/hdrf";
-  private static final String inputFile = "./data/datasets/twitter_combined.txt";
-  private static final int minT = 3;
-  private static final int maxT = 3;
-  private static final int tBase = 2;
-  private static final int minW = 5;
-  private static final int maxW = 5;
-  private static final int wBase = 10;
+//  private static final String outputFile = "/Users/Ganymedian/Desktop/results/hdrf";
+//  private static final String inputFile = "./data/datasets/twitter_combined.txt";
+//  private static final int minT = 3;
+//  private static final int maxT = 3;
+//  private static final int tBase = 2;
+//  private static final int minW = 5;
+//  private static final int maxW = 5;
+//  private static final int wBase = 10;
 //  private static final int maxW = 5;
 //    private static final String dbUrl = "jdbc:mysql://localhost/hdrf";
-  private static final String dbUrl = "127.0.0.1:4444";
-  private static final String USER = "root";
-  private static final String PASS = "";
+//  private static final String dbUrl = "127.0.0.1:4444";
+//  private static final String USER = "root";
+//  private static final String PASS = "";
 
   public static void main(String[] args) throws SQLException, IOException {
-//        args = new String[]{
-//            "-f", "./data/datasets/Cit-HepTh.txt",
-//            "-w", "1000",
-//            "-m", "hdrf",
-//            "-p", "4",
-//            "-t", "4",
-//            //            "-reset", "true",
-//            "-s", "memory",
-//            "-db", "jdbc:mysql://localhost/hdrf",
-//            "-user", "root",
-//            "-pass", "",
-//            "-output", "/Users/Ganymedian/Desktop/hdrf",
-//            "-append", "true",
-//            "-delay", "10", "20"};
-    int wb = wBase;
-    int p = 4;
-    int tb = tBase;
+//    args = new String[]{
+//      "-f", "./data/datasets/twitter_combined.txt",
+//      "-w", "10", "3", "3",
+//      "-m", "hdrf",
+//      "-p", "4",
+//      "-t", "2", "3", "3",
+//      //            "-reset", "true",
+//      "-s", "remote",
+//      "-db", "localhost:4444",
+//      "-user", "root",
+//      "-pass", "",
+//      "-output", "/home/ganymedian/Desktop/results/hdrf",
+//      "-append", "false", //FIXME: if appends is true it throws exception.
+//      "-delay", "0", "0"};
+
+    PartitionerInputCommands commands = new PartitionerInputCommands();
+    JCommander commander;
+    try {
+      commander = new JCommander(commands, args);
+    } catch (ParameterException ex) {
+      System.out.println(ex.getMessage());
+      System.out.println(Arrays.toString(args));
+      commander = new JCommander(commands);
+      commander.usage();
+      System.out.println(String.format("A valid command is like: %s",
+          "-f ./data/datasets/Cit-HepTh.txt -w 10 0 5 -m hdrf -p 4 -t 2 0 6 -s remote -db localhost:4444"));
+      System.exit(1);
+    }
+    if (!commands.method.equals(PartitionerInputCommands.HDRF)) {
+      throw new ParameterException("");
+    }
+
+    PartitionerSettings settings = new PartitionerSettings();
+    settings.k = commands.nPartitions;
+    settings.file = commands.file;
+    settings.output = commands.output;
+    settings.storage = commands.storage;
+    settings.dbUrl = commands.dbUrl;
+    settings.user = commands.user;
+    settings.pass = commands.pass;
+    settings.method = commands.method;
+    settings.lambda = commands.lambda;
+    settings.epsilon = commands.epsilon;
+    settings.delay = commands.delay;
+    if (settings.delay == null || settings.delay.size() != 2) {
+      settings.delay = new ArrayList<>(2);
+      settings.delay.add(0);
+      settings.delay.add(1);
+    }
+    settings.append = commands.append;
+    settings.reset = commands.reset;
+    int wb = commands.window.get(0);
+    int minW = commands.window.get(1);
+    int maxW = commands.window.get(2);
+    int tb = commands.nTasks.get(0);
+    int minT = commands.nTasks.get(1);
+    int maxT = commands.nTasks.get(2);
 
     for (int i = minT; i <= maxT; i++) {
       int t = (int) Math.pow(tb, i);
       int j = minW;
       int w;
-      System.out.println(String.format("Reading file %s", inputFile));
+      System.out.println(String.format("Reading file %s", settings.file));
       long start = System.currentTimeMillis();
       EdgeFileReader reader = new EdgeFileReader(DELIMITER);
-      Set<Tuple3<Long, Long, Double>>[] splits = reader.readSplitFile(inputFile, t);
+      Set<Tuple3<Long, Long, Double>>[] splits = reader.readSplitFile(settings.file, t);
       int nEdges = reader.getnEdges();
       System.out.println(String.format("Finished reading in %d seconds.", (System.currentTimeMillis() - start) / 1000));
       while (true) {
@@ -90,107 +134,76 @@ public class GraphPartitioner {
         } else if ((maxW >= 0) && (j > maxW)) {
           break;
         }
-        InputCommands commands = new InputCommands();
-        JCommander commander;
-        try {
-          args = new String[]{
-            "-f", inputFile,
-            "-w", String.valueOf(w),
-            "-m", "hdrf",
-            "-p", "4",
-            "-t", String.valueOf(t),
-            "-reset", "true",
-            "-s", storage,
-            "-db", dbUrl,
-            "-user", USER,
-            "-pass", PASS,
-            "-output", outputFile,
-            "-append", "true",
-            "-delay", "0", "0"};
-          commander = new JCommander(commands, args);
-          runPartitioner(commands, splits);
-        } catch (ParameterException ex) {
-          System.out.println(ex.getMessage());
-          System.out.println(Arrays.toString(args));
-          commander = new JCommander(commands);
-          commander.usage();
-          System.out.println(String.format("A valid command is like: %s",
-            "-f ./data/datasets/Cit-HepTh.txt -w 1000 -m hdrf -p 4 -t 4 -s mysql -db jdbc:mysql://localhost/hdrf -user root"));
-        }
+        settings.window = w;
+        settings.tasks = t;
+
+        runPartitioner(settings, splits);
         j++;
       }
     }
-
-    writeToFile(windowRf, taskRf, windowTime, taskTime, outputFile);
-
+    writeToFile(settings);
   }
 
-  public static void runPartitioner(InputCommands commands, Set<Tuple3<Long, Long, Double>>[] splits) throws SQLException, IOException {
-    int minDelay = 0;
-    int maxDelay = 0;
-    if (commands.nTasks > 1 && commands.delay != null && commands.delay.size() > 0) {
-      if (commands.delay.get(0) > commands.delay.get(1)) {
-        throw new ParameterException("delay max time cannot be less than min time!");
-      }
-
-      minDelay = commands.delay.get(0);
-      maxDelay = commands.delay.get(1);
-
-    }
-    printCommandSetup(commands);
-    if (!commands.method.equals(InputCommands.HDRF)) {
-      throw new ParameterException("");
-    }
+  private static void runPartitioner(PartitionerSettings settings, Set<Tuple3<Long, Long, Double>>[] splits) throws SQLException, IOException {
+    printCommandSetup(settings);
     PartitionState state = null;
-    switch (commands.storage) {
-      case InputCommands.IN_MEMORY:
-        state = new HdrfInMemoryState(commands.nPartitions);
+    switch (settings.storage) {
+      case PartitionerInputCommands.IN_MEMORY:
+        state = new HdrfInMemoryState(settings.k);
         break;
-      case InputCommands.MYSQL:
+      case PartitionerInputCommands.MYSQL:
         state = new HdrfMysqlState(
-          commands.nPartitions,
-          commands.dbUrl,
-          commands.user,
-          commands.pass,
-          commands.reset);
+            settings.k,
+            settings.dbUrl,
+            settings.user,
+            settings.pass,
+            settings.reset);
         break;
-      case InputCommands.REMOTE:
-        String[] url = commands.dbUrl.split(":");
-        state = new HdrfRemoteState(commands.nPartitions, url[0], Integer.valueOf(url[1]));
+      case PartitionerInputCommands.REMOTE:
+        String[] url = settings.dbUrl.split(":");
+        state = new HdrfRemoteState(settings.k, url[0], Integer.valueOf(url[1]));
         break;
       default:
         throw new ParameterException("");
     }
 
     long start = System.currentTimeMillis();
-    HdrfPartitioner.partitionWithWindow(state, splits, commands.lambda, commands.epsilon, commands.window, minDelay, maxDelay);
+    HdrfPartitioner.partitionWithWindow(state, splits, settings.lambda, settings.epsilon, settings.window, settings.delay.get(0), settings.delay.get(1));
     int duration = (int) ((System.currentTimeMillis() - start) / 1000);
     PartitionsStatistics ps = new PartitionsStatistics(state);
-    printResults(commands.nPartitions, ps, String.format("HdrfPartitioner lambda=%f\tepsilon=%f", commands.lambda, commands.epsilon));
-    if (!commands.output.isEmpty()) {
+    printResults(settings.k, ps, String.format("HdrfPartitioner lambda=%f\tepsilon=%f", settings.lambda, settings.epsilon));
+    if (!settings.output.isEmpty()) {
       try {
-        GraphPartitioner.writeToFile(ps, commands);
+        GraphPartitioner.writeToFile(ps, settings);
       } catch (FileNotFoundException ex) {
         ex.printStackTrace();
       }
     }
 
-    if (!windowRf.containsKey(commands.window)) {
-      windowRf.put(commands.window, new LinkedList<Float>());
+    if (!windowRf.containsKey(settings.window)) {
+      windowRf.put(settings.window, new LinkedList<Float>());
     }
-    windowRf.get(commands.window).add(ps.replicationFactor());
-    if (!taskRf.containsKey(commands.nTasks)) {
-      taskRf.put(commands.nTasks, new LinkedList<Float>());
+    windowRf.get(settings.window).add(ps.replicationFactor());
+    if (!taskRf.containsKey(settings.tasks)) {
+      taskRf.put(settings.tasks, new LinkedList<Float>());
     }
-    taskRf.get(commands.nTasks).add(ps.replicationFactor());
-    if (!windowTime.containsKey(commands.window)) {
-      windowTime.put(commands.window, new LinkedList<Integer>());
+    taskRf.get(settings.tasks).add(ps.replicationFactor());
+    if (!windowTime.containsKey(settings.window)) {
+      windowTime.put(settings.window, new LinkedList<Integer>());
     }
-    windowTime.get(commands.window).add(duration);
-    if (!taskTime.containsKey(commands.nTasks)) {
-      taskTime.put(commands.nTasks, new LinkedList<Integer>());
+    windowTime.get(settings.window).add(duration);
+    if (!taskTime.containsKey(settings.tasks)) {
+      taskTime.put(settings.tasks, new LinkedList<Integer>());
     }
-    taskTime.get(commands.nTasks).add(duration);
+    taskTime.get(settings.tasks).add(duration);
+    if (!windowLb.containsKey(settings.window)) {
+      windowLb.put(settings.window, new LinkedList<Float>());
+    }
+    windowLb.get(settings.window).add(ps.loadRelativeStandardDeviation());
+    if (!taskLb.containsKey(settings.tasks)) {
+      taskLb.put(settings.tasks, new LinkedList<Float>());
+    }
+    taskLb.get(settings.tasks).add(ps.loadRelativeStandardDeviation());
     state.releaseResources();
   }
 
@@ -210,39 +223,39 @@ public class GraphPartitioner {
     System.out.println("MEC: Max Edge Cardinality.");
     System.out.println("MVC: Max Vertex Cardinality.");
     System.out.println(String.format("RF=%f\tLRSD=%f\tMEC=%d\tMVC=%d",
-      ps.replicationFactor(),
-      ps.loadRelativeStandardDeviation(),
-      ps.maxEdgeCardinality(),
-      ps.maxVertexCardinality()));
+        ps.replicationFactor(),
+        ps.loadRelativeStandardDeviation(),
+        ps.maxEdgeCardinality(),
+        ps.maxVertexCardinality()));
   }
 
-  private static void printCommandSetup(InputCommands commands) {
+  private static void printCommandSetup(PartitionerSettings settings) {
     final String newLine = "\n";
     StringBuilder sb = new StringBuilder("Your partitionig configurations:\n");
-    sb.append("file:\t").append(commands.file).append(newLine);
-    sb.append("window:\t").append(commands.window).append(newLine);
-    sb.append("method:\t").append(commands.method).append(newLine);
-    sb.append("partitions:\t").append(commands.nPartitions).append(newLine);
-    sb.append("tasks(threads):\t").append(commands.nTasks).append(newLine);
+    sb.append("file:\t").append(settings.file).append(newLine);
+    sb.append("window:\t").append(settings.window).append(newLine);
+    sb.append("method:\t").append(settings.method).append(newLine);
+    sb.append("partitions:\t").append(settings.k).append(newLine);
+    sb.append("tasks(threads):\t").append(settings.tasks).append(newLine);
 
-    if (commands.storage.contentEquals(InputCommands.HDRF)) {
-      sb.append("lambda:\t").append(commands.lambda).append(newLine);
-      sb.append("epsilon:\t").append(commands.epsilon).append(newLine);
+    if (settings.storage.contentEquals(PartitionerInputCommands.HDRF)) {
+      sb.append("lambda:\t").append(settings.lambda).append(newLine);
+      sb.append("epsilon:\t").append(settings.epsilon).append(newLine);
     }
-    sb.append("storage:\t").append(commands.storage).append(newLine);
-    sb.append("reset storage:\t").append(commands.reset).append(newLine);
-    if (commands.storage.contentEquals(InputCommands.MYSQL)) {
-      sb.append("db:\t").append(commands.dbUrl).append(newLine);
-      sb.append("db user:\t").append(commands.user).append(newLine);
-      sb.append("db pass:\t").append(commands.pass).append(newLine);
+    sb.append("storage:\t").append(settings.storage).append(newLine);
+    sb.append("reset storage:\t").append(settings.reset).append(newLine);
+    if (settings.storage.contentEquals(PartitionerInputCommands.MYSQL)) {
+      sb.append("db:\t").append(settings.dbUrl).append(newLine);
+      sb.append("db user:\t").append(settings.user).append(newLine);
+      sb.append("db pass:\t").append(settings.pass).append(newLine);
     }
-    sb.append("Output:\t").append(commands.output).append(newLine);
-    sb.append(String.format("Delay:\t min:%d\tmax=%d", commands.delay.get(0), commands.delay.get(1))).append(newLine);
-    sb.append("Append to output:\t").append(commands.append).append(newLine);
+    sb.append("Output:\t").append(settings.output).append(newLine);
+    sb.append(String.format("Delay:\t min:%d\tmax=%d", settings.delay.get(0), settings.delay.get(1))).append(newLine);
+    sb.append("Append to output:\t").append(settings.append).append(newLine);
     System.out.println(sb.toString());
   }
 
-  public static void writeToFile(PartitionsStatistics ps, InputCommands commands) throws FileNotFoundException {
+  public static void writeToFile(PartitionsStatistics ps, PartitionerSettings settings) throws FileNotFoundException {
 //        File f1 = new File(commands.output + "-partitions.csv");
 //        boolean append = false;
 //        if (f1.exists() && !f1.isDirectory()) {
@@ -263,40 +276,41 @@ public class GraphPartitioner {
 //            writer.flush();
 //        }
     boolean append = false;
-    String file = commands.output + "-result.csv";
+    String file = settings.output + "-result.csv";
     File f2 = new File(file);
     if (f2.exists() && !f2.isDirectory()) {
-      append = commands.append;
+      append = settings.append;
     }
     try (PrintWriter writer = new PrintWriter(new FileOutputStream(
-      f2,
-      commands.append))) {
+        f2,
+        append))) {
       if (!append) {
         writer.write("nTasks,nPartitions,window,rf,lrsd,mec,mvc\n");
       }
       writer.append(String.format("%d,%d,%d,%f,%f,%d,%d",
-        commands.nTasks,
-        commands.nPartitions,
-        commands.window,
-        ps.replicationFactor(),
-        ps.loadRelativeStandardDeviation(),
-        ps.maxEdgeCardinality(),
-        ps.maxVertexCardinality()));
+          settings.tasks,
+          settings.k,
+          settings.window,
+          ps.replicationFactor(),
+          ps.loadRelativeStandardDeviation(),
+          ps.maxEdgeCardinality(),
+          ps.maxVertexCardinality()));
       writer.append("\n");
       writer.flush();
     }
   }
 
   private static void writeToFile(
-    Map<Integer, List<Float>> windowRf,
-    Map<Integer, List<Float>> taskRf,
-    Map<Integer, List<Integer>> windowTime,
-    Map<Integer, List<Integer>> taskTime,
-    String file) {
-    String fName = file + "-window.csv";
+      PartitionerSettings settings) {
+    boolean append = false;
+    String fName = settings.output + "-window.csv";
     File f1 = new File(fName);
+    if (f1.exists() && !f1.isDirectory()) {
+      append = settings.append;
+    }
     try (PrintWriter writer = new PrintWriter(new FileOutputStream(
-      f1))) {
+        f1,
+        append))) {
       Iterator<Map.Entry<Integer, List<Float>>> iterator = windowRf.entrySet().iterator();
       while (iterator.hasNext()) {
         Map.Entry<Integer, List<Float>> entry = iterator.next();
@@ -312,10 +326,15 @@ public class GraphPartitioner {
       Logger.getLogger(GraphPartitioner.class.getName()).log(Level.SEVERE, null, ex);
     }
 
-    fName = file + "-tasks.csv";
+    append = false;
+    fName = settings.output + "-tasks.csv";
     f1 = new File(fName);
+    if (f1.exists() && !f1.isDirectory()) {
+      append = settings.append;
+    }
     try (PrintWriter writer = new PrintWriter(new FileOutputStream(
-      f1))) {
+        f1,
+        append))) {
       Iterator<Map.Entry<Integer, List<Float>>> iterator = taskRf.entrySet().iterator();
       while (iterator.hasNext()) {
         Map.Entry<Integer, List<Float>> entry = iterator.next();
@@ -331,10 +350,63 @@ public class GraphPartitioner {
       Logger.getLogger(GraphPartitioner.class.getName()).log(Level.SEVERE, null, ex);
     }
 
-    fName = file + "-windows-time.csv";
+    append = false;
+    fName = settings.output + "-tasks-lb.csv";
     f1 = new File(fName);
+    if (f1.exists() && !f1.isDirectory()) {
+      append = settings.append;
+    }
     try (PrintWriter writer = new PrintWriter(new FileOutputStream(
-      f1))) {
+        f1,
+        append))) {
+      Iterator<Map.Entry<Integer, List<Float>>> iterator = taskLb.entrySet().iterator();
+      while (iterator.hasNext()) {
+        Map.Entry<Integer, List<Float>> entry = iterator.next();
+        writer.append(entry.getKey().toString()).append(",");
+        for (float lb : entry.getValue()) {
+          writer.append(String.valueOf(lb)).append(",");
+        }
+        writer.append("\n");
+      }
+
+      writer.flush();
+    } catch (FileNotFoundException ex) {
+      Logger.getLogger(GraphPartitioner.class.getName()).log(Level.SEVERE, null, ex);
+    }
+
+    append = false;
+    fName = settings.output + "-windows-lb.csv";
+    f1 = new File(fName);
+    if (f1.exists() && !f1.isDirectory()) {
+      append = settings.append;
+    }
+    try (PrintWriter writer = new PrintWriter(new FileOutputStream(
+        f1,
+        append))) {
+      Iterator<Map.Entry<Integer, List<Float>>> iterator = windowLb.entrySet().iterator();
+      while (iterator.hasNext()) {
+        Map.Entry<Integer, List<Float>> entry = iterator.next();
+        writer.append(entry.getKey().toString()).append(",");
+        for (float lb : entry.getValue()) {
+          writer.append(String.valueOf(lb)).append(",");
+        }
+        writer.append("\n");
+      }
+
+      writer.flush();
+    } catch (FileNotFoundException ex) {
+      Logger.getLogger(GraphPartitioner.class.getName()).log(Level.SEVERE, null, ex);
+    }
+
+    append = false;
+    fName = settings.output + "-windows-time.csv";
+    f1 = new File(fName);
+    if (f1.exists() && !f1.isDirectory()) {
+      append = settings.append;
+    }
+    try (PrintWriter writer = new PrintWriter(new FileOutputStream(
+        f1,
+        append))) {
       Iterator<Map.Entry<Integer, List<Integer>>> iterator = windowTime.entrySet().iterator();
       while (iterator.hasNext()) {
         Map.Entry<Integer, List<Integer>> entry = iterator.next();
@@ -350,10 +422,15 @@ public class GraphPartitioner {
       Logger.getLogger(GraphPartitioner.class.getName()).log(Level.SEVERE, null, ex);
     }
 
-    fName = file + "-tasks-time.csv";
+    append = false;
+    fName = settings.output + "-tasks-time.csv";
     f1 = new File(fName);
+    if (f1.exists() && !f1.isDirectory()) {
+      append = settings.append;
+    }
     try (PrintWriter writer = new PrintWriter(new FileOutputStream(
-      f1))) {
+        f1,
+        append))) {
       Iterator<Map.Entry<Integer, List<Integer>>> iterator = taskTime.entrySet().iterator();
       while (iterator.hasNext()) {
         Map.Entry<Integer, List<Integer>> entry = iterator.next();
