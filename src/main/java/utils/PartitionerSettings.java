@@ -16,6 +16,7 @@ public class PartitionerSettings {
   public String file;
   public String delimiter;
   public int window;
+  public int frequency;
   public String method;
   public double lambda;
   public double epsilon;

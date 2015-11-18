@@ -24,6 +24,9 @@ public class PartitionerInputCommands {
   @Parameter(names = {"-window", "-w"}, description = "Window size: (1)base (2)min exponent (3)max exponent.", arity = 3, required = true)
   public List<Integer> window;
 
+  @Parameter(names = {"-puf"}, description = "Partitions update frequency comparing to the window size.")
+  public int frequency = 1;
+
   @Parameter(names = {"-tasks", "-t"}, description = "Number of tasks (threads): (1)base (2)min exponent (3)max exponent.", arity = 3, required = true)
   public List<Integer> nTasks;
 
