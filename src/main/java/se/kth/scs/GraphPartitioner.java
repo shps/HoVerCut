@@ -61,7 +61,7 @@ public class GraphPartitioner {
   public static void main(String[] args) throws SQLException, IOException {
     args = new String[]{
       "-f", "./data/datasets/twitter_combined.txt",
-      "-w", "10", "0", "0",
+      "-w", "10", "3", "3",
       "-m", "hdrf",
       "-p", "4",
       "-t", "2", "6", "6",
@@ -234,7 +234,7 @@ public class GraphPartitioner {
     System.out.println("LRSD: Load Relative Standard Deviation");
     System.out.println("MEC: Max Edge Cardinality.");
     System.out.println("MVC: Max Vertex Cardinality.");
-    System.out.println(String.format("RF=%f\tLRSD=%f\tMEC=%d\tMVC=%d",
+    System.out.println(String.format("RF=%f\tLRSD=%f\tMEC=%d",
         ps.replicationFactor(),
         ps.loadRelativeStandardDeviation(),
         ps.maxEdgeCardinality(),

@@ -198,12 +198,10 @@ public class HdrfRemoteState implements PartitionState {
     try {
       ClientSocket c = getClient();
       int[] eDeltas = new int[ps.size()];
-      int[] vDeltas = new int[ps.size()];
       for (Partition p : ps) {
         eDeltas[p.getId()] = p.getESizeDelta();
-        vDeltas[p.getId()] = p.getVSizeDelta();
       }
-      PartitionsWriteRequest request = new PartitionsWriteRequest(eDeltas, vDeltas);
+      PartitionsWriteRequest request = new PartitionsWriteRequest(eDeltas);
       c.getOutput().writeObject(request);
       c.getOutput().flush();
     } catch (IOException ex) {
@@ -223,12 +221,10 @@ public class HdrfRemoteState implements PartitionState {
 
   private List<Partition> deserializePartititions(PartitionsResponse response) {
     int[] eSizes = response.getESizes();
-    int[] vSizes = response.getVSizes();
     List<Partition> partitions = new ArrayList<>(eSizes.length);
     for (short i = 0; i < eSizes.length; i++) {
       Partition p = new Partition(i);
       p.setESize(eSizes[i]);
-      p.setVSize(vSizes[i]);
       partitions.add(p);
     }
 

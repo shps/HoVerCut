@@ -8,10 +8,7 @@ public class Partition {
 
   private final short id;
   private int eSize = 0;
-  private int vSize = 0;
-
   private int eSizeDelta = 0;
-  private int vSizeDelta = 0;
 
   public Partition(short id) {
     this.id = id;
@@ -19,10 +16,6 @@ public class Partition {
 
   public void incrementESize() {
     this.eSizeDelta++;
-  }
-
-  public void incrementVSize() {
-    this.vSizeDelta++;
   }
 
   /**
@@ -47,31 +40,10 @@ public class Partition {
   }
 
   /**
-   * @return the vSize
-   */
-  public int getVSize() {
-    return vSize + vSizeDelta;
-  }
-
-  /**
-   * @param vSize the vSize to set
-   */
-  public void setVSize(int vSize) {
-    this.vSize = vSize;
-  }
-
-  /**
    * @return the eSizeDelta
    */
   public int getESizeDelta() {
     return eSizeDelta;
-  }
-
-  /**
-   * @return the vSizeDelta
-   */
-  public int getVSizeDelta() {
-    return vSizeDelta;
   }
 
   @Override
@@ -98,12 +70,5 @@ public class Partition {
    */
   public void seteSizeDelta(int eSizeDelta) {
     this.eSizeDelta = eSizeDelta;
-  }
-
-  /**
-   * @param vSizeDelta the vSizeDelta to set
-   */
-  public void setvSizeDelta(int vSizeDelta) {
-    this.vSizeDelta = vSizeDelta;
   }
 }

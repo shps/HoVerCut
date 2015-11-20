@@ -34,7 +34,6 @@ public class HdrfMySqlQueries {
   public static final String VID = "vid";
   public static final String PID = "pid";
   public static final String EDGE_SIZE = "edge_size";
-  public static final String VERTEX_SIZE = "vertex_size";
   public static final String PARTIAL_DEGREE = "partial_degree";
 
   public static Vertex getVertex(int vid, Connection con) throws SQLException {
@@ -58,10 +57,8 @@ public class HdrfMySqlQueries {
     ResultSet r = s.executeQuery(query);
     Partition p = null;
     if (r.next()) {
-      int vSize = r.getInt(VERTEX_SIZE);
       int eSize = r.getInt(EDGE_SIZE);
       p = new Partition(pid);
-      p.setVSize(vSize);
       p.setESize(eSize);
     }
 
@@ -124,11 +121,9 @@ public class HdrfMySqlQueries {
     LinkedList<Partition> partitions = new LinkedList<>();
     while (r.next()) {
       short pid = r.getShort(PID);
-      int vSize = r.getInt(VERTEX_SIZE);
       int eSize = r.getInt(EDGE_SIZE);
       Partition p = new Partition(pid);
       p.setESize(eSize);
-      p.setVSize(vSize);
       partitions.add(p);
     }
 
@@ -142,11 +137,9 @@ public class HdrfMySqlQueries {
     ArrayList<Partition> partitions = new ArrayList<>();
     while (r.next()) {
       short pid = r.getShort(PID);
-      int vSize = r.getInt(VERTEX_SIZE);
       int eSize = r.getInt(EDGE_SIZE);
       Partition p = new Partition(pid);
       p.setESize(eSize);
-      p.setVSize(vSize);
       partitions.add(p);
     }
 
@@ -199,15 +192,13 @@ public class HdrfMySqlQueries {
   }
 
   public static int[] putPartitions(List<Partition> partitions, Connection con) throws SQLException {
-    PreparedStatement s = con.prepareStatement(String.format("insert into %s (pid, vertex_size, edge_size) values (?, ?, ?) "
-      + "on duplicate key update vertex_size=vertex_size+?, edge_size=edge_size+?",
+    PreparedStatement s = con.prepareStatement(String.format("insert into %s (pid, edge_size) values (?, ?) "
+      + "on duplicate key update edge_size=edge_size+?",
       PARTITIONS));
     for (Partition p : partitions) {
       s.setShort(1, p.getId());
-      s.setInt(2, p.getVSize());
-      s.setInt(3, p.getESize());
-      s.setInt(4, p.getVSizeDelta());
-      s.setInt(5, p.getESizeDelta());
+      s.setInt(2, p.getESize());
+      s.setInt(3, p.getESizeDelta());
       s.addBatch();
     }
     int[] r = s.executeBatch();
@@ -219,14 +210,12 @@ public class HdrfMySqlQueries {
 
   private static String createPutPartitionQuery(Partition p) {
     short pid = p.getId();
-    int vSize = p.getVSize();
     int eSize = p.getESize();
-    int vDelta = p.getVSizeDelta();
     int eDelta = p.getESizeDelta();
     String query
-      = String.format("insert into %s (pid, vertex_size, edge_size) values (%d, %d, %d) "
-        + "on duplicate key update vertex_size=vertex_size+%d, edge_size=edge_size+%d",
-        PARTITIONS, pid, vSize, eSize, vDelta, eDelta);
+      = String.format("insert into %s (pid, edge_size) values (%d, %d) "
+        + "on duplicate key update edge_size=edge_size+%d",
+        PARTITIONS, pid, eSize, eDelta);
     return query;
   }
 

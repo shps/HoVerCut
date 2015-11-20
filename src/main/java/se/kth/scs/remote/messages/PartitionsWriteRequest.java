@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.scs.remote.messages;
 
 import java.io.Serializable;
@@ -14,11 +9,9 @@ import java.io.Serializable;
 public class PartitionsWriteRequest implements Serializable {
 
   private final int[] eDeltas;
-  private final int[] vDeltas;
 
-  public PartitionsWriteRequest(int[] eDeltas, int[] vDeltas) {
+  public PartitionsWriteRequest(int[] eDeltas) {
     this.eDeltas = eDeltas;
-    this.vDeltas = vDeltas;
   }
 
   /**
@@ -26,12 +19,5 @@ public class PartitionsWriteRequest implements Serializable {
    */
   public int[] geteDeltas() {
     return eDeltas;
-  }
-
-  /**
-   * @return the vDeltas
-   */
-  public int[] getvDeltas() {
-    return vDeltas;
   }
 }

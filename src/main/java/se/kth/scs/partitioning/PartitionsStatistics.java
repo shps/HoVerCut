@@ -31,14 +31,13 @@ public class PartitionsStatistics {
     nVertexPartitions = new int[partitions.size()];
 
     int totalReplicas = 0;
-    int totalEdges = 0;
     nVertices = vertices.size();
     for (Vertex v : vertices.values()) {
-      totalEdges += v.getpDegree();
       int ps = v.getPartitions();
-      for (Partition partition : partitions) {
+      for (Partition p : partitions) {
         if ((ps & 1) == 1) {
           totalReplicas++;
+          nVertexPartitions[p.getId()] += 1;
         }
         ps = ps >> 1;
       }
@@ -50,32 +49,21 @@ public class PartitionsStatistics {
     int maxE = 0;
     int i = 0;
     int eSize = 0;
-    int vSize = 0;
     for (Partition p : partitions) {
       nEdgePartitions[i] = p.getESize();
-      nVertexPartitions[i] = p.getVSize();
       eSize += p.getESize();
-      vSize += p.getVSize();
-      if (p.getVSize() > maxV) {
-        maxV = p.getVSize();
-      }
       if (p.getESize() > maxE) {
         maxE = p.getESize();
       }
+      if (nVertexPartitions[p.getId()] > maxV) {
+        maxV = nVertexPartitions[p.getId()];
+      }
       i++;
     }
+ 
     nEdges = eSize;
     maxVertexCardinality = maxV;
     maxEdgeCardinality = maxE;
-
-    if (vSize != totalReplicas) {
-      System.err.println(String.format("Inconsistent replica size: replicas=%d\tvertex-size=%d", totalReplicas, vSize));
-    }
-    
-    if ((totalEdges/2) != eSize)
-    {
-      System.err.println(String.format("Inconsistent edge sizes: vertex-degrees=%d\tedge-size=%d", totalReplicas, vSize));
-    }
   }
 
   /**

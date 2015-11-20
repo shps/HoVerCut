@@ -118,11 +118,11 @@ public class HdrfPartitionerTask implements Runnable {
       Vertex u = vertices.get(e.getSrc());
       Vertex v = vertices.get(e.getDst());
       if (u == null) {
-        u = new Vertex(e.getSrc(), 0);
+        u = new Vertex(e.getSrc());
         vertices.put(u.getId(), u);
       }
       if (v == null) {
-        v = new Vertex(e.getDst(), 0);
+        v = new Vertex(e.getDst());
         vertices.put(v.getId(), v);
       }
       u.incrementDegree();
@@ -189,12 +189,8 @@ public class HdrfPartitionerTask implements Runnable {
     }
 
     //MaxPartition should not be null
-    if (v1.addPartition(maxPartition.getId())) {
-      maxPartition.incrementVSize();
-    }
-    if (v2.addPartition(maxPartition.getId())) {
-      maxPartition.incrementVSize();
-    }
+    v1.addPartition(maxPartition.getId());
+    v2.addPartition(maxPartition.getId());
     maxPartition.incrementESize();
 
     return maxPartition;

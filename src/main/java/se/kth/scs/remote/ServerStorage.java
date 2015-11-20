@@ -134,19 +134,16 @@ public class ServerStorage {
 
   public PartitionsResponse getPartitions(PartitionsRequest request) {
     int[] eSizes = new int[k];
-    int[] vSizes = new int[k];
     for (short i = 0; i < k; i++) {
       Partition p = getPartition(i);
       if (p == null) {
         eSizes[i] = 0;
-        vSizes[i] = 0;
       } else {
         eSizes[i] = p.getESize();
-        vSizes[i] = p.getVSize();
       }
     }
 
-    return new PartitionsResponse(eSizes, vSizes);
+    return new PartitionsResponse(eSizes);
   }
 
   public void putPartition(Partition p) {
@@ -166,11 +163,9 @@ public class ServerStorage {
 
   public void putPartitions(PartitionsWriteRequest request) {
     int[] eSizes = request.geteDeltas();
-    int[] vSizes = request.getvDeltas();
     for (short i = 0; i < eSizes.length; i++) {
       Partition p = new Partition(i);
       p.seteSizeDelta(eSizes[i]);
-      p.setvSizeDelta(vSizes[i]);
       putPartition(p);
     }
   }

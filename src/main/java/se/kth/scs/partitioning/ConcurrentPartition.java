@@ -8,81 +8,56 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ConcurrentPartition {
 
-    private final short id;
-    private final AtomicInteger eSize;
-    private final AtomicInteger vSize;
+  private final short id;
+  private final AtomicInteger eSize;
 
-    public ConcurrentPartition(short id) {
-        eSize = new AtomicInteger();
-        vSize = new AtomicInteger();
-        this.id = id;
+  public ConcurrentPartition(short id) {
+    eSize = new AtomicInteger();
+    this.id = id;
+  }
+
+  /**
+   * @return the id
+   */
+  public short getId() {
+    return id;
+  }
+
+  public synchronized void accumulate(Partition p) {
+    eSize.addAndGet(p.getESizeDelta());
+  }
+
+  /**
+   * @return the eSize
+   */
+  public int getESize() {
+    return eSize.get();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
     }
-
-    /**
-     * @return the id
-     */
-    public short getId() {
-        return id;
+    if (!(obj instanceof ConcurrentPartition)) {
+      return false;
     }
+    ConcurrentPartition other = (ConcurrentPartition) obj;
+    return other.getId() == this.getId();
+  }
 
-    public synchronized void accumulate(Partition p) {
-        eSize.addAndGet(p.getESizeDelta());
-        vSize.addAndGet(p.getVSizeDelta());
-    }
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 73 * hash + this.id;
+    return hash;
+  }
 
-    /**
-     * @return the eSize
-     */
-    public int getESize() {
-        return eSize.get();
-    }
-
-//    /**
-//     * @param eSize the eSize to set
-//     */
-//    public void setESize(int eSize) {
-//        this.eSize.set(eSize);
-//    }
-
-    /**
-     * @return the vSize
-     */
-    public int getVSize() {
-        return vSize.get();
-    }
-
-//    /**
-//     * @param vSize the vSize to set
-//     */
-//    public void setVSize(int vSize) {
-//        this.vSize.set(vSize);
-//    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof ConcurrentPartition)) {
-            return false;
-        }
-        ConcurrentPartition other = (ConcurrentPartition) obj;
-        return other.getId() == this.getId();
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 73 * hash + this.id;
-        return hash;
-    }
-
-    @Override
-    public synchronized Partition clone() {
-        Partition clone = new Partition(id);
-        clone.setESize(this.getESize());
-        clone.setVSize(this.getVSize());
-        return clone;
-    }
+  @Override
+  public synchronized Partition clone() {
+    Partition clone = new Partition(id);
+    clone.setESize(this.getESize());
+    return clone;
+  }
 
 }
