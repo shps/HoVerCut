@@ -1,8 +1,6 @@
 package se.kth.scs.remote;
 
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import se.kth.scs.partitioning.ConcurrentPartition;
 import se.kth.scs.partitioning.ConcurrentVertex;
@@ -21,24 +19,24 @@ import se.kth.scs.remote.messages.VerticesWriteRequest;
  */
 public class ServerStorage {
 
-  final ConcurrentHashMap<Long, ConcurrentVertex> vertices = new ConcurrentHashMap<>(); // Holds partial degree of each vertex.
-  private final ConcurrentHashMap<Integer, ConcurrentPartition> partitions;
-  private final int k;
+  final ConcurrentHashMap<Integer, ConcurrentVertex> vertices = new ConcurrentHashMap<>(); // Holds partial degree of each vertex.
+  private final ConcurrentHashMap<Short, ConcurrentPartition> partitions;
+  private final short k;
 
-  public ServerStorage(int k) {
+  public ServerStorage(short k) {
     this.k = k;
     partitions = new ConcurrentHashMap();
     initPartitions(partitions, this.k);
   }
 
-  private void initPartitions(ConcurrentHashMap<Integer, ConcurrentPartition> partitions, int k) {
+  private void initPartitions(ConcurrentHashMap<Short, ConcurrentPartition> partitions, short k) {
     partitions.clear();
-    for (int i = 0; i < k; i++) {
+    for (short i = 0; i < k; i++) {
       partitions.put(i, new ConcurrentPartition(i));
     }
   }
 
-  public int getNumberOfPartitions() {
+  public short getNumberOfPartitions() {
     return k;
   }
 
@@ -54,7 +52,7 @@ public class ServerStorage {
    */
   public VerticesReadResponse getAllVertices() {
     int size = vertices.size();
-    long[] vIds = new long[size];
+    int[] vIds = new int[size];
     int[] degrees = new int[size];
     int[] ps = new int[size];
     int i = 0;
@@ -68,7 +66,7 @@ public class ServerStorage {
     return new VerticesReadResponse(vIds, degrees, ps);
   }
 
-  public Vertex getVertex(long vid) {
+  public Vertex getVertex(int vid) {
     //TODO: a clone should be sent in multi-threaded version.
     ConcurrentVertex v = vertices.get(vid);
     if (v != null) {
@@ -80,13 +78,13 @@ public class ServerStorage {
 
   public VerticesReadResponse getVertices(VerticesReadRequest request) {
     LinkedList<Vertex> vs = new LinkedList<>();
-    for (long vid : request.getVertices()) {
+    for (int vid : request.getVertices()) {
       Vertex v = getVertex(vid);
       if (v != null) {
         vs.add(v);
       }
     }
-    long[] vIds = new long[vs.size()];
+    int[] vIds = new int[vs.size()];
     int[] degrees = new int[vs.size()];
     int[] ps = new int[vs.size()];
     for (int i = 0; i < vs.size(); i++) {
@@ -103,18 +101,18 @@ public class ServerStorage {
     if (shared != null) {
       shared.accumulate(v);
     } else {
-      ConcurrentVertex newShared = new ConcurrentVertex(v.getId(), 0);
-      newShared.accumulate(v);
-      newShared = vertices.putIfAbsent(v.getId(), newShared);
+      shared = new ConcurrentVertex(v.getId(), 0);
+      shared.accumulate(v);
+      shared = vertices.putIfAbsent(v.getId(), shared);
       // Double check if the entry does not exist.
-      if (newShared != null) {
-        newShared.accumulate(v);
+      if (shared != null) {
+        shared.accumulate(v);
       }
     }
   }
 
   public void putVertices(VerticesWriteRequest request) {
-    long[] vids = request.getVertices();
+    int[] vids = request.getVertices();
     int[] degrees = request.getDegreeDeltas();
     int[] ps = request.getPartitionsDeltas();
     for (int i = 0; i < vids.length; i++) {
@@ -125,7 +123,7 @@ public class ServerStorage {
     }
   }
 
-  public Partition getPartition(int pid) {
+  public Partition getPartition(short pid) {
     ConcurrentPartition p = partitions.get(pid);
     if (p != null) {
       return p.clone();
@@ -137,7 +135,7 @@ public class ServerStorage {
   public PartitionsResponse getPartitions(PartitionsRequest request) {
     int[] eSizes = new int[k];
     int[] vSizes = new int[k];
-    for (int i = 0; i < k; i++) {
+    for (short i = 0; i < k; i++) {
       Partition p = getPartition(i);
       if (p == null) {
         eSizes[i] = 0;
@@ -156,12 +154,12 @@ public class ServerStorage {
     if (shared != null) {
       shared.accumulate(p);
     } else {
-      ConcurrentPartition newShared = new ConcurrentPartition(p.getId());
-      newShared.accumulate(p);
-      newShared = partitions.putIfAbsent(p.getId(), newShared);
+      shared = new ConcurrentPartition(p.getId());
+      shared.accumulate(p);
+      shared = partitions.putIfAbsent(p.getId(), shared);
       // Double check if the entry does not exist.
-      if (newShared != null) {
-        newShared.accumulate(p);
+      if (shared != null) {
+        shared.accumulate(p);
       }
     }
   }
@@ -169,7 +167,7 @@ public class ServerStorage {
   public void putPartitions(PartitionsWriteRequest request) {
     int[] eSizes = request.geteDeltas();
     int[] vSizes = request.getvDeltas();
-    for (int i = 0; i < eSizes.length; i++) {
+    for (short i = 0; i < eSizes.length; i++) {
       Partition p = new Partition(i);
       p.seteSizeDelta(eSizes[i]);
       p.setvSizeDelta(vSizes[i]);

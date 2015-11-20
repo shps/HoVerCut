@@ -20,7 +20,7 @@ public class PartitionerSettings {
   public String method;
   public double lambda;
   public double epsilon;
-  public int k;
+  public short k;
   public int tasks;
   public String storage;
   public String dbUrl;
@@ -122,7 +122,7 @@ public class PartitionerSettings {
    * @param k the k to set
    * @return
    */
-  public PartitionerSettings setK(int k) {
+  public PartitionerSettings setK(short k) {
     this.k = k;
     return this;
   }

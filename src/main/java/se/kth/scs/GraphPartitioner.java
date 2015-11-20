@@ -12,13 +12,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.flink.api.java.tuple.Tuple3;
+import se.kth.scs.partitioning.Edge;
 import se.kth.scs.partitioning.PartitionState;
 import se.kth.scs.partitioning.PartitionsStatistics;
 import se.kth.scs.partitioning.algorithms.hdrf.HdrfInMemoryState;
@@ -59,22 +59,22 @@ public class GraphPartitioner {
 //  private static final String PASS = "";
 
   public static void main(String[] args) throws SQLException, IOException {
-//    args = new String[]{
-//      "-f", "./data/datasets/twitter_combined.txt",
-//      "-w", "10", "3", "3",
-//      "-m", "hdrf",
-//      "-p", "16",
-//      "-t", "2", "6", "6",
-//      //            "-reset", "true",
-//      "-s", "memory",
-//      "-db", "localhost:4444",
-//      "-user", "root",
-//      "-pass", "",
-//      "-output", "/home/ganymedian/Desktop/results/hdrf",
-//      "-append", "false", //FIXME: if appends is true it throws exception.
-//      "-delay", "0", "0",
-//      "-d", "\" \"",
-//      "-puf", "10"};
+    args = new String[]{
+      "-f", "./data/datasets/twitter_combined.txt",
+      "-w", "10", "0", "0",
+      "-m", "hdrf",
+      "-p", "4",
+      "-t", "2", "6", "6",
+      //            "-reset", "true",
+      "-s", "memory",
+      "-db", "localhost:4444",
+      "-user", "root",
+      "-pass", "",
+      "-output", "/home/ganymedian/Desktop/results/hdrf",
+      "-append", "false", //FIXME: if appends is true it throws exception.
+      "-delay", "0", "0",
+      "-d", "\" \"",
+      "-puf", "1"};
 
     PartitionerInputCommands commands = new PartitionerInputCommands();
     JCommander commander;
@@ -94,7 +94,7 @@ public class GraphPartitioner {
     }
 
     PartitionerSettings settings = new PartitionerSettings();
-    settings.k = commands.nPartitions;
+    settings.k = (short) commands.nPartitions;
     settings.file = commands.file;
     settings.output = commands.output;
     settings.storage = commands.storage;
@@ -128,7 +128,7 @@ public class GraphPartitioner {
       System.out.println(String.format("Reading file %s", settings.file));
       long start = System.currentTimeMillis();
       EdgeFileReader reader = new EdgeFileReader(settings.delimiter);
-      Set<Tuple3<Long, Long, Double>>[] splits = reader.readSplitFile(settings.file, t);
+      LinkedHashSet<Edge>[] splits = reader.readSplitFile(settings.file, t);
       int nEdges = reader.getnEdges();
       System.out.println(String.format("Finished reading in %d seconds.", (System.currentTimeMillis() - start) / 1000));
       while (true) {
@@ -148,7 +148,7 @@ public class GraphPartitioner {
     writeToFile(settings);
   }
 
-  private static void runPartitioner(PartitionerSettings settings, Set<Tuple3<Long, Long, Double>>[] splits) throws SQLException, IOException {
+  private static void runPartitioner(PartitionerSettings settings, LinkedHashSet<Edge>[] splits) throws SQLException, IOException {
     printCommandSetup(settings);
     PartitionState state = null;
     switch (settings.storage) {

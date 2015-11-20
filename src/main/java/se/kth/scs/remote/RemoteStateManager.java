@@ -15,14 +15,14 @@ import utils.StorageInputCommands;
  */
 public class RemoteStateManager {
 
-  private final static int k = 4;
+  private final static short k = 4;
   private final static int port = 4444;
   private final static String address = "127.0.0.1";
 
   public static void main(String[] args) {
-//    args = new String[]{
-//    "-p","4",
-//    "-a", "localhost:4444"};
+    args = new String[]{
+    "-p","4",
+    "-a", "localhost:4444"};
     StorageInputCommands commands = new StorageInputCommands();
     JCommander commander;
     try {
@@ -39,7 +39,7 @@ public class RemoteStateManager {
 
     String[] addr = commands.address.split(":");
     try (ServerSocket server = new ServerSocket(Integer.valueOf(addr[1]), 0, InetAddress.getByName(addr[0]))) {
-      ServerStorage state = new ServerStorage(commands.nPartitions);
+      ServerStorage state = new ServerStorage((short) commands.nPartitions);
       System.out.println("Server is waiting for clients to connect...");
       int i = 1;
       while (true) {

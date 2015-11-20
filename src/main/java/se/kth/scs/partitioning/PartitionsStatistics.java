@@ -17,7 +17,7 @@ public class PartitionsStatistics {
   private final int nEdges;
   private final int[] nEdgePartitions;
   private final int[] nVertexPartitions;
-  private final Map<Long, Vertex> vertices;
+  private final Map<Integer, Vertex> vertices;
 
   /**
    * Eagerly calculates some metrics about a list of partitions.
@@ -31,10 +31,12 @@ public class PartitionsStatistics {
     nVertexPartitions = new int[partitions.size()];
 
     int totalReplicas = 0;
+    int totalEdges = 0;
     nVertices = vertices.size();
     for (Vertex v : vertices.values()) {
+      totalEdges += v.getpDegree();
       int ps = v.getPartitions();
-      for (int i = 0; i < partitions.size(); i++) {
+      for (Partition partition : partitions) {
         if ((ps & 1) == 1) {
           totalReplicas++;
         }
@@ -48,10 +50,12 @@ public class PartitionsStatistics {
     int maxE = 0;
     int i = 0;
     int eSize = 0;
+    int vSize = 0;
     for (Partition p : partitions) {
       nEdgePartitions[i] = p.getESize();
       nVertexPartitions[i] = p.getVSize();
       eSize += p.getESize();
+      vSize += p.getVSize();
       if (p.getVSize() > maxV) {
         maxV = p.getVSize();
       }
@@ -63,6 +67,15 @@ public class PartitionsStatistics {
     nEdges = eSize;
     maxVertexCardinality = maxV;
     maxEdgeCardinality = maxE;
+
+    if (vSize != totalReplicas) {
+      System.err.println(String.format("Inconsistent replica size: replicas=%d\tvertex-size=%d", totalReplicas, vSize));
+    }
+    
+    if ((totalEdges/2) != eSize)
+    {
+      System.err.println(String.format("Inconsistent edge sizes: vertex-degrees=%d\tedge-size=%d", totalReplicas, vSize));
+    }
   }
 
   /**
@@ -99,8 +112,7 @@ public class PartitionsStatistics {
   }
 
   /**
-   * Relative standard deviation of the number of edges hosted in the
-   * partitions.
+   * Relative standard deviation of the number of edges hosted in the partitions.
    *
    * @return
    */
@@ -118,8 +130,7 @@ public class PartitionsStatistics {
   }
 
   /**
-   * ** The number of vertices in the Partition with the max vertex
-   * cardinality.
+   * ** The number of vertices in the Partition with the max vertex cardinality.
    *
    * @return
    */
@@ -158,7 +169,7 @@ public class PartitionsStatistics {
   /**
    * @return the vertices
    */
-  public Map<Long, Vertex> getVertices() {
+  public Map<Integer, Vertex> getVertices() {
     return vertices;
   }
 }

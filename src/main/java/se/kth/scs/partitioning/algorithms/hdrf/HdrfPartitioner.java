@@ -1,7 +1,7 @@
 package se.kth.scs.partitioning.algorithms.hdrf;
 
-import java.util.Set;
-import org.apache.flink.api.java.tuple.Tuple3;
+import java.util.LinkedHashSet;
+import se.kth.scs.partitioning.Edge;
 import se.kth.scs.partitioning.PartitionState;
 
 /**
@@ -16,7 +16,7 @@ public class HdrfPartitioner {
   public static final double DEFAULT_EPSILON = 1;
 
   public static void partitionWithWindow(
-      PartitionState hState, Set<Tuple3<Long, Long, Double>> edges[],
+      PartitionState hState, LinkedHashSet<Edge> edges[],
       double lambda,
       double epsilon,
       int windowSize,

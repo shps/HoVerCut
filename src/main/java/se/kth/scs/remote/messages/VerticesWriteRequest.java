@@ -11,13 +11,13 @@ import java.io.Serializable;
  *
  * @author Hooman
  */
-public class VerticesWriteRequest implements Serializable{
+public class VerticesWriteRequest implements Serializable {
 
-  private final long[] vertices;
+  private final int[] vertices;
   private final int[] degreeDeltas;
   private final int[] partitionsDeltas;
 
-  public VerticesWriteRequest(long[] vertices, int[] degreeDeltas, int[] partitionsDeltas) {
+  public VerticesWriteRequest(int[] vertices, int[] degreeDeltas, int[] partitionsDeltas) {
     this.vertices = vertices;
     this.degreeDeltas = degreeDeltas;
     this.partitionsDeltas = partitionsDeltas;
@@ -26,7 +26,7 @@ public class VerticesWriteRequest implements Serializable{
   /**
    * @return the vertices
    */
-  public long[] getVertices() {
+  public int[] getVertices() {
     return vertices;
   }
 

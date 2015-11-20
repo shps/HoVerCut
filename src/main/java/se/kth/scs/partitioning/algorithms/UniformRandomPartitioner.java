@@ -2,7 +2,7 @@ package se.kth.scs.partitioning.algorithms;
 
 import java.security.SecureRandom;
 import java.util.Collection;
-import org.apache.flink.api.java.tuple.Tuple3;
+import se.kth.scs.partitioning.Edge;
 
 /**
  *
@@ -17,10 +17,10 @@ public class UniformRandomPartitioner {
      * @param edges input edges.
      * @return
      */
-    public static URState partition(URState state, Collection<Tuple3<Long, Long, Double>> edges) {
+    public static URState partition(URState state, Collection<Edge> edges) {
         int k = state.getNumberOfPartitions();
         SecureRandom r = new SecureRandom();
-        for (Tuple3<Long, Long, Double> e : edges) {
+        for (Edge e : edges) {
             int p = r.nextInt(k);
 //            state.addEdgeToPartition(p, e);
             //TODO: Implement this partitioner.

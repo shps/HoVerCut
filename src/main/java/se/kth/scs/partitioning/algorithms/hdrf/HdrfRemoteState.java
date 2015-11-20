@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang.ArrayUtils;
 import se.kth.scs.partitioning.Partition;
 import se.kth.scs.partitioning.PartitionState;
 import se.kth.scs.partitioning.Vertex;
@@ -35,12 +34,12 @@ import se.kth.scs.remote.messages.VerticesWriteRequest;
  */
 public class HdrfRemoteState implements PartitionState {
 
-  private final int k;
+  private final short k;
   private final String ip;
   private final int port;
   private final ThreadLocal<ClientSocket> clients = new ThreadLocal<>();
 
-  public HdrfRemoteState(int k, String ip, int port) throws IOException {
+  public HdrfRemoteState(short k, String ip, int port) throws IOException {
     this.k = k;
     this.ip = ip;
     this.port = port;
@@ -53,7 +52,7 @@ public class HdrfRemoteState implements PartitionState {
   }
 
   @Override
-  public int getNumberOfPartitions() {
+  public short getNumberOfPartitions() {
     return k;
   }
 
@@ -80,13 +79,13 @@ public class HdrfRemoteState implements PartitionState {
   }
 
   @Override
-  public Vertex getVertex(long vid) {
+  public Vertex getVertex(int vid) {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 
   @Override
-  public Map<Long, Vertex> getAllVertices() {
-    Map<Long, Vertex> vertices = null;
+  public Map<Integer, Vertex> getAllVertices() {
+    Map<Integer, Vertex> vertices = null;
     try {
       ClientSocket c = getClient();
       c.getOutput().writeObject(new AllVerticesRequest());
@@ -99,9 +98,9 @@ public class HdrfRemoteState implements PartitionState {
     return vertices;
   }
 
-  private Map<Long, Vertex> deserializeVertices(VerticesReadResponse response) {
-    Map<Long, Vertex> vertices = new HashMap<>();
-    long[] vIds = response.getVertices();
+  private Map<Integer, Vertex> deserializeVertices(VerticesReadResponse response) {
+    Map<Integer, Vertex> vertices = new HashMap<>();
+    int[] vIds = response.getVertices();
     int[] degrees = response.getDegrees();
     int[] partitions = response.getPartitions();
     for (int i = 0; i < vIds.length; i++) {
@@ -114,13 +113,13 @@ public class HdrfRemoteState implements PartitionState {
   }
 
   @Override
-  public Map<Long, Vertex> getVertices(Set<Long> vids) {
-    Map<Long, Vertex> vertices = null;
+  public Map<Integer, Vertex> getVertices(Set<Integer> vids) {
+    Map<Integer, Vertex> vertices = null;
     try {
       ClientSocket c = getClient();
-      long[] ids = new long[vids.size()];
+      int[] ids = new int[vids.size()];
       int i = 0;
-      for (Long v : vids) {
+      for (int v : vids) {
         ids[i] = v;
         i++;
       }
@@ -144,7 +143,7 @@ public class HdrfRemoteState implements PartitionState {
   public void putVertices(Collection<Vertex> vs) {
     try {
       ClientSocket c = getClient();
-      long[] vids = new long[vs.size()];
+      int[] vids = new int[vs.size()];
       int[] degrees = new int[vs.size()];
       int[] ps = new int[vs.size()];
       int i = 0;
@@ -163,12 +162,12 @@ public class HdrfRemoteState implements PartitionState {
   }
 
   @Override
-  public Partition getPartition(int pid) {
+  public Partition getPartition(short pid) {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 
   @Override
-  public List<Partition> getPartions(int[] pids) {
+  public List<Partition> getPartions(short[] pids) {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 
@@ -226,7 +225,7 @@ public class HdrfRemoteState implements PartitionState {
     int[] eSizes = response.getESizes();
     int[] vSizes = response.getVSizes();
     List<Partition> partitions = new ArrayList<>(eSizes.length);
-    for (int i = 0; i < eSizes.length; i++) {
+    for (short i = 0; i < eSizes.length; i++) {
       Partition p = new Partition(i);
       p.setESize(eSizes[i]);
       p.setVSize(vSizes[i]);

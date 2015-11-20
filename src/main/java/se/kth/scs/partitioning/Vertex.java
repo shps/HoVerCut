@@ -7,17 +7,17 @@ package se.kth.scs.partitioning;
 public class Vertex {
 
   private int partitions;
-  private final long id;
+  private final int id;
   private int pDegree;
   private int degreeDelta = 0;
   private int partitionsDelta;
 
-  public Vertex(long id, int partitions) {
+  public Vertex(int id, int partitions) {
     this.partitions = partitions;
     this.id = id;
   }
 
-  public Vertex(long id) {
+  public Vertex(int id) {
     this(id, 0);
   }
 
@@ -26,7 +26,7 @@ public class Vertex {
    * @param p
    * @return true if partition does not exist and false if it already exists.
    */
-  public boolean addPartition(int p) {
+  public boolean addPartition(short p) {
     if (!this.containsPartition(p)) {
       setPartitionsDelta(partitionsDelta | (1 << p));
       return true;
@@ -45,7 +45,7 @@ public class Vertex {
   /**
    * @return the id
    */
-  public long getId() {
+  public int getId() {
     return id;
   }
 
@@ -81,7 +81,7 @@ public class Vertex {
     return partitionsDelta;
   }
 
-  public boolean containsPartition(int pid) {
+  public boolean containsPartition(short pid) {
     return (((partitions | partitionsDelta) >> pid) & 1) == 1;
   }
 

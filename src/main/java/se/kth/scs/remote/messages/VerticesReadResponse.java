@@ -13,11 +13,11 @@ import java.io.Serializable;
  */
 public class VerticesReadResponse implements Serializable {
 
-  private final long[] vertices;
+  private final int[] vertices;
   private final int[] degrees;
   private final int[] partitions;
 
-  public VerticesReadResponse(long[] vertices, int[] degrees, int[] partitions) {
+  public VerticesReadResponse(int[] vertices, int[] degrees, int[] partitions) {
     this.vertices = vertices;
     this.degrees = degrees;
     this.partitions = partitions;
@@ -26,7 +26,7 @@ public class VerticesReadResponse implements Serializable {
   /**
    * @return the vertices
    */
-  public long[] getVertices() {
+  public int[] getVertices() {
     return vertices;
   }
 

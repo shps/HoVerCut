@@ -8,7 +8,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +37,7 @@ public class HdrfMySqlQueries {
   public static final String VERTEX_SIZE = "vertex_size";
   public static final String PARTIAL_DEGREE = "partial_degree";
 
-  public static Vertex getVertex(long vid, Connection con) throws SQLException {
+  public static Vertex getVertex(int vid, Connection con) throws SQLException {
     String query = String.format("select * from %s where vid=%d", VERTICES, vid);
     Statement s = con.createStatement();
     ResultSet r = s.executeQuery(query);
@@ -53,7 +52,7 @@ public class HdrfMySqlQueries {
     return v;
   }
 
-  public static Partition getPartition(int pid, Connection con) throws SQLException {
+  public static Partition getPartition(short pid, Connection con) throws SQLException {
     String query = String.format("select * from %s where pid=%d", PARTITIONS, pid);
     Statement s = con.createStatement();
     ResultSet r = s.executeQuery(query);
@@ -69,10 +68,10 @@ public class HdrfMySqlQueries {
     return p;
   }
 
-  public static Map<Long, Vertex> getVertices(Set<Long> vids, Connection con) throws SQLException {
+  public static Map<Integer, Vertex> getVertices(Set<Integer> vids, Connection con) throws SQLException {
     StringBuilder query = new StringBuilder(String.format("select * from %s where ", VERTICES));
     int i = 0;
-    for (long vid : vids) {
+    for (int vid : vids) {
       query.append(String.format(" vid=%d ", vid));
       if (i + 1 < vids.size()) {
         query.append("or");
@@ -81,9 +80,9 @@ public class HdrfMySqlQueries {
     }
     Statement s = con.createStatement();
     ResultSet r = s.executeQuery(query.toString());
-    Map<Long, Vertex> vertices = new HashMap();
+    Map<Integer, Vertex> vertices = new HashMap();
     while (r.next()) {
-      long vid = r.getLong(VID);
+      int vid = r.getInt(VID);
       int degree = r.getInt(PARTIAL_DEGREE);
       int partitions = r.getInt(PARTITIONS);
       Vertex v = new Vertex(vid, partitions);
@@ -94,14 +93,14 @@ public class HdrfMySqlQueries {
     return vertices;
   }
 
-  public static Map<Long, Vertex> getAllVertices(Connection con) throws SQLException {
+  public static Map<Integer, Vertex> getAllVertices(Connection con) throws SQLException {
     String query = String.format("select * from %s", VERTICES);
 
     Statement s = con.createStatement();
     ResultSet r = s.executeQuery(query);
-    Map<Long, Vertex> vertices = new HashMap();
+    Map<Integer, Vertex> vertices = new HashMap();
     while (r.next()) {
-      long vid = r.getLong(VID);
+      int vid = r.getInt(VID);
       int degree = r.getInt(PARTIAL_DEGREE);
       int partitions = r.getInt(PARTITIONS);
       Vertex v = new Vertex(vid, partitions);
@@ -112,7 +111,7 @@ public class HdrfMySqlQueries {
     return vertices;
   }
 
-  public static List<Partition> getPartitions(int[] pids, Connection con) throws SQLException {
+  public static List<Partition> getPartitions(short[] pids, Connection con) throws SQLException {
     StringBuilder query = new StringBuilder(String.format("select * from %s where ", PARTITIONS));
     for (int i = 0; i < pids.length; i++) {
       query.append(String.format(" pid=%d ", pids[i]));
@@ -124,7 +123,7 @@ public class HdrfMySqlQueries {
     ResultSet r = s.executeQuery(query.toString());
     LinkedList<Partition> partitions = new LinkedList<>();
     while (r.next()) {
-      int pid = r.getInt(PID);
+      short pid = r.getShort(PID);
       int vSize = r.getInt(VERTEX_SIZE);
       int eSize = r.getInt(EDGE_SIZE);
       Partition p = new Partition(pid);
@@ -142,7 +141,7 @@ public class HdrfMySqlQueries {
     ResultSet r = s.executeQuery(query);
     ArrayList<Partition> partitions = new ArrayList<>();
     while (r.next()) {
-      int pid = r.getInt(PID);
+      short pid = r.getShort(PID);
       int vSize = r.getInt(VERTEX_SIZE);
       int eSize = r.getInt(EDGE_SIZE);
       Partition p = new Partition(pid);
@@ -172,7 +171,7 @@ public class HdrfMySqlQueries {
   }
 
   private static String createPutVertexQuery(Vertex v) {
-    long vid = v.getId();
+    int vid = v.getId();
     int pDegree = v.getpDegree();
     String partitions = String.format("%8s", Integer.toBinaryString(v.getPartitions() & 0xFF)).replace(' ', '0');
     String deltaPartitions = String.format("%8s", Integer.toBinaryString(v.getPartitionsDelta() & 0xFF)).replace(' ', '0');
@@ -186,7 +185,7 @@ public class HdrfMySqlQueries {
       + "on duplicate key update partial_degree=partial_degree+?, partitions=partitions | ?",
       VERTICES));
     for (Vertex v : vertices) {
-      s.setLong(1, v.getId());
+      s.setInt(1, v.getId());
       s.setInt(2, v.getpDegree());
       s.setInt(3, v.getPartitions());
       s.setInt(4, v.getDegreeDelta());
@@ -204,7 +203,7 @@ public class HdrfMySqlQueries {
       + "on duplicate key update vertex_size=vertex_size+?, edge_size=edge_size+?",
       PARTITIONS));
     for (Partition p : partitions) {
-      s.setInt(1, p.getId());
+      s.setShort(1, p.getId());
       s.setInt(2, p.getVSize());
       s.setInt(3, p.getESize());
       s.setInt(4, p.getVSizeDelta());
@@ -219,7 +218,7 @@ public class HdrfMySqlQueries {
   }
 
   private static String createPutPartitionQuery(Partition p) {
-    int pid = p.getId();
+    short pid = p.getId();
     int vSize = p.getVSize();
     int eSize = p.getESize();
     int vDelta = p.getVSizeDelta();

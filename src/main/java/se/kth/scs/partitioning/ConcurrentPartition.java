@@ -8,11 +8,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ConcurrentPartition {
 
-    private final int id;
+    private final short id;
     private final AtomicInteger eSize;
     private final AtomicInteger vSize;
 
-    public ConcurrentPartition(int id) {
+    public ConcurrentPartition(short id) {
         eSize = new AtomicInteger();
         vSize = new AtomicInteger();
         this.id = id;
@@ -21,7 +21,7 @@ public class ConcurrentPartition {
     /**
      * @return the id
      */
-    public int getId() {
+    public short getId() {
         return id;
     }
 
@@ -37,12 +37,12 @@ public class ConcurrentPartition {
         return eSize.get();
     }
 
-    /**
-     * @param eSize the eSize to set
-     */
-    public void setESize(int eSize) {
-        this.eSize.set(eSize);
-    }
+//    /**
+//     * @param eSize the eSize to set
+//     */
+//    public void setESize(int eSize) {
+//        this.eSize.set(eSize);
+//    }
 
     /**
      * @return the vSize
@@ -51,12 +51,12 @@ public class ConcurrentPartition {
         return vSize.get();
     }
 
-    /**
-     * @param vSize the vSize to set
-     */
-    public void setVSize(int vSize) {
-        this.vSize.set(vSize);
-    }
+//    /**
+//     * @param vSize the vSize to set
+//     */
+//    public void setVSize(int vSize) {
+//        this.vSize.set(vSize);
+//    }
 
     @Override
     public boolean equals(Object obj) {

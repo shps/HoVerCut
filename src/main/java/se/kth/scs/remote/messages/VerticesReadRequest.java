@@ -8,16 +8,16 @@ import java.io.Serializable;
  */
 public class VerticesReadRequest implements Serializable {
 
-  private final long[] vertices;
+  private final int[] vertices;
 
-  public VerticesReadRequest(long[] vertices) {
+  public VerticesReadRequest(int[] vertices) {
     this.vertices = vertices;
   }
 
   /**
    * @return the vertices
    */
-  public long[] getVertices() {
+  public int[] getVertices() {
     return vertices;
   }
 

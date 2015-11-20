@@ -2,7 +2,7 @@ package se.kth.scs.partitioning.algorithms;
 
 import se.kth.scs.partitioning.Partition;
 import java.util.List;
-import org.apache.flink.api.java.tuple.Tuple3;
+import se.kth.scs.partitioning.Edge;
 
 /**
  * The implementation of the Greedy Vertex-Cuts algorithm.
@@ -14,13 +14,13 @@ import org.apache.flink.api.java.tuple.Tuple3;
  */
 public class GreedyPartitioner {
 
-  public static Partition[] partition(List<Tuple3<Long, Long, Double>> edges, int k) {
+  public static Partition[] partition(List<Edge> edges, int k) {
     final Partition[] partitions = new Partition[k];
-    for (int i = 0; i < k; i++) {
+    for (short i = 0; i < k; i++) {
       partitions[i] = new Partition(i);
     }
     
-    for (Tuple3<Long, Long, Double> e : edges) {
+    for (Edge e : edges) {
       
       
     }
