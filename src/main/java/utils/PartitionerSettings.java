@@ -30,6 +30,7 @@ public class PartitionerSettings {
   public String output;
   public boolean append;
   public List<Integer> delay;
+  public int restream;
 
   /**
    * @return the file

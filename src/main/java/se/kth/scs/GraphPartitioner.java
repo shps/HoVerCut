@@ -41,22 +41,6 @@ public class GraphPartitioner {
   private static final Map<Integer, List<Float>> taskLb = new LinkedHashMap<>();
   private static final Map<Integer, List<Integer>> windowTime = new LinkedHashMap<>();
   private static final Map<Integer, List<Integer>> taskTime = new LinkedHashMap<>();
-//  private static final String DELIMITER = " ";
-//  private static final String storage = "remote";
-//  private static final String dbUrl = "jdbc:mysql://104.155.65.24:3306/hdrf";
-//  private static final String outputFile = "/Users/Ganymedian/Desktop/results/hdrf";
-//  private static final String inputFile = "./data/datasets/twitter_combined.txt";
-//  private static final int minT = 3;
-//  private static final int maxT = 3;
-//  private static final int tBase = 2;
-//  private static final int minW = 5;
-//  private static final int maxW = 5;
-//  private static final int wBase = 10;
-//  private static final int maxW = 5;
-//    private static final String dbUrl = "jdbc:mysql://localhost/hdrf";
-//  private static final String dbUrl = "127.0.0.1:4444";
-//  private static final String USER = "root";
-//  private static final String PASS = "";
 
   public static void main(String[] args) throws SQLException, IOException {
     PartitionerInputCommands commands = new PartitionerInputCommands();
@@ -69,7 +53,7 @@ public class GraphPartitioner {
       commander = new JCommander(commands);
       commander.usage();
       System.out.println(String.format("A valid command is like: %s",
-          "-f ./data/datasets/Cit-HepTh.txt -w 10 0 5 -m hdrf -p 4 -t 2 0 6 -s remote -db localhost:4444"));
+        "-f ./data/datasets/Cit-HepTh.txt -w 10 0 5 -m hdrf -p 4 -t 2 0 6 -s remote -db localhost:4444"));
       System.exit(1);
     }
     if (!commands.method.equals(PartitionerInputCommands.HDRF)) {
@@ -97,6 +81,7 @@ public class GraphPartitioner {
     settings.reset = commands.reset;
     settings.delimiter = commands.delimiter;
     settings.frequency = commands.frequency;
+    settings.restream = commands.restreaming;
     int wb = commands.window.get(0);
     int minW = commands.window.get(1);
     int maxW = commands.window.get(2);
@@ -134,28 +119,42 @@ public class GraphPartitioner {
   private static void runPartitioner(PartitionerSettings settings, LinkedHashSet<Edge>[] splits) throws SQLException, IOException {
     printCommandSetup(settings);
     PartitionState state = null;
-    switch (settings.storage) {
-      case PartitionerInputCommands.IN_MEMORY:
-        state = new HdrfInMemoryState(settings.k);
-        break;
-      case PartitionerInputCommands.MYSQL:
-        state = new HdrfMysqlState(
+    LinkedList<Edge>[][] outputAssignments = null;
+    PartitionsStatistics ps = null;
+    long start = System.currentTimeMillis();
+    for (int i = 0; i <= settings.restream; i++) {
+      switch (settings.storage) {
+        case PartitionerInputCommands.IN_MEMORY:
+          state = new HdrfInMemoryState(settings.k);
+          break;
+        case PartitionerInputCommands.MYSQL:
+          state = new HdrfMysqlState(
             settings.k,
             settings.dbUrl,
             settings.user,
             settings.pass,
             settings.reset);
-        break;
-      case PartitionerInputCommands.REMOTE:
-        String[] url = settings.dbUrl.split(":");
-        state = new HdrfRemoteState(settings.k, url[0], Integer.valueOf(url[1]));
-        break;
-      default:
-        throw new ParameterException("");
-    }
+          break;
+        case PartitionerInputCommands.REMOTE:
+          String[] url = settings.dbUrl.split(":");
+          state = new HdrfRemoteState(settings.k, url[0], Integer.valueOf(url[1]));
+          break;
+        default:
+          throw new ParameterException("");
+      }
 
-    long start = System.currentTimeMillis();
-    HdrfPartitioner.partitionWithWindow(
+      if (outputAssignments != null) {
+        for (int j = 0; j < splits.length; j++) {
+          splits[j] = new LinkedHashSet();
+          for (LinkedList l : outputAssignments[j]) {
+            splits[j].addAll(l);
+          }
+        }
+        outputAssignments = null;
+      }
+
+//      long start = System.currentTimeMillis();
+      outputAssignments = HdrfPartitioner.partitionWithWindow(
         state,
         splits,
         settings.lambda,
@@ -164,9 +163,10 @@ public class GraphPartitioner {
         settings.delay.get(0),
         settings.delay.get(1),
         settings.frequency);
+      ps = new PartitionsStatistics(state);
+      printResults(settings.k, ps, String.format("HdrfPartitioner lambda=%f\tepsilon=%f", settings.lambda, settings.epsilon));
+    }
     int duration = (int) ((System.currentTimeMillis() - start) / 1000);
-    PartitionsStatistics ps = new PartitionsStatistics(state);
-    printResults(settings.k, ps, String.format("HdrfPartitioner lambda=%f\tepsilon=%f", settings.lambda, settings.epsilon));
     if (!settings.output.isEmpty()) {
       try {
         GraphPartitioner.writeToFile(ps, settings);
@@ -218,10 +218,10 @@ public class GraphPartitioner {
     System.out.println("MEC: Max Edge Cardinality.");
     System.out.println("MVC: Max Vertex Cardinality.");
     System.out.println(String.format("RF=%f\tLRSD=%f\tMEC=%d",
-        ps.replicationFactor(),
-        ps.loadRelativeStandardDeviation(),
-        ps.maxEdgeCardinality(),
-        ps.maxVertexCardinality()));
+      ps.replicationFactor(),
+      ps.loadRelativeStandardDeviation(),
+      ps.maxEdgeCardinality(),
+      ps.maxVertexCardinality()));
   }
 
   private static void printCommandSetup(PartitionerSettings settings) {
@@ -230,6 +230,7 @@ public class GraphPartitioner {
     sb.append("file:\t").append(settings.file).append(newLine);
     sb.append("window:\t").append(settings.window).append(newLine);
     sb.append("partitions update frequency:\t").append(settings.frequency).append(newLine);
+    sb.append("number of restreaming:\t").append(settings.restream).append(newLine);
     sb.append("method:\t").append(settings.method).append(newLine);
     sb.append("partitions:\t").append(settings.k).append(newLine);
     sb.append("tasks(threads):\t").append(settings.tasks).append(newLine);
@@ -278,26 +279,26 @@ public class GraphPartitioner {
       append = settings.append;
     }
     try (PrintWriter writer = new PrintWriter(new FileOutputStream(
-        f2,
-        append))) {
+      f2,
+      append))) {
       if (!append) {
         writer.write("nTasks,nPartitions,window,rf,lrsd,mec,mvc\n");
       }
       writer.append(String.format("%d,%d,%d,%f,%f,%d,%d",
-          settings.tasks,
-          settings.k,
-          settings.window,
-          ps.replicationFactor(),
-          ps.loadRelativeStandardDeviation(),
-          ps.maxEdgeCardinality(),
-          ps.maxVertexCardinality()));
+        settings.tasks,
+        settings.k,
+        settings.window,
+        ps.replicationFactor(),
+        ps.loadRelativeStandardDeviation(),
+        ps.maxEdgeCardinality(),
+        ps.maxVertexCardinality()));
       writer.append("\n");
       writer.flush();
     }
   }
 
   private static void writeToFile(
-      PartitionerSettings settings) {
+    PartitionerSettings settings) {
     boolean append = false;
     String fName = settings.output + "-window.csv";
     File f1 = new File(fName);
@@ -305,8 +306,8 @@ public class GraphPartitioner {
       append = settings.append;
     }
     try (PrintWriter writer = new PrintWriter(new FileOutputStream(
-        f1,
-        append))) {
+      f1,
+      append))) {
       Iterator<Map.Entry<Integer, List<Float>>> iterator = windowRf.entrySet().iterator();
       while (iterator.hasNext()) {
         Map.Entry<Integer, List<Float>> entry = iterator.next();
@@ -329,8 +330,8 @@ public class GraphPartitioner {
       append = settings.append;
     }
     try (PrintWriter writer = new PrintWriter(new FileOutputStream(
-        f1,
-        append))) {
+      f1,
+      append))) {
       Iterator<Map.Entry<Integer, List<Float>>> iterator = taskRf.entrySet().iterator();
       while (iterator.hasNext()) {
         Map.Entry<Integer, List<Float>> entry = iterator.next();
@@ -353,8 +354,8 @@ public class GraphPartitioner {
       append = settings.append;
     }
     try (PrintWriter writer = new PrintWriter(new FileOutputStream(
-        f1,
-        append))) {
+      f1,
+      append))) {
       Iterator<Map.Entry<Integer, List<Float>>> iterator = taskLb.entrySet().iterator();
       while (iterator.hasNext()) {
         Map.Entry<Integer, List<Float>> entry = iterator.next();
@@ -377,8 +378,8 @@ public class GraphPartitioner {
       append = settings.append;
     }
     try (PrintWriter writer = new PrintWriter(new FileOutputStream(
-        f1,
-        append))) {
+      f1,
+      append))) {
       Iterator<Map.Entry<Integer, List<Float>>> iterator = windowLb.entrySet().iterator();
       while (iterator.hasNext()) {
         Map.Entry<Integer, List<Float>> entry = iterator.next();
@@ -401,8 +402,8 @@ public class GraphPartitioner {
       append = settings.append;
     }
     try (PrintWriter writer = new PrintWriter(new FileOutputStream(
-        f1,
-        append))) {
+      f1,
+      append))) {
       Iterator<Map.Entry<Integer, List<Integer>>> iterator = windowTime.entrySet().iterator();
       while (iterator.hasNext()) {
         Map.Entry<Integer, List<Integer>> entry = iterator.next();
@@ -425,8 +426,8 @@ public class GraphPartitioner {
       append = settings.append;
     }
     try (PrintWriter writer = new PrintWriter(new FileOutputStream(
-        f1,
-        append))) {
+      f1,
+      append))) {
       Iterator<Map.Entry<Integer, List<Integer>>> iterator = taskTime.entrySet().iterator();
       while (iterator.hasNext()) {
         Map.Entry<Integer, List<Integer>> entry = iterator.next();

@@ -1,5 +1,6 @@
 package se.kth.scs.partitioning.algorithms.hdrf;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -26,6 +27,8 @@ public class HdrfPartitionerTask implements Runnable {
   private final int minDelay;
   private final int maxDelay;
   private final int pUpdateFrequency;
+
+  private final LinkedList<Edge>[] assignments;
 
   public HdrfPartitionerTask(PartitionState state, LinkedHashSet<Edge> edges, double lambda, double epsilon, int windowSize) {
     this(state, edges, lambda, epsilon, windowSize, 0, 0);
@@ -61,6 +64,10 @@ public class HdrfPartitionerTask implements Runnable {
     this.maxDelay = maxDelay;
 //    r = new SecureRandom();
     this.pUpdateFrequency = pUpdateFrequency;
+    this.assignments = new LinkedList[state.getNumberOfPartitions()];
+    for (int i = 0; i < state.getNumberOfPartitions(); i++) {
+      this.assignments[i] = new LinkedList<>();
+    }
   }
 
   /**
@@ -73,7 +80,7 @@ public class HdrfPartitionerTask implements Runnable {
     int counter = 1;
     List<Edge> edgeWindow = new LinkedList<>();
     Set<Integer> vertices = new HashSet();
-    long start = System.currentTimeMillis();
+//    long start = System.currentTimeMillis();
     int partitionsWindow = windowSize / pUpdateFrequency;
     for (Edge e : edges) {
 //            System.out.println(String.format("%d Received %d -> %d.", counter, e.f0, e.f1));
@@ -94,7 +101,7 @@ public class HdrfPartitionerTask implements Runnable {
       vertices.clear();
     }
 
-    System.out.println(String.format("******** Task %d finished in %d seconds.", Thread.currentThread().getId(), (System.currentTimeMillis() - start) / 1000));
+//    System.out.println(String.format("******** Task %d finished in %d seconds.", Thread.currentThread().getId(), (System.currentTimeMillis() - start) / 1000));
     return state;
   }
 
@@ -127,7 +134,8 @@ public class HdrfPartitionerTask implements Runnable {
       }
       u.incrementDegree();
       v.incrementDegree();
-      allocateNextEdge(u, v, partitions, lambda, epsilon);
+      Partition assignedPartition = allocateNextEdge(u, v, partitions, lambda, epsilon);
+      this.assignments[assignedPartition.getId()].add(e);
       if (counter % partitionWindow == 0 && counter < size) {
         state.putPartitions(partitions);
         partitions = state.getAllPartitions();
@@ -192,7 +200,6 @@ public class HdrfPartitionerTask implements Runnable {
     v1.addPartition(maxPartition.getId());
     v2.addPartition(maxPartition.getId());
     maxPartition.incrementESize();
-
     return maxPartition;
   }
 
@@ -233,4 +240,7 @@ public class HdrfPartitionerTask implements Runnable {
     return maxDelay;
   }
 
+  public LinkedList<Edge>[] getAssignments() {
+    return assignments;
+  }
 }

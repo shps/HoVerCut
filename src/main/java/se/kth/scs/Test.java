@@ -17,7 +17,7 @@ public class Test {
   public static void main(String[] args) throws SQLException, IOException {
     args = new String[]{
       "-f", "./data/datasets/twitter_combined.txt",
-      "-w", "10", "3", "3",
+      "-w", "10", "4", "4",
       "-m", "hdrf",
       "-p", "4",
       "-t", "2", "6", "6",
@@ -30,7 +30,8 @@ public class Test {
       "-append", "false", //FIXME: if appends is true it throws exception.
       "-delay", "0", "0",
       "-d", "\" \"",
-      "-puf", "1"};
+      "-puf", "1",
+      "-rs", "0"};
 
     GraphPartitioner.main(args);
   }
