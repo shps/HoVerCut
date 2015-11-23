@@ -15,10 +15,6 @@ import utils.StorageInputCommands;
  */
 public class RemoteStateManager {
 
-  private final static short k = 4;
-  private final static int port = 4444;
-  private final static String address = "127.0.0.1";
-
   public static void main(String[] args) {
     StorageInputCommands commands = new StorageInputCommands();
     JCommander commander;

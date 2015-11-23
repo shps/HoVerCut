@@ -18,6 +18,7 @@
                     <archive>
                         <manifest>
                             <mainClass>se.kth.scs.GraphPartitioner</mainClass>
+                            <!--<mainClass>se.kth.scs.remote.RemoteStateManager</mainClass>-->
                         </manifest>
                     </archive>
                     <descriptorRefs>
