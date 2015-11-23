@@ -27,7 +27,7 @@ public class PartitionerInputCommands {
   @Parameter(names = {"-puf"}, description = "Partitions update frequency comparing to the window size.")
   public int frequency = 1;
   
-    @Parameter(names = {"-rs"}, description = "Number of restreamings.")
+  @Parameter(names = {"-rs"}, description = "Number of restreamings.")
   public int restreaming = 0;
 
   @Parameter(names = {"-tasks", "-t"}, description = "Number of tasks (threads): (1)base (2)min exponent (3)max exponent.", arity = 3, required = true)
