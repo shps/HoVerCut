@@ -31,6 +31,21 @@ public class PartitionerSettings {
   public boolean append;
   public List<Integer> delay;
   public int restream;
+  public final int tb;
+  public final int minT;
+  public final int maxT;
+  public final int wb;
+  public final int minW;
+  public final int maxW;
+
+  public PartitionerSettings(int tb, int minT, int maxT, int wb, int minW, int maxW) {
+    this.tb = tb;
+    this.minT = minT;
+    this.maxT = maxT;
+    this.wb = wb;
+    this.minW = minW;
+    this.maxW = maxW;
+  }
 
   /**
    * @return the file

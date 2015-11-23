@@ -20,12 +20,13 @@ import se.kth.scs.partitioning.PartitionsStatistics;
  */
 public class OutputManager {
 
-  private final Map<Integer, List<Float>> windowRf = new LinkedHashMap<>();
-  private final Map<Integer, List<Float>> taskRf = new LinkedHashMap<>();
-  private final Map<Integer, List<Float>> windowLb = new LinkedHashMap<>();
-  private final Map<Integer, List<Float>> taskLb = new LinkedHashMap<>();
-  private final Map<Integer, List<Integer>> windowTime = new LinkedHashMap<>();
-  private final Map<Integer, List<Integer>> taskTime = new LinkedHashMap<>();
+//  private final Map<Integer, List<Float>> windowRf = new LinkedHashMap<>();
+  private final Map<Integer, Map<Integer, List<Number>>> windowRf = new LinkedHashMap<>();
+  private final Map<Integer, Map<Integer, List<Number>>> taskRf = new LinkedHashMap<>();
+  private final Map<Integer, Map<Integer, List<Number>>> windowLb = new LinkedHashMap<>();
+  private final Map<Integer, Map<Integer, List<Number>>> taskLb = new LinkedHashMap<>();
+  private final Map<Integer, Map<Integer, List<Number>>> windowTime = new LinkedHashMap<>();
+  private final Map<Integer, Map<Integer, List<Number>>> taskTime = new LinkedHashMap<>();
 
   /**
    *
@@ -36,81 +37,56 @@ public class OutputManager {
    * @param lrsd load relative standard deviation
    */
   public void addResults(int w, int t, int d, float rf, float lrsd) {
-    addRfToWindow(rf, w);
-    addRfToTask(rf, t);
-    addDurationToWindow(d, w);
-    addDurationToTask(d, t);
-    addLrsdToWindow(lrsd, w);
-    addLrsdToTask(lrsd, t);
+    addRfToWindow(rf, w, t);
+    addRfToTask(rf, t, w);
+    addDurationToWindow(d, w, t);
+    addDurationToTask(d, t, w);
+    addLrsdToWindow(lrsd, w, t);
+    addLrsdToTask(lrsd, t, w);
   }
 
-  public void addRfToWindow(float rf, int w) {
-    if (!windowRf.containsKey(w)) {
-      windowRf.put(w, new LinkedList<Float>());
-    }
-    windowRf.get(w).add(rf);
+  public void addRfToWindow(float rf, int w, int t) {
+    checkEntries(w, t, windowRf);
+    windowRf.get(w).get(t).add(rf);
   }
 
-  public void addRfToTask(float rf, int t) {
-    if (!taskRf.containsKey(t)) {
-      taskRf.put(t, new LinkedList<Float>());
+  private <F, S, T> Map<F, Map<S, List<T>>> checkEntries(F first, S second, Map<F, Map<S, List<T>>> map) {
+    if (!map.containsKey(first)) {
+      map.put(first, new LinkedHashMap<S, List<T>>());
+    }
+    if (!map.get(first).containsKey(second)) {
+      map.get(first).put(second, new LinkedList<T>());
     }
 
-    taskRf.get(t).add(rf);
+    return map;
   }
 
-  public void addDurationToWindow(int d, int w) {
-    if (!windowTime.containsKey(w)) {
-      windowTime.put(w, new LinkedList<Integer>());
-    }
-
-    windowTime.get(w).add(d);
+  public void addRfToTask(float rf, int t, int w) {
+    checkEntries(t, w, taskRf);
+    taskRf.get(t).get(w).add(rf);
   }
 
-  public void addDurationToTask(int d, int t) {
-    if (!taskTime.containsKey(t)) {
-      taskTime.put(t, new LinkedList<Integer>());
-    }
-
-    taskTime.get(t).add(d);
+  public void addDurationToWindow(int d, int w, int t) {
+    checkEntries(w, t, windowTime);
+    windowTime.get(w).get(t).add(d);
   }
 
-  public void addLrsdToWindow(float l, int w) {
-    if (!windowLb.containsKey(w)) {
-      windowLb.put(w, new LinkedList<Float>());
-    }
-
-    windowLb.get(w).add(l);
+  public void addDurationToTask(int d, int t, int w) {
+    checkEntries(t, w, taskTime);
+    taskTime.get(t).get(w).add(d);
   }
 
-  public void addLrsdToTask(float l, int t) {
-    if (!taskLb.containsKey(t)) {
-      taskLb.put(t, new LinkedList<Float>());
-    }
+  public void addLrsdToWindow(float l, int w, int t) {
+    checkEntries(w, t, windowLb);
+    windowLb.get(w).get(t).add(l);
+  }
 
-    taskLb.get(t).add(l);
+  public void addLrsdToTask(float l, int t, int w) {
+    checkEntries(t, w, taskLb);
+    taskLb.get(t).get(w).add(l);
   }
 
   public void writeToFile(PartitionsStatistics ps, PartitionerSettings settings) throws FileNotFoundException {
-//        File f1 = new File(commands.output + "-partitions.csv");
-//        boolean append = false;
-//        if (f1.exists() && !f1.isDirectory()) {
-//            append = commands.append;
-//        }
-//        try (PrintWriter writer = new PrintWriter(new FileOutputStream(
-//                f1,
-//                append))) {
-//            Collection<Vertex> vertices = ps.getVertices().values();
-//            for (Vertex v : vertices) {
-//                writer.append(String.format("%d,", v.getId()));
-//                for (int p : v.getPartitions()) {
-//                    writer.append(String.format("%d,", p));
-//                }
-//                writer.append("\n");
-//            }
-//
-//            writer.flush();
-//        }
     boolean append = false;
     String file = settings.output + "-result.csv";
     File f2 = new File(file);
@@ -138,8 +114,33 @@ public class OutputManager {
 
   public void writeToFile(
     PartitionerSettings settings) {
-    boolean append = false;
+    boolean isWindow = true;
     String fName = settings.output + "-window.csv";
+    writeWindowTaskToFile(fName, settings, windowRf, isWindow);
+    fName = settings.output + "-windows-lb.csv";
+    writeWindowTaskToFile(fName, settings, windowLb, isWindow);
+    fName = settings.output + "-windows-time.csv";
+    writeWindowTaskToFile(fName, settings, windowTime, isWindow);
+
+    isWindow = false;
+    fName = settings.output + "-tasks.csv";
+    writeWindowTaskToFile(fName, settings, taskRf, isWindow);
+    fName = settings.output + "-tasks-lb.csv";
+    writeWindowTaskToFile(fName, settings, taskLb, isWindow);
+    fName = settings.output + "-tasks-time.csv";
+    writeWindowTaskToFile(fName, settings, taskTime, isWindow);
+
+  }
+
+  /**
+   *
+   * @param fName
+   * @param settings
+   * @param result
+   * @param isWindow
+   */
+  private void writeWindowTaskToFile(String fName, PartitionerSettings settings, Map<Integer, Map<Integer, List<Number>>> result, boolean isWindow) {
+    boolean append = false;
     File f1 = new File(fName);
     if (f1.exists() && !f1.isDirectory()) {
       append = settings.append;
@@ -147,132 +148,45 @@ public class OutputManager {
     try (PrintWriter writer = new PrintWriter(new FileOutputStream(
       f1,
       append))) {
-      Iterator<Map.Entry<Integer, List<Float>>> iterator = windowRf.entrySet().iterator();
-      while (iterator.hasNext()) {
-        Map.Entry<Integer, List<Float>> entry = iterator.next();
-        writer.append(entry.getKey().toString()).append(",");
-        for (float rf : entry.getValue()) {
-          writer.append(String.valueOf(rf)).append(",");
+      if (!append) {
+        String firstHeader;
+        String secondHeader;
+        int base;
+        int minP;
+        int maxP;
+        if (isWindow) {
+          firstHeader = "W,";
+          secondHeader = "T";
+          base = settings.tb;
+          minP = settings.minT;
+          maxP = settings.maxT;
+        } else {
+          firstHeader = "T,";
+          secondHeader = "W";
+          base = settings.wb;
+          minP = settings.minW;
+          maxP = settings.maxW;
         }
-        writer.append("\n");
+        writer.write(firstHeader);
+        for (int i = minP; i <= maxP; i++) {
+          int taskId = (int) Math.pow(base, i);
+          for (int j = 0; j <= settings.restream; j++) {
+            writer.append(String.format("%s%d-%d,", secondHeader, taskId, j));
+          }
+        }
+        writer.println();
       }
 
-      writer.flush();
-    } catch (FileNotFoundException ex) {
-      Logger.getLogger(GraphPartitioner.class.getName()).log(Level.SEVERE, null, ex);
-    }
-
-    append = false;
-    fName = settings.output + "-tasks.csv";
-    f1 = new File(fName);
-    if (f1.exists() && !f1.isDirectory()) {
-      append = settings.append;
-    }
-    try (PrintWriter writer = new PrintWriter(new FileOutputStream(
-      f1,
-      append))) {
-      Iterator<Map.Entry<Integer, List<Float>>> iterator = taskRf.entrySet().iterator();
-      while (iterator.hasNext()) {
-        Map.Entry<Integer, List<Float>> entry = iterator.next();
+      Iterator<Map.Entry<Integer, Map<Integer, List<Number>>>> it1 = result.entrySet().iterator();
+      while (it1.hasNext()) {
+        Map.Entry<Integer, Map<Integer, List<Number>>> entry = it1.next();
         writer.append(entry.getKey().toString()).append(",");
-        for (float rf : entry.getValue()) {
-          writer.append(String.valueOf(rf)).append(",");
-        }
-        writer.append("\n");
-      }
-
-      writer.flush();
-    } catch (FileNotFoundException ex) {
-      Logger.getLogger(GraphPartitioner.class.getName()).log(Level.SEVERE, null, ex);
-    }
-
-    append = false;
-    fName = settings.output + "-tasks-lb.csv";
-    f1 = new File(fName);
-    if (f1.exists() && !f1.isDirectory()) {
-      append = settings.append;
-    }
-    try (PrintWriter writer = new PrintWriter(new FileOutputStream(
-      f1,
-      append))) {
-      Iterator<Map.Entry<Integer, List<Float>>> iterator = taskLb.entrySet().iterator();
-      while (iterator.hasNext()) {
-        Map.Entry<Integer, List<Float>> entry = iterator.next();
-        writer.append(entry.getKey().toString()).append(",");
-        for (float lb : entry.getValue()) {
-          writer.append(String.valueOf(lb)).append(",");
-        }
-        writer.append("\n");
-      }
-
-      writer.flush();
-    } catch (FileNotFoundException ex) {
-      Logger.getLogger(GraphPartitioner.class.getName()).log(Level.SEVERE, null, ex);
-    }
-
-    append = false;
-    fName = settings.output + "-windows-lb.csv";
-    f1 = new File(fName);
-    if (f1.exists() && !f1.isDirectory()) {
-      append = settings.append;
-    }
-    try (PrintWriter writer = new PrintWriter(new FileOutputStream(
-      f1,
-      append))) {
-      Iterator<Map.Entry<Integer, List<Float>>> iterator = windowLb.entrySet().iterator();
-      while (iterator.hasNext()) {
-        Map.Entry<Integer, List<Float>> entry = iterator.next();
-        writer.append(entry.getKey().toString()).append(",");
-        for (float lb : entry.getValue()) {
-          writer.append(String.valueOf(lb)).append(",");
-        }
-        writer.append("\n");
-      }
-
-      writer.flush();
-    } catch (FileNotFoundException ex) {
-      Logger.getLogger(GraphPartitioner.class.getName()).log(Level.SEVERE, null, ex);
-    }
-
-    append = false;
-    fName = settings.output + "-windows-time.csv";
-    f1 = new File(fName);
-    if (f1.exists() && !f1.isDirectory()) {
-      append = settings.append;
-    }
-    try (PrintWriter writer = new PrintWriter(new FileOutputStream(
-      f1,
-      append))) {
-      Iterator<Map.Entry<Integer, List<Integer>>> iterator = windowTime.entrySet().iterator();
-      while (iterator.hasNext()) {
-        Map.Entry<Integer, List<Integer>> entry = iterator.next();
-        writer.append(entry.getKey().toString()).append(",");
-        for (int time : entry.getValue()) {
-          writer.append(String.valueOf(time)).append(",");
-        }
-        writer.append("\n");
-      }
-
-      writer.flush();
-    } catch (FileNotFoundException ex) {
-      Logger.getLogger(GraphPartitioner.class.getName()).log(Level.SEVERE, null, ex);
-    }
-
-    append = false;
-    fName = settings.output + "-tasks-time.csv";
-    f1 = new File(fName);
-    if (f1.exists() && !f1.isDirectory()) {
-      append = settings.append;
-    }
-    try (PrintWriter writer = new PrintWriter(new FileOutputStream(
-      f1,
-      append))) {
-      Iterator<Map.Entry<Integer, List<Integer>>> iterator = taskTime.entrySet().iterator();
-      while (iterator.hasNext()) {
-        Map.Entry<Integer, List<Integer>> entry = iterator.next();
-        writer.append(entry.getKey().toString()).append(",");
-        for (int time : entry.getValue()) {
-          writer.append(String.valueOf(time)).append(",");
+        Iterator<Map.Entry<Integer, List<Number>>> it2 = entry.getValue().entrySet().iterator();
+        while (it2.hasNext()) {
+          Map.Entry<Integer, List<Number>> entry2 = it2.next();
+          for (Number rf : entry2.getValue()) {
+            writer.append(String.valueOf(rf)).append(",");
+          }
         }
         writer.append("\n");
       }

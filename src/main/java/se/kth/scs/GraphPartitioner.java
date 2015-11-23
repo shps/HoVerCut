@@ -47,7 +47,13 @@ public class GraphPartitioner {
       throw new ParameterException("");
     }
 
-    PartitionerSettings settings = new PartitionerSettings();
+    int wb = commands.window.get(0);
+    int minW = commands.window.get(1);
+    int maxW = commands.window.get(2);
+    int tb = commands.nTasks.get(0);
+    int minT = commands.nTasks.get(1);
+    int maxT = commands.nTasks.get(2);
+    PartitionerSettings settings = new PartitionerSettings(tb, minT, maxT, wb, minW, maxW);
     settings.k = (short) commands.nPartitions;
     settings.file = commands.file;
     settings.output = commands.output;
@@ -69,12 +75,6 @@ public class GraphPartitioner {
     settings.delimiter = commands.delimiter;
     settings.frequency = commands.frequency;
     settings.restream = commands.restreaming;
-    int wb = commands.window.get(0);
-    int minW = commands.window.get(1);
-    int maxW = commands.window.get(2);
-    int tb = commands.nTasks.get(0);
-    int minT = commands.nTasks.get(1);
-    int maxT = commands.nTasks.get(2);
 
     for (int i = minT; i <= maxT; i++) {
       int t = (int) Math.pow(tb, i);
@@ -108,7 +108,6 @@ public class GraphPartitioner {
     PartitionState state = null;
     LinkedList<Edge>[][] outputAssignments = null;
     PartitionsStatistics ps = null;
-    long start = System.currentTimeMillis();
     for (int i = 0; i <= settings.restream; i++) {
       switch (settings.storage) {
         case PartitionerInputCommands.IN_MEMORY:
@@ -140,7 +139,7 @@ public class GraphPartitioner {
         outputAssignments = null;
       }
 
-//      long start = System.currentTimeMillis();
+      long start = System.currentTimeMillis();
       outputAssignments = HdrfPartitioner.partitionWithWindow(
         state,
         splits,
@@ -150,10 +149,11 @@ public class GraphPartitioner {
         settings.delay.get(0),
         settings.delay.get(1),
         settings.frequency);
+      int duration = (int) ((System.currentTimeMillis() - start) / 1000);
       ps = new PartitionsStatistics(state);
+      output.addResults(settings.window, settings.tasks, duration, ps.replicationFactor(), ps.loadRelativeStandardDeviation());
       OutputManager.printResults(settings.k, ps, String.format("HdrfPartitioner lambda=%f\tepsilon=%f", settings.lambda, settings.epsilon));
     }
-    int duration = (int) ((System.currentTimeMillis() - start) / 1000);
     if (!settings.output.isEmpty()) {
       try {
         output.writeToFile(ps, settings);
@@ -161,8 +161,6 @@ public class GraphPartitioner {
         ex.printStackTrace();
       }
     }
-
-    output.addResults(settings.window, settings.tasks, duration, ps.replicationFactor(), ps.loadRelativeStandardDeviation());
 
     state.releaseResources();
   }
