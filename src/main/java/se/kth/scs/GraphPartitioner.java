@@ -75,6 +75,7 @@ public class GraphPartitioner {
     settings.delimiter = commands.delimiter;
     settings.frequency = commands.frequency;
     settings.restream = commands.restreaming;
+    settings.shuffle = commands.shuffle;
 
     for (int i = minT; i <= maxT; i++) {
       int t = (int) Math.pow(tb, i);
@@ -83,7 +84,7 @@ public class GraphPartitioner {
       System.out.println(String.format("Reading file %s", settings.file));
       long start = System.currentTimeMillis();
       EdgeFileReader reader = new EdgeFileReader(settings.delimiter);
-      LinkedHashSet<Edge>[] splits = reader.readSplitFile(settings.file, t);
+      LinkedHashSet<Edge>[] splits = reader.readSplitFile(settings.file, t, settings.shuffle);
       int nEdges = reader.getnEdges();
       System.out.println(String.format("Finished reading in %d seconds.", (System.currentTimeMillis() - start) / 1000));
       while (true) {

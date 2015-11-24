@@ -68,6 +68,9 @@ public class PartitionerInputCommands {
 
   @Parameter(names = {"-append"}, description = "Append to the output file.", arity = 1)
   public boolean append = true;
+  
+  @Parameter(names = {"-shuffle"}, description = "Shuffle the input edges randomly.", arity = 1)
+  public boolean shuffle = true;
 
   @Parameter(names = {"-delay"}, description = "Delay to add after every transaction with storage.", arity = 2)
   public List<Integer> delay;

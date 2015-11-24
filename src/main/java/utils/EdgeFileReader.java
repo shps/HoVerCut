@@ -5,9 +5,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import se.kth.scs.partitioning.Edge;
 
 /**
@@ -83,14 +87,23 @@ public class EdgeFileReader {
     return edges;
   }
 
-  public LinkedHashSet[] readSplitFile(String file, int nSplit) {
+  public LinkedHashSet[] readSplitFile(String file, int nSplit, boolean shuffle) {
     LinkedHashSet<Edge> allEdges = read(file);
     nEdges = allEdges.size();
     LinkedHashSet<Edge>[] splits = new LinkedHashSet[nSplit];
     int splitSize = allEdges.size() / nSplit + 1;
+    Iterator<Edge> it;
+    if (shuffle) {
+      List<Edge> shuffled = new ArrayList<>(allEdges);
+      Collections.shuffle(shuffled);
+      it = shuffled.iterator();
+    } else {
+      it = allEdges.iterator();
+    }
     int j = -1;
     int i = 0;
-    for (Edge e : allEdges) {
+    while (it.hasNext()) {
+      Edge e = it.next();
       if (i % splitSize == 0) {
         j++;
         splits[j] = new LinkedHashSet<>();

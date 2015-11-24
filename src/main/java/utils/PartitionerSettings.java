@@ -37,6 +37,7 @@ public class PartitionerSettings {
   public final int wb;
   public final int minW;
   public final int maxW;
+  public boolean shuffle;
 
   public PartitionerSettings(int tb, int minT, int maxT, int wb, int minW, int maxW) {
     this.tb = tb;

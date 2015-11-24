@@ -244,6 +244,7 @@ public class OutputManager {
     sb.append("Output:\t").append(settings.output).append(newLine);
     sb.append(String.format("Delay:\t min:%d\tmax=%d", settings.delay.get(0), settings.delay.get(1))).append(newLine);
     sb.append("Append to output:\t").append(settings.append).append(newLine);
+    sb.append("Shuffle input:\t").append(settings.shuffle).append(newLine);
     System.out.println(sb.toString());
   }
 }
