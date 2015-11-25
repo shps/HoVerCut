@@ -25,8 +25,8 @@ public class PartitionerInputCommands {
   public List<Integer> window;
 
   @Parameter(names = {"-puf"}, description = "Partitions update frequency comparing to the window size.")
-  public int frequency = 1;
-  
+  public int partitionsUpdateFrequency = 1;
+
   @Parameter(names = {"-rs"}, description = "Number of restreamings.")
   public int restreaming = 0;
 
@@ -68,9 +68,12 @@ public class PartitionerInputCommands {
 
   @Parameter(names = {"-append"}, description = "Append to the output file.", arity = 1)
   public boolean append = true;
-  
+
   @Parameter(names = {"-shuffle"}, description = "Shuffle the input edges randomly.", arity = 1)
   public boolean shuffle = true;
+
+  @Parameter(names = {"-grouping"}, description = "Grouping edges based on their source ids.", arity = 1)
+  public boolean srcGrouping = true;
 
   @Parameter(names = {"-delay"}, description = "Delay to add after every transaction with storage.", arity = 2)
   public List<Integer> delay;

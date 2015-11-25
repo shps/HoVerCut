@@ -18,7 +18,7 @@ import se.kth.scs.partitioning.Vertex;
  */
 public class HdrfPartitionerTask implements Runnable {
 
-  private final LinkedHashSet<Edge> edges;
+  private LinkedHashSet<Edge> edges;
   private final double lambda;
   private final double epsilon;
   private final int windowSize;
@@ -27,11 +27,12 @@ public class HdrfPartitionerTask implements Runnable {
   private final int minDelay;
   private final int maxDelay;
   private final int pUpdateFrequency;
+  private final boolean srcGrouping;
 
   private final LinkedList<Edge>[] assignments;
 
   public HdrfPartitionerTask(PartitionState state, LinkedHashSet<Edge> edges, double lambda, double epsilon, int windowSize) {
-    this(state, edges, lambda, epsilon, windowSize, 0, 0);
+    this(state, edges, lambda, epsilon, windowSize, 0, 0, false);
   }
 
   public HdrfPartitionerTask(
@@ -41,8 +42,9 @@ public class HdrfPartitionerTask implements Runnable {
     double epsilon,
     int windowSize,
     int minDelay,
-    int maxDelay) {
-    this(state, edges, lambda, epsilon, windowSize, minDelay, maxDelay, (short) 0);
+    int maxDelay,
+    boolean srcGrouping) {
+    this(state, edges, lambda, epsilon, windowSize, minDelay, maxDelay, (short) 0, srcGrouping);
 
   }
 
@@ -54,7 +56,8 @@ public class HdrfPartitionerTask implements Runnable {
     int windowSize,
     int minDelay,
     int maxDelay,
-    int pUpdateFrequency) {
+    int pUpdateFrequency,
+    boolean srcGrouping) {
     this.edges = edges;
     this.lambda = lambda;
     this.epsilon = epsilon;
@@ -64,6 +67,7 @@ public class HdrfPartitionerTask implements Runnable {
     this.maxDelay = maxDelay;
 //    r = new SecureRandom();
     this.pUpdateFrequency = pUpdateFrequency;
+    this.srcGrouping = srcGrouping;
     this.assignments = new LinkedList[state.getNumberOfPartitions()];
     for (int i = 0; i < state.getNumberOfPartitions(); i++) {
       this.assignments[i] = new LinkedList<>();
@@ -76,7 +80,9 @@ public class HdrfPartitionerTask implements Runnable {
    * @return
    */
   public PartitionState partitionWithWindow() {
-
+    if (srcGrouping) {
+      this.edges = applyEdgeSourceGrouping(this.edges);
+    }
     int counter = 1;
     List<Edge> edgeWindow = new LinkedList<>();
     Set<Integer> vertices = new HashSet();
@@ -242,5 +248,37 @@ public class HdrfPartitionerTask implements Runnable {
 
   public LinkedList<Edge>[] getAssignments() {
     return assignments;
+  }
+
+  /**
+   * Put edges in a different bucket based on its source id.
+   *
+   * @param edges
+   * @return
+   */
+  private LinkedHashSet<Edge> applyEdgeSourceGrouping(LinkedHashSet<Edge> edges) {
+    long id = Thread.currentThread().getId();
+    System.out.println(String.format("Task%d started to do source grouping.", id));
+    long start = System.currentTimeMillis();
+    Map<Integer, LinkedList<Edge>> buckets = new HashMap<>();
+    for (Edge e : edges) {
+      LinkedList<Edge> list;
+      if (buckets.containsKey(e.getSrc())) {
+        list = buckets.get(e.getSrc());
+      } else {
+        list = new LinkedList<>();
+        buckets.put(e.getSrc(), list);
+      }
+
+      list.add(e);
+    }
+
+    LinkedHashSet<Edge> groupedEdges = new LinkedHashSet<>();
+    for (LinkedList<Edge> l : buckets.values()) {
+      groupedEdges.addAll(l);
+    }
+    System.out.println(String.format("Task%d finished source grouping in %d seconds.",
+      id, (System.currentTimeMillis() - start) / 1000));
+    return groupedEdges;
   }
 }

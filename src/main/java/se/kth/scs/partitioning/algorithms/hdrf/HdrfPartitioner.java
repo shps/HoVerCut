@@ -6,9 +6,8 @@ import se.kth.scs.partitioning.Edge;
 import se.kth.scs.partitioning.PartitionState;
 
 /**
- * This class is an implementation of the HDRF partitioning algorithm. Paper:
- * Petroni, Fabio, et al. "HDRF: Stream-Based Partitioning for Power-Law
- * Graphs."
+ * This class is an implementation of the HDRF partitioning algorithm. Paper: Petroni, Fabio, et al. "HDRF: Stream-Based
+ * Partitioning for Power-Law Graphs."
  *
  * @author Hooman
  */
@@ -24,13 +23,23 @@ public class HdrfPartitioner {
     int windowSize,
     int minDelay,
     int maxDelay,
-    int pUpdateFrequency) {
+    int pUpdateFrequency,
+    boolean srcGrouping) {
     System.out.println("Starts partitioning...");
     int nTasks = edges.length;
     HdrfPartitionerTask[] tasks = new HdrfPartitionerTask[nTasks];
     Thread[] threads = new Thread[nTasks];
     for (int i = 0; i < nTasks; i++) {
-      tasks[i] = new HdrfPartitionerTask(hState, edges[i], lambda, epsilon, windowSize, minDelay, maxDelay, pUpdateFrequency);
+      tasks[i] = new HdrfPartitionerTask(
+        hState,
+        edges[i],
+        lambda,
+        epsilon,
+        windowSize,
+        minDelay,
+        maxDelay,
+        pUpdateFrequency,
+        srcGrouping);
       threads[i] = new Thread(tasks[i]);
     }
 

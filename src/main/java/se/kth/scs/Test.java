@@ -17,9 +17,9 @@ public class Test {
   public static void main(String[] args) throws SQLException, IOException {
     args = new String[]{
       "-f", "./data/datasets/twitter_combined.txt",
-      "-w", "10", "4", "4",
+      "-w", "10", "3", "3",
       "-m", "hdrf",
-      "-p", "4",
+      "-p", "16",
       "-t", "2", "5", "5",
       //            "-reset", "true",
       "-s", "memory",
@@ -32,7 +32,8 @@ public class Test {
       "-d", "\" \"",
       "-puf", "1",
       "-rs", "3",
-      "-shuffle", "true"};
+      "-shuffle", "true",
+      "-grouping", "true"};
 
     GraphPartitioner.main(args);
   }

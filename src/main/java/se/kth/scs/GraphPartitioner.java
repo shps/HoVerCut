@@ -73,9 +73,10 @@ public class GraphPartitioner {
     settings.append = commands.append;
     settings.reset = commands.reset;
     settings.delimiter = commands.delimiter;
-    settings.frequency = commands.frequency;
+    settings.frequency = commands.partitionsUpdateFrequency;
     settings.restream = commands.restreaming;
     settings.shuffle = commands.shuffle;
+    settings.srcGrouping = commands.srcGrouping;
 
     for (int i = minT; i <= maxT; i++) {
       int t = (int) Math.pow(tb, i);
@@ -109,6 +110,7 @@ public class GraphPartitioner {
     PartitionState state = null;
     LinkedList<Edge>[][] outputAssignments = null;
     PartitionsStatistics ps = null;
+    boolean srcGrouping = settings.srcGrouping;
     for (int i = 0; i <= settings.restream; i++) {
       switch (settings.storage) {
         case PartitionerInputCommands.IN_MEMORY:
@@ -138,6 +140,7 @@ public class GraphPartitioner {
           }
         }
         outputAssignments = null;
+        srcGrouping = false;
       }
 
       long start = System.currentTimeMillis();
@@ -149,7 +152,8 @@ public class GraphPartitioner {
         settings.window,
         settings.delay.get(0),
         settings.delay.get(1),
-        settings.frequency);
+        settings.frequency,
+        srcGrouping);
       int duration = (int) ((System.currentTimeMillis() - start) / 1000);
       ps = new PartitionsStatistics(state);
       output.addResults(settings.window, settings.tasks, duration, ps.replicationFactor(), ps.loadRelativeStandardDeviation());
