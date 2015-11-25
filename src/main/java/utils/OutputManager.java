@@ -241,10 +241,12 @@ public class OutputManager {
       sb.append("db user:\t").append(settings.user).append(newLine);
       sb.append("db pass:\t").append(settings.pass).append(newLine);
     }
-    sb.append("Output:\t").append(settings.output).append(newLine);
+    sb.append("output:\t").append(settings.output).append(newLine);
     sb.append(String.format("Delay:\t min:%d\tmax=%d", settings.delay.get(0), settings.delay.get(1))).append(newLine);
-    sb.append("Append to output:\t").append(settings.append).append(newLine);
-    sb.append("Shuffle input:\t").append(settings.shuffle).append(newLine);
+    sb.append("append to output:\t").append(settings.append).append(newLine);
+    sb.append("shuffle input:\t").append(settings.shuffle).append(newLine);
+    sb.append("source grouping:\t").append(settings.srcGrouping).append(newLine);
+    sb.append("+single experiment:\t").append(settings.single).append(newLine);
     System.out.println(sb.toString());
   }
 }

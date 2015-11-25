@@ -77,6 +77,10 @@ public class GraphPartitioner {
     settings.restream = commands.restreaming;
     settings.shuffle = commands.shuffle;
     settings.srcGrouping = commands.srcGrouping;
+    settings.single = commands.single;
+    if (settings.single) {
+      runSingleExperiment(settings);
+    }
 
     for (int i = minT; i <= maxT; i++) {
       int t = (int) Math.pow(tb, i);
@@ -168,5 +172,21 @@ public class GraphPartitioner {
     }
 
     state.releaseResources();
+  }
+
+  private static void runSingleExperiment(PartitionerSettings settings) throws SQLException, IOException {
+    PartitionerSettings singleSettings = new PartitionerSettings();
+    singleSettings.setSettings(settings);
+    singleSettings.srcGrouping = false;
+    singleSettings.storage = PartitionerInputCommands.IN_MEMORY;
+    singleSettings.window = 1;
+    singleSettings.tasks = 1;
+    singleSettings.frequency = 1;
+    System.out.println(String.format("Reading file %s", singleSettings.file));
+    long start = System.currentTimeMillis();
+    EdgeFileReader reader = new EdgeFileReader(singleSettings.delimiter);
+    LinkedHashSet<Edge>[] splits = reader.readSplitFile(singleSettings.file, singleSettings.tasks, singleSettings.shuffle);
+    System.out.println(String.format("Finished reading in %d seconds.", (System.currentTimeMillis() - start) / 1000));
+    runPartitioner(singleSettings, splits);
   }
 }

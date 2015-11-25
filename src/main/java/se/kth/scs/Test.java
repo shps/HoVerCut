@@ -27,13 +27,13 @@ public class Test {
       "-user", "root",
       "-pass", "",
       "-output", "/home/ganymedian/Desktop/results/hdrf",
-      "-append", "false", //FIXME: if appends is true it throws exception.
-      "-delay", "0", "0",
+      "-append", "true", //FIXME: if appends is true it throws exception.
       "-d", "\" \"",
       "-puf", "1",
       "-rs", "3",
       "-shuffle", "true",
-      "-grouping", "true"};
+      "-grouping", "true",
+      "-single", "true"};
 
     GraphPartitioner.main(args);
   }

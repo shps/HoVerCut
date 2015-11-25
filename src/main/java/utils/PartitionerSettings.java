@@ -39,6 +39,7 @@ public class PartitionerSettings {
   public final int maxW;
   public boolean shuffle;
   public boolean srcGrouping;
+  public boolean single;
 
   public PartitionerSettings(int tb, int minT, int maxT, int wb, int minW, int maxW) {
     this.tb = tb;
@@ -47,6 +48,34 @@ public class PartitionerSettings {
     this.wb = wb;
     this.minW = minW;
     this.maxW = maxW;
+  }
+
+  public PartitionerSettings() {
+    this(1, 1, 1, 1, 1, 1);
+  }
+
+  public void setSettings(PartitionerSettings settings) {
+    file = settings.file;
+    delimiter = settings.delimiter;
+    window = settings.window;
+    frequency = settings.frequency;
+    method = settings.method;
+    lambda = settings.lambda;
+    epsilon = settings.lambda;
+    k = settings.k;
+    tasks = settings.tasks;
+    storage = settings.storage;
+    dbUrl = settings.dbUrl;
+    user = settings.user;
+    pass = settings.pass;
+    reset = settings.reset;
+    output = settings.output;
+    append = settings.append;
+    delay = settings.delay;
+    restream = settings.restream;
+    shuffle = settings.shuffle;
+    srcGrouping = settings.srcGrouping;
+    single = settings.srcGrouping;
   }
 
   /**

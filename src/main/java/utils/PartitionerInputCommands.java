@@ -75,6 +75,9 @@ public class PartitionerInputCommands {
   @Parameter(names = {"-grouping"}, description = "Grouping edges based on their source ids.", arity = 1)
   public boolean srcGrouping = true;
 
+  @Parameter(names = {"-single"}, description = "Run a single thread experiment as a base for comparison.", arity = 1)
+  public boolean single = true;
+
   @Parameter(names = {"-delay"}, description = "Delay to add after every transaction with storage.", arity = 2)
   public List<Integer> delay;
 
