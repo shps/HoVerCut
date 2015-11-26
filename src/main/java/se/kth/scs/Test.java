@@ -19,10 +19,10 @@ public class Test {
       "-f", "./data/datasets/twitter_combined.txt",
       "-w", "10", "3", "3",
       "-m", "hdrf",
-      "-p", "16",
-      "-t", "2", "5", "5",
+      "-p", "4",
+      "-t", "2", "3", "3",
       //            "-reset", "true",
-      "-s", "memory",
+      "-s", "remote",
       "-db", "localhost:4444",
       "-user", "root",
       "-pass", "",
@@ -30,10 +30,10 @@ public class Test {
       "-append", "true", //FIXME: if appends is true it throws exception.
       "-d", "\" \"",
       "-puf", "1",
-      "-rs", "3",
-      "-shuffle", "true",
-      "-grouping", "true",
-      "-single", "true"};
+      "-rs", "0",
+      "-shuffle", "false",
+      "-grouping", "false",
+      "-single", "false"};
 
     GraphPartitioner.main(args);
   }

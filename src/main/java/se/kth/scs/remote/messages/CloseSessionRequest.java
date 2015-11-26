@@ -12,5 +12,6 @@ import java.io.Serializable;
  * @author Hooman
  */
 public class CloseSessionRequest implements Serializable{
+  private static final long serialVersionUID = 213980565542967555L;
   
 }

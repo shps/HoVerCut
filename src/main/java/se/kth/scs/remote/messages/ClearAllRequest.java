@@ -12,5 +12,6 @@ import java.io.Serializable;
  * @author Hooman
  */
 public class ClearAllRequest implements Serializable {
+  private static final long serialVersionUID = -5837357862978112025L;
 
 }

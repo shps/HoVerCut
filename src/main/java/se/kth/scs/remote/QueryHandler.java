@@ -1,8 +1,7 @@
 package se.kth.scs.remote;
 
+import java.io.EOFException;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
 import se.kth.scs.remote.messages.AllVerticesRequest;
 import se.kth.scs.remote.messages.ClearAllRequest;
@@ -13,6 +12,7 @@ import se.kth.scs.remote.messages.PartitionsWriteRequest;
 import se.kth.scs.remote.messages.VerticesReadRequest;
 import se.kth.scs.remote.messages.VerticesReadResponse;
 import se.kth.scs.remote.messages.VerticesWriteRequest;
+import utils.FstStream;
 
 /**
  *
@@ -30,28 +30,24 @@ public class QueryHandler implements Runnable {
 
   @Override
   public void run() {
-    try (ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
-      ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream())) {
-
+    try {
       while (true) {
-        Object request = input.readObject();
+        Object request = FstStream.readObject(socket);
         if (request instanceof VerticesReadRequest) {
           VerticesReadResponse response = state.getVertices((VerticesReadRequest) request);
-          output.writeObject(response);
-          output.flush();
+          FstStream.writeObject(response, socket);
         } else if (request instanceof VerticesWriteRequest) {
           state.putVertices((VerticesWriteRequest) request);
         } else if (request instanceof PartitionsRequest) {
           PartitionsResponse response = state.getPartitions((PartitionsRequest) request);
-          output.writeObject(response);
-          output.flush();
+          FstStream.writeObject(response, socket);
         } else if (request instanceof PartitionsWriteRequest) {
           state.putPartitions((PartitionsWriteRequest) request);
         } else if (request instanceof AllVerticesRequest) {
           VerticesReadResponse response = state.getAllVertices();
-          output.writeObject(response);
-          output.flush();
+          FstStream.writeObject(response, socket);
         } else if (request instanceof CloseSessionRequest) {
+          System.out.println("A close-session request is received.");
           break;
         } else if (request instanceof ClearAllRequest) {
           state.releaseResources();
@@ -59,11 +55,14 @@ public class QueryHandler implements Runnable {
           throw new ClassNotFoundException(request.getClass().toString());
         }
       }
-    } catch (Exception ex) {
-      ex.printStackTrace();
+    } catch (IOException | ClassNotFoundException ex) {
+      if (!(ex instanceof EOFException)) {
+        ex.printStackTrace();
+      }
     }
-    
+
     try {
+      System.out.println("Socket is closed.");
       socket.close();
     } catch (IOException ex) {
       ex.printStackTrace();

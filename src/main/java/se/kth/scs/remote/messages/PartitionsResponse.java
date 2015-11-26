@@ -8,6 +8,7 @@ import java.io.Serializable;
  * @author Hooman
  */
 public class PartitionsResponse implements Serializable {
+  private static final long serialVersionUID = 7756716259401794541L;
 
   private final int[] eSizes;
 

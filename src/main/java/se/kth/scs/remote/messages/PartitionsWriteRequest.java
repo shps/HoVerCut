@@ -7,6 +7,7 @@ import java.io.Serializable;
  * @author Hooman
  */
 public class PartitionsWriteRequest implements Serializable {
+  private static final long serialVersionUID = -2309871953447025368L;
 
   private final int[] eDeltas;
 

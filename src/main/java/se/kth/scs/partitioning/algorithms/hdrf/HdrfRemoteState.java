@@ -6,8 +6,6 @@
 package se.kth.scs.partitioning.algorithms.hdrf;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,6 +25,7 @@ import se.kth.scs.remote.messages.PartitionsWriteRequest;
 import se.kth.scs.remote.messages.VerticesReadRequest;
 import se.kth.scs.remote.messages.VerticesReadResponse;
 import se.kth.scs.remote.messages.VerticesWriteRequest;
+import utils.FstStream;
 
 /**
  *
@@ -37,17 +36,15 @@ public class HdrfRemoteState implements PartitionState {
   private final short k;
   private final String ip;
   private final int port;
-  private final ThreadLocal<ClientSocket> clients = new ThreadLocal<>();
+  private final ThreadLocal<Socket> clients = new ThreadLocal<>();
 
   public HdrfRemoteState(short k, String ip, int port) throws IOException {
     this.k = k;
     this.ip = ip;
     this.port = port;
-    ClientSocket client = new ClientSocket(new Socket(ip, port));
-    client.getOutput().writeObject(new ClearAllRequest());
-    client.getOutput().flush();
-    client.getOutput().writeObject(new CloseSessionRequest());
-    client.getOutput().flush();
+    Socket client = new Socket(ip, port);
+    FstStream.writeObject(new ClearAllRequest(), client);
+    FstStream.writeObject(new CloseSessionRequest(), client);
     client.close();
   }
 
@@ -69,10 +66,11 @@ public class HdrfRemoteState implements PartitionState {
   @Override
   public void releaseTaskResources() {
     try {
-      ClientSocket c = getClient();
-      c.getOutput().writeObject(new CloseSessionRequest());
-      c.getOutput().flush();
-      c.close();
+      Socket c = getClient();
+      FstStream.writeObject(new CloseSessionRequest(), c);
+      if (!c.isClosed()) {
+        c.close();
+      }
     } catch (IOException ex) {
       ex.printStackTrace();
     }
@@ -87,10 +85,9 @@ public class HdrfRemoteState implements PartitionState {
   public Map<Integer, Vertex> getAllVertices() {
     Map<Integer, Vertex> vertices = null;
     try {
-      ClientSocket c = getClient();
-      c.getOutput().writeObject(new AllVerticesRequest());
-      c.getOutput().flush();
-      VerticesReadResponse reponse = (VerticesReadResponse) c.getInput().readObject();
+      Socket c = getClient();
+      FstStream.writeObject(new AllVerticesRequest(), c);
+      VerticesReadResponse reponse = (VerticesReadResponse) FstStream.readObject(c);
       vertices = deserializeVertices(reponse);
     } catch (IOException | ClassNotFoundException ex) {
       ex.printStackTrace();
@@ -116,7 +113,7 @@ public class HdrfRemoteState implements PartitionState {
   public Map<Integer, Vertex> getVertices(Set<Integer> vids) {
     Map<Integer, Vertex> vertices = null;
     try {
-      ClientSocket c = getClient();
+      Socket c = getClient();
       int[] ids = new int[vids.size()];
       int i = 0;
       for (int v : vids) {
@@ -124,9 +121,8 @@ public class HdrfRemoteState implements PartitionState {
         i++;
       }
       VerticesReadRequest request = new VerticesReadRequest(ids);
-      c.getOutput().writeObject(request);
-      c.getOutput().flush();
-      VerticesReadResponse reponse = (VerticesReadResponse) c.getInput().readObject();
+      FstStream.writeObject(request, c);
+      VerticesReadResponse reponse = (VerticesReadResponse) FstStream.readObject(c);
       vertices = deserializeVertices(reponse);
     } catch (IOException | ClassNotFoundException ex) {
       ex.printStackTrace();
@@ -142,7 +138,7 @@ public class HdrfRemoteState implements PartitionState {
   @Override
   public void putVertices(Collection<Vertex> vs) {
     try {
-      ClientSocket c = getClient();
+      Socket c = getClient();
       int[] vids = new int[vs.size()];
       int[] degrees = new int[vs.size()];
       int[] ps = new int[vs.size()];
@@ -154,8 +150,7 @@ public class HdrfRemoteState implements PartitionState {
         i++;
       }
       VerticesWriteRequest request = new VerticesWriteRequest(vids, degrees, ps);
-      c.getOutput().writeObject(request);
-      c.getOutput().flush();
+      FstStream.writeObject(request, c);
     } catch (IOException ex) {
       ex.printStackTrace();
     }
@@ -175,11 +170,10 @@ public class HdrfRemoteState implements PartitionState {
   public List<Partition> getAllPartitions() {
     List<Partition> partitions = null;
     try {
-      ClientSocket c = getClient();
+      Socket c = getClient();
       PartitionsRequest request = new PartitionsRequest();
-      c.getOutput().writeObject(request);
-      c.getOutput().flush();
-      PartitionsResponse response = (PartitionsResponse) c.getInput().readObject();
+      FstStream.writeObject(request, c);
+      PartitionsResponse response = (PartitionsResponse) FstStream.readObject(c);
       partitions = deserializePartititions(response);
     } catch (IOException | ClassNotFoundException ex) {
       ex.printStackTrace();
@@ -196,23 +190,22 @@ public class HdrfRemoteState implements PartitionState {
   @Override
   public void putPartitions(List<Partition> ps) {
     try {
-      ClientSocket c = getClient();
+      Socket c = getClient();
       int[] eDeltas = new int[ps.size()];
       for (Partition p : ps) {
         eDeltas[p.getId()] = p.getESizeDelta();
       }
       PartitionsWriteRequest request = new PartitionsWriteRequest(eDeltas);
-      c.getOutput().writeObject(request);
-      c.getOutput().flush();
+      FstStream.writeObject(request, c);
     } catch (IOException ex) {
       ex.printStackTrace();
     }
   }
 
-  private ClientSocket getClient() throws IOException {
-    ClientSocket c = clients.get();
+  private Socket getClient() throws IOException {
+    Socket c = clients.get();
     if (c == null) {
-      c = new ClientSocket(new Socket(ip, port));
+      c = new Socket(ip, port);
       clients.set(c);
     }
 
@@ -229,46 +222,6 @@ public class HdrfRemoteState implements PartitionState {
     }
 
     return partitions;
-  }
-
-  private class ClientSocket {
-
-    private final Socket socket;
-    private final ObjectInputStream input;
-    private final ObjectOutputStream output;
-
-    public ClientSocket(Socket socket) throws IOException {
-      this.socket = socket;
-      output = new ObjectOutputStream(socket.getOutputStream());
-      input = new ObjectInputStream(socket.getInputStream());
-    }
-
-    /**
-     * @return the socket
-     */
-    public Socket getSocket() {
-      return socket;
-    }
-
-    /**
-     * @return the input
-     */
-    public ObjectInputStream getInput() {
-      return input;
-    }
-
-    /**
-     * @return the output
-     */
-    public ObjectOutputStream getOutput() {
-      return output;
-    }
-
-    private void close() throws IOException {
-      input.close();
-      output.close();
-      socket.close();
-    }
   }
 
 }

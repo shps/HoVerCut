@@ -12,6 +12,7 @@ import java.io.Serializable;
  * @author Hooman
  */
 public class VerticesReadResponse implements Serializable {
+  private static final long serialVersionUID = -509337766467432309L;
 
   private final int[] vertices;
   private final int[] degrees;

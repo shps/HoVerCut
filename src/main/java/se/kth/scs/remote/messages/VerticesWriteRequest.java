@@ -12,6 +12,7 @@ import java.io.Serializable;
  * @author Hooman
  */
 public class VerticesWriteRequest implements Serializable {
+  private static final long serialVersionUID = 3083427927860617772L;
 
   private final int[] vertices;
   private final int[] degreeDeltas;
