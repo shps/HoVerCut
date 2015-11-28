@@ -1,6 +1,5 @@
 package se.kth.scs.remote;
 
-import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -8,12 +7,6 @@ import se.kth.scs.partitioning.ConcurrentPartition;
 import se.kth.scs.partitioning.ConcurrentVertex;
 import se.kth.scs.partitioning.Partition;
 import se.kth.scs.partitioning.Vertex;
-import se.kth.scs.remote.messages.PartitionsRequest;
-import se.kth.scs.remote.messages.PartitionsResponse;
-import se.kth.scs.remote.messages.PartitionsWriteRequest;
-import se.kth.scs.remote.messages.VerticesReadRequest;
-import se.kth.scs.remote.messages.VerticesReadResponse;
-import se.kth.scs.remote.messages.VerticesWriteRequest;
 
 /**
  *
@@ -48,12 +41,25 @@ public class ServerStorage {
   }
 
   /**
-   * Order of number of vertices.
+   * Order of number of vertices. It serializes for efficiency.
    *
    * @return
    */
-  public Collection<ConcurrentVertex> getAllVertices() {
-    return vertices.values();
+  public int[] getAllVertices() {
+    Collection<ConcurrentVertex> vs = vertices.values();
+    // The usage of list is to work around the concurrenthashmap's weak consistency,
+    // that affects inconsistent results bttween values().size() and the iterator over the valus.
+    LinkedList<ConcurrentVertex> list = new LinkedList<>(vs);
+    int[] array = new int[list.size() * 3];
+    int i = 0;
+    for (ConcurrentVertex v : list) {
+      array[i] = v.getId();
+      array[i + 1] = v.getpDegree();
+      array[i + 2] = v.getPartitions();
+      i = i + 3;
+    }
+
+    return array;
   }
 
   public Vertex getVertex(int vid) {
@@ -93,10 +99,10 @@ public class ServerStorage {
   }
 
   public void putVertices(int[] vertices) {
-    for (int i = 0; i < vertices.length; i=i+3) {
+    for (int i = 0; i < vertices.length; i = i + 3) {
       Vertex v = new Vertex(vertices[i]);
-      v.setDegreeDelta(vertices[i+1]);
-      v.setPartitionsDelta(vertices[i+2]);
+      v.setDegreeDelta(vertices[i + 1]);
+      v.setPartitionsDelta(vertices[i + 2]);
       putVertex(v);
     }
   }

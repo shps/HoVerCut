@@ -29,7 +29,7 @@ public class GraphPartitioner {
 
   private static final OutputManager output = new OutputManager();
 
-  public static void main(String[] args) throws SQLException, IOException {
+  public static void main(String[] args) throws SQLException, IOException, Exception {
     PartitionerInputCommands commands = new PartitionerInputCommands();
     JCommander commander;
     try {
@@ -102,14 +102,14 @@ public class GraphPartitioner {
         settings.window = w;
         settings.tasks = t;
 
-        runPartitioner(settings, splits);
+        runPartitioner(settings, splits, reader.getnVertices());
         j++;
       }
     }
     output.writeToFile(settings);
   }
 
-  private static void runPartitioner(PartitionerSettings settings, LinkedHashSet<Edge>[] splits) throws SQLException, IOException {
+  private static void runPartitioner(PartitionerSettings settings, LinkedHashSet<Edge>[] splits, int nVertices) throws SQLException, IOException, Exception {
     OutputManager.printCommandSetup(settings);
     PartitionState state = null;
     LinkedList<Edge>[][] outputAssignments = null;
@@ -162,6 +162,9 @@ public class GraphPartitioner {
       ps = new PartitionsStatistics(state);
       output.addResults(settings.window, settings.tasks, duration, ps.replicationFactor(), ps.loadRelativeStandardDeviation());
       OutputManager.printResults(settings.k, ps, String.format("HdrfPartitioner lambda=%f\tepsilon=%f", settings.lambda, settings.epsilon));
+      if (ps.getNVertices() != nVertices) {
+        throw new Exception(String.format("Inconsistent number of vertices file=%d\tstorage=%d.", nVertices, ps.getNVertices()));
+      }
     }
     if (!settings.output.isEmpty()) {
       try {
@@ -174,7 +177,7 @@ public class GraphPartitioner {
     state.releaseResources();
   }
 
-  private static void runSingleExperiment(PartitionerSettings settings) throws SQLException, IOException {
+  private static void runSingleExperiment(PartitionerSettings settings) throws SQLException, IOException, Exception {
     PartitionerSettings singleSettings = new PartitionerSettings();
     singleSettings.setSettings(settings);
     singleSettings.srcGrouping = false;
@@ -187,6 +190,6 @@ public class GraphPartitioner {
     EdgeFileReader reader = new EdgeFileReader(singleSettings.delimiter);
     LinkedHashSet<Edge>[] splits = reader.readSplitFile(singleSettings.file, singleSettings.tasks, singleSettings.shuffle);
     System.out.println(String.format("Finished reading in %d seconds.", (System.currentTimeMillis() - start) / 1000));
-    runPartitioner(singleSettings, splits);
+    runPartitioner(singleSettings, splits, reader.getnVertices());
   }
 }

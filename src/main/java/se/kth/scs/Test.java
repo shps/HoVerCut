@@ -17,20 +17,20 @@ public class Test {
   public static void main(String[] args) throws SQLException, IOException {
     args = new String[]{
       "-f", "./data/datasets/twitter_combined.txt",
-      "-w", "10", "3", "3",
+      "-w", "10", "3", "4",
       "-m", "hdrf",
       "-p", "4",
-      "-t", "2", "3", "3",
+      "-t", "2", "3", "4",
       //            "-reset", "true",
       "-s", "remote",
       "-db", "localhost:4444",
       "-user", "root",
       "-pass", "",
-      "-output", "/home/ganymedian/Desktop/results/hdrf",
+      "-output", "/Users/Ganymedian/Desktop/results/hdrf",
       "-append", "true", //FIXME: if appends is true it throws exception.
       "-d", "\" \"",
       "-puf", "1",
-      "-rs", "1",
+      "-rs", "2",
       "-shuffle", "false",
       "-grouping", "false",
       "-single", "false"};

@@ -168,6 +168,12 @@ public class OutputManager {
           maxP = settings.maxW;
         }
         writer.write(firstHeader);
+        if (settings.single) {
+          int taskId = 1;
+          for (int j = 0; j <= settings.restream; j++) {
+            writer.append(String.format("%s%d-%d,", secondHeader, taskId, j));
+          }
+        }
         for (int i = minP; i <= maxP; i++) {
           int taskId = (int) Math.pow(base, i);
           for (int j = 0; j <= settings.restream; j++) {
@@ -176,12 +182,22 @@ public class OutputManager {
         }
         writer.println();
       }
-
+      StringBuilder sd = new StringBuilder();
+      if (settings.single) {
+        for (int i = 0; i <= settings.restream; i++) {
+          sd.append(",");
+        }
+      }
+      boolean firstRound = true;
       Iterator<Map.Entry<Integer, Map<Integer, List<Number>>>> it1 = result.entrySet().iterator();
       while (it1.hasNext()) {
         Map.Entry<Integer, Map<Integer, List<Number>>> entry = it1.next();
         writer.append(entry.getKey().toString()).append(",");
         Iterator<Map.Entry<Integer, List<Number>>> it2 = entry.getValue().entrySet().iterator();
+        if (!firstRound) {
+          writer.append(sd.toString());
+        }
+        firstRound = false;
         while (it2.hasNext()) {
           Map.Entry<Integer, List<Number>> entry2 = it2.next();
           for (Number rf : entry2.getValue()) {

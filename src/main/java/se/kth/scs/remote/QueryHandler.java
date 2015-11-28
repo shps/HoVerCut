@@ -29,9 +29,9 @@ public class QueryHandler implements Runnable {
   @Override
   public void run() {
     try {
+      DataInputStream input = new DataInputStream(socket.getInputStream());
+      DataOutputStream output = new DataOutputStream(socket.getOutputStream());
       while (true) {
-        DataInputStream input = new DataInputStream(socket.getInputStream());
-        DataOutputStream output = new DataOutputStream(socket.getOutputStream());
         byte request = input.readByte();
         if (request == Protocol.VERTICES_READ_REQUEST) {
           int[] vids = Serializer.deserializeRequest(input);
@@ -47,7 +47,7 @@ public class QueryHandler implements Runnable {
           int[] partitions = Serializer.deserializeRequest(input);
           state.putPartitions(partitions);
         } else if (request == Protocol.ALL_VERTICES_REQUEST) {
-          Collection<ConcurrentVertex> response = state.getAllVertices();
+          int[] response = state.getAllVertices();
           Serializer.serializeAllVerticesReadResponse(output, response);
         } else if (request == Protocol.CLOSE_SESSION_REQUEST) {
           System.out.println("A close-session request is received.");
@@ -66,9 +66,13 @@ public class QueryHandler implements Runnable {
 
     try {
       System.out.println("Socket is closed.");
-      socket.close();
+      if (!socket.isClosed()) {
+        socket.close();
+      }
     } catch (IOException ex) {
-      ex.printStackTrace();
+      if (!(ex instanceof EOFException)) {
+        ex.printStackTrace();
+      }
     }
   }
 }

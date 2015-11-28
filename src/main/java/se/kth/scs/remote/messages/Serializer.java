@@ -82,15 +82,15 @@ public class Serializer {
     output.flush();
   }
 
-  public static void serializeAllVerticesReadResponse(DataOutputStream output, Collection<ConcurrentVertex> vertices) throws IOException {
+  public static void serializeAllVerticesReadResponse(DataOutputStream output, int[] array) throws IOException {
     // this is a reduntant version of serializeVerticesReadResponse but only not to duplicate the memory usage.
-    int size = vertices.size() * 3 * 4;
+    int size = array.length * 4;
     byte[] response = new byte[size];
     IntBuffer buffer = ByteBuffer.wrap(response).asIntBuffer();
-    for (ConcurrentVertex v : vertices) {
-      buffer.put(v.getId());
-      buffer.put(v.getpDegree());
-      buffer.put(v.getPartitions());
+    for (int i = 0; i < array.length; i = i + 3) {
+      buffer.put(array[i]);
+      buffer.put(array[i + 1]);
+      buffer.put(array[i + 2]);
     }
     write(output, size, response);
   }
