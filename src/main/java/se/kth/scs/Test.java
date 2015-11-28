@@ -14,7 +14,7 @@ import java.sql.SQLException;
  */
 public class Test {
 
-  public static void main(String[] args) throws SQLException, IOException {
+  public static void main(String[] args) throws SQLException, IOException, Exception {
     args = new String[]{
       "-f", "./data/datasets/twitter_combined.txt",
       "-w", "10", "3", "4",
