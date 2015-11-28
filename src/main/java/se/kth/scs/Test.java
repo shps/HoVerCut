@@ -30,7 +30,7 @@ public class Test {
       "-append", "true", //FIXME: if appends is true it throws exception.
       "-d", "\" \"",
       "-puf", "1",
-      "-rs", "0",
+      "-rs", "1",
       "-shuffle", "false",
       "-grouping", "false",
       "-single", "false"};

@@ -1,18 +1,16 @@
 package se.kth.scs.remote;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
-import se.kth.scs.remote.messages.AllVerticesRequest;
-import se.kth.scs.remote.messages.ClearAllRequest;
-import se.kth.scs.remote.messages.CloseSessionRequest;
-import se.kth.scs.remote.messages.PartitionsRequest;
-import se.kth.scs.remote.messages.PartitionsResponse;
-import se.kth.scs.remote.messages.PartitionsWriteRequest;
-import se.kth.scs.remote.messages.VerticesReadRequest;
-import se.kth.scs.remote.messages.VerticesReadResponse;
-import se.kth.scs.remote.messages.VerticesWriteRequest;
-import utils.FstStream;
+import java.util.Collection;
+import java.util.LinkedList;
+import se.kth.scs.partitioning.ConcurrentVertex;
+import se.kth.scs.partitioning.Vertex;
+import se.kth.scs.remote.messages.Protocol;
+import se.kth.scs.remote.messages.Serializer;
 
 /**
  *
@@ -32,30 +30,35 @@ public class QueryHandler implements Runnable {
   public void run() {
     try {
       while (true) {
-        Object request = FstStream.readObject(socket);
-        if (request instanceof VerticesReadRequest) {
-          VerticesReadResponse response = state.getVertices((VerticesReadRequest) request);
-          FstStream.writeObject(response, socket);
-        } else if (request instanceof VerticesWriteRequest) {
-          state.putVertices((VerticesWriteRequest) request);
-        } else if (request instanceof PartitionsRequest) {
-          PartitionsResponse response = state.getPartitions((PartitionsRequest) request);
-          FstStream.writeObject(response, socket);
-        } else if (request instanceof PartitionsWriteRequest) {
-          state.putPartitions((PartitionsWriteRequest) request);
-        } else if (request instanceof AllVerticesRequest) {
-          VerticesReadResponse response = state.getAllVertices();
-          FstStream.writeObject(response, socket);
-        } else if (request instanceof CloseSessionRequest) {
+        DataInputStream input = new DataInputStream(socket.getInputStream());
+        DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+        byte request = input.readByte();
+        if (request == Protocol.VERTICES_READ_REQUEST) {
+          int[] vids = Serializer.deserializeRequest(input);
+          LinkedList<Vertex> response = state.getVertices(vids);
+          Serializer.serializeVerticesReadResponse(output, response);
+        } else if (request == Protocol.VERTICES_WRITE_REQUEST) {
+          int[] vertices = Serializer.deserializeRequest(input);
+          state.putVertices(vertices);
+        } else if (request == Protocol.PARTITIONS_REQUEST) {
+          int[] response = state.getPartitions();
+          Serializer.serializePartitionsReadResponse(output, response);
+        } else if (request == Protocol.PARTITIONS_WRITE_REQUEST) {
+          int[] partitions = Serializer.deserializeRequest(input);
+          state.putPartitions(partitions);
+        } else if (request == Protocol.ALL_VERTICES_REQUEST) {
+          Collection<ConcurrentVertex> response = state.getAllVertices();
+          Serializer.serializeAllVerticesReadResponse(output, response);
+        } else if (request == Protocol.CLOSE_SESSION_REQUEST) {
           System.out.println("A close-session request is received.");
           break;
-        } else if (request instanceof ClearAllRequest) {
+        } else if (request == Protocol.CLEAR_ALL_REQUEST) {
           state.releaseResources();
         } else {
-          throw new ClassNotFoundException(request.getClass().toString());
+          throw new Exception(String.format("Request type %d is not found.", request));
         }
       }
-    } catch (IOException | ClassNotFoundException ex) {
+    } catch (Exception ex) {
       if (!(ex instanceof EOFException)) {
         ex.printStackTrace();
       }

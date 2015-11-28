@@ -27,6 +27,7 @@ public class PartitionsStatistics {
   public PartitionsStatistics(PartitionState state) {
     vertices = state.getAllVertices();
     List<Partition> partitions = state.getAllPartitions();
+    state.releaseTaskResources();
     nEdgePartitions = new int[partitions.size()];
     nVertexPartitions = new int[partitions.size()];
 
@@ -60,7 +61,7 @@ public class PartitionsStatistics {
       }
       i++;
     }
- 
+
     nEdges = eSize;
     maxVertexCardinality = maxV;
     maxEdgeCardinality = maxE;
@@ -100,7 +101,8 @@ public class PartitionsStatistics {
   }
 
   /**
-   * Relative standard deviation of the number of edges hosted in the partitions.
+   * Relative standard deviation of the number of edges hosted in the
+   * partitions.
    *
    * @return
    */
@@ -118,7 +120,8 @@ public class PartitionsStatistics {
   }
 
   /**
-   * ** The number of vertices in the Partition with the max vertex cardinality.
+   * ** The number of vertices in the Partition with the max vertex
+   * cardinality.
    *
    * @return
    */

@@ -1,5 +1,7 @@
 package se.kth.scs.remote;
 
+import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 import se.kth.scs.partitioning.ConcurrentPartition;
@@ -50,20 +52,8 @@ public class ServerStorage {
    *
    * @return
    */
-  public VerticesReadResponse getAllVertices() {
-    int size = vertices.size();
-    int[] vIds = new int[size];
-    int[] degrees = new int[size];
-    int[] ps = new int[size];
-    int i = 0;
-    for (ConcurrentVertex v : vertices.values()) {
-      vIds[i] = v.getId();
-      degrees[i] = v.getpDegree();
-      ps[i] = v.getPartitions();
-      i++;
-    }
-
-    return new VerticesReadResponse(vIds, degrees, ps);
+  public Collection<ConcurrentVertex> getAllVertices() {
+    return vertices.values();
   }
 
   public Vertex getVertex(int vid) {
@@ -76,24 +66,15 @@ public class ServerStorage {
     }
   }
 
-  public VerticesReadResponse getVertices(VerticesReadRequest request) {
+  public LinkedList<Vertex> getVertices(int[] vids) {
     LinkedList<Vertex> vs = new LinkedList<>();
-    for (int vid : request.getVertices()) {
+    for (int vid : vids) {
       Vertex v = getVertex(vid);
       if (v != null) {
         vs.add(v);
       }
     }
-    int[] vIds = new int[vs.size()];
-    int[] degrees = new int[vs.size()];
-    int[] ps = new int[vs.size()];
-    for (int i = 0; i < vs.size(); i++) {
-      Vertex v = vs.get(i);
-      vIds[i] = v.getId();
-      degrees[i] = v.getpDegree();
-      ps[i] = v.getPartitions();
-    }
-    return new VerticesReadResponse(vIds, degrees, ps);
+    return vs;
   }
 
   public void putVertex(Vertex v) {
@@ -111,14 +92,11 @@ public class ServerStorage {
     }
   }
 
-  public void putVertices(VerticesWriteRequest request) {
-    int[] vids = request.getVertices();
-    int[] degrees = request.getDegreeDeltas();
-    int[] ps = request.getPartitionsDeltas();
-    for (int i = 0; i < vids.length; i++) {
-      Vertex v = new Vertex(vids[i]);
-      v.setDegreeDelta(degrees[i]);
-      v.setPartitionsDelta(ps[i]);
+  public void putVertices(int[] vertices) {
+    for (int i = 0; i < vertices.length; i=i+3) {
+      Vertex v = new Vertex(vertices[i]);
+      v.setDegreeDelta(vertices[i+1]);
+      v.setPartitionsDelta(vertices[i+2]);
       putVertex(v);
     }
   }
@@ -132,7 +110,7 @@ public class ServerStorage {
     }
   }
 
-  public PartitionsResponse getPartitions(PartitionsRequest request) {
+  public int[] getPartitions() {
     int[] eSizes = new int[k];
     for (short i = 0; i < k; i++) {
       Partition p = getPartition(i);
@@ -143,7 +121,7 @@ public class ServerStorage {
       }
     }
 
-    return new PartitionsResponse(eSizes);
+    return eSizes;
   }
 
   public void putPartition(Partition p) {
@@ -161,8 +139,7 @@ public class ServerStorage {
     }
   }
 
-  public void putPartitions(PartitionsWriteRequest request) {
-    int[] eSizes = request.geteDeltas();
+  public void putPartitions(int[] eSizes) {
     for (short i = 0; i < eSizes.length; i++) {
       Partition p = new Partition(i);
       p.seteSizeDelta(eSizes[i]);

@@ -5,6 +5,8 @@
  */
 package se.kth.scs.partitioning.algorithms.hdrf;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -16,16 +18,8 @@ import java.util.Set;
 import se.kth.scs.partitioning.Partition;
 import se.kth.scs.partitioning.PartitionState;
 import se.kth.scs.partitioning.Vertex;
-import se.kth.scs.remote.messages.AllVerticesRequest;
-import se.kth.scs.remote.messages.ClearAllRequest;
-import se.kth.scs.remote.messages.CloseSessionRequest;
-import se.kth.scs.remote.messages.PartitionsRequest;
-import se.kth.scs.remote.messages.PartitionsResponse;
-import se.kth.scs.remote.messages.PartitionsWriteRequest;
-import se.kth.scs.remote.messages.VerticesReadRequest;
-import se.kth.scs.remote.messages.VerticesReadResponse;
-import se.kth.scs.remote.messages.VerticesWriteRequest;
-import utils.FstStream;
+import se.kth.scs.remote.messages.Protocol;
+import se.kth.scs.remote.messages.Serializer;
 
 /**
  *
@@ -42,10 +36,13 @@ public class HdrfRemoteState implements PartitionState {
     this.k = k;
     this.ip = ip;
     this.port = port;
-    Socket client = new Socket(ip, port);
-    FstStream.writeObject(new ClearAllRequest(), client);
-    FstStream.writeObject(new CloseSessionRequest(), client);
-    client.close();
+    try (Socket client = new Socket(ip, port)) {
+      DataOutputStream output = new DataOutputStream(client.getOutputStream());
+      output.writeByte(Protocol.CLEAR_ALL_REQUEST);
+      output.flush();
+      output.writeByte(Protocol.CLOSE_SESSION_REQUEST);
+      output.flush();
+    }
   }
 
   @Override
@@ -67,9 +64,12 @@ public class HdrfRemoteState implements PartitionState {
   public void releaseTaskResources() {
     try {
       Socket c = getClient();
-      FstStream.writeObject(new CloseSessionRequest(), c);
+      DataOutputStream output = new DataOutputStream(c.getOutputStream());
+      output.writeByte(Protocol.CLOSE_SESSION_REQUEST);
+      output.flush();
       if (!c.isClosed()) {
         c.close();
+        c = null;
       }
     } catch (IOException ex) {
       ex.printStackTrace();
@@ -86,24 +86,24 @@ public class HdrfRemoteState implements PartitionState {
     Map<Integer, Vertex> vertices = null;
     try {
       Socket c = getClient();
-      FstStream.writeObject(new AllVerticesRequest(), c);
-      VerticesReadResponse reponse = (VerticesReadResponse) FstStream.readObject(c);
-      vertices = deserializeVertices(reponse);
-    } catch (IOException | ClassNotFoundException ex) {
+      DataInputStream input = new DataInputStream(c.getInputStream());
+      DataOutputStream output = new DataOutputStream(c.getOutputStream());
+      output.writeByte(Protocol.ALL_VERTICES_REQUEST);
+      output.flush();
+      int[] response = Serializer.deserializeRequest(input);
+      vertices = deserializeVertices(response);
+    } catch (IOException ex) {
       ex.printStackTrace();
     }
     return vertices;
   }
 
-  private Map<Integer, Vertex> deserializeVertices(VerticesReadResponse response) {
+  private Map<Integer, Vertex> deserializeVertices(int[] r) {
     Map<Integer, Vertex> vertices = new HashMap<>();
-    int[] vIds = response.getVertices();
-    int[] degrees = response.getDegrees();
-    int[] partitions = response.getPartitions();
-    for (int i = 0; i < vIds.length; i++) {
-      Vertex v = new Vertex(vIds[i]);
-      v.setpDegree(degrees[i]);
-      v.setPartitions(partitions[i]);
+    for (int i = 0; i < r.length; i = i + 3) {
+      Vertex v = new Vertex(r[i]);
+      v.setpDegree(r[i + 1]);
+      v.setPartitions(r[i + 2]);
       vertices.put(v.getId(), v);
     }
     return vertices;
@@ -114,17 +114,18 @@ public class HdrfRemoteState implements PartitionState {
     Map<Integer, Vertex> vertices = null;
     try {
       Socket c = getClient();
+      DataInputStream input = new DataInputStream(c.getInputStream());
+      DataOutputStream output = new DataOutputStream(c.getOutputStream());
       int[] ids = new int[vids.size()];
       int i = 0;
       for (int v : vids) {
         ids[i] = v;
         i++;
       }
-      VerticesReadRequest request = new VerticesReadRequest(ids);
-      FstStream.writeObject(request, c);
-      VerticesReadResponse reponse = (VerticesReadResponse) FstStream.readObject(c);
-      vertices = deserializeVertices(reponse);
-    } catch (IOException | ClassNotFoundException ex) {
+      Serializer.serializeRequest(output, Protocol.VERTICES_READ_REQUEST, ids);
+      int[] response = Serializer.deserializeRequest(input);
+      vertices = deserializeVertices(response);
+    } catch (IOException ex) {
       ex.printStackTrace();
     }
     return vertices;
@@ -139,18 +140,16 @@ public class HdrfRemoteState implements PartitionState {
   public void putVertices(Collection<Vertex> vs) {
     try {
       Socket c = getClient();
-      int[] vids = new int[vs.size()];
-      int[] degrees = new int[vs.size()];
-      int[] ps = new int[vs.size()];
+      DataOutputStream output = new DataOutputStream(c.getOutputStream());
+      int[] vertices = new int[vs.size() * 3];
       int i = 0;
       for (Vertex v : vs) {
-        vids[i] = v.getId();
-        degrees[i] = v.getDegreeDelta();
-        ps[i] = v.getPartitionsDelta();
-        i++;
+        vertices[i] = v.getId();
+        vertices[i + 1] = v.getDegreeDelta();
+        vertices[i + 2] = v.getPartitionsDelta();
+        i = i + 3;
       }
-      VerticesWriteRequest request = new VerticesWriteRequest(vids, degrees, ps);
-      FstStream.writeObject(request, c);
+      Serializer.serializeRequest(output, Protocol.VERTICES_WRITE_REQUEST, vertices);
     } catch (IOException ex) {
       ex.printStackTrace();
     }
@@ -171,11 +170,13 @@ public class HdrfRemoteState implements PartitionState {
     List<Partition> partitions = null;
     try {
       Socket c = getClient();
-      PartitionsRequest request = new PartitionsRequest();
-      FstStream.writeObject(request, c);
-      PartitionsResponse response = (PartitionsResponse) FstStream.readObject(c);
-      partitions = deserializePartititions(response);
-    } catch (IOException | ClassNotFoundException ex) {
+      DataInputStream input = new DataInputStream(c.getInputStream());
+      DataOutputStream output = new DataOutputStream(c.getOutputStream());
+      output.writeByte(Protocol.PARTITIONS_REQUEST);
+      output.flush();
+      int[] ps = Serializer.deserializeRequest(input);
+      partitions = deserializePartititions(ps);
+    } catch (IOException ex) {
       ex.printStackTrace();
     }
 
@@ -191,12 +192,12 @@ public class HdrfRemoteState implements PartitionState {
   public void putPartitions(List<Partition> ps) {
     try {
       Socket c = getClient();
+      DataOutputStream output = new DataOutputStream(c.getOutputStream());
       int[] eDeltas = new int[ps.size()];
       for (Partition p : ps) {
         eDeltas[p.getId()] = p.getESizeDelta();
       }
-      PartitionsWriteRequest request = new PartitionsWriteRequest(eDeltas);
-      FstStream.writeObject(request, c);
+      Serializer.serializeRequest(output, Protocol.PARTITIONS_WRITE_REQUEST, eDeltas);
     } catch (IOException ex) {
       ex.printStackTrace();
     }
@@ -212,12 +213,11 @@ public class HdrfRemoteState implements PartitionState {
     return c;
   }
 
-  private List<Partition> deserializePartititions(PartitionsResponse response) {
-    int[] eSizes = response.getESizes();
-    List<Partition> partitions = new ArrayList<>(eSizes.length);
-    for (short i = 0; i < eSizes.length; i++) {
+  private List<Partition> deserializePartititions(int[] r) {
+    List<Partition> partitions = new ArrayList<>(r.length);
+    for (short i = 0; i < r.length; i++) {
       Partition p = new Partition(i);
-      p.setESize(eSizes[i]);
+      p.setESize(r[i]);
       partitions.add(p);
     }
 

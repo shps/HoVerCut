@@ -105,5 +105,4 @@ public class Vertex {
   public void setPartitions(int partitions) {
     this.partitions = partitions;
   }
-
 }

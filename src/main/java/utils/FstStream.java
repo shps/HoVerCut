@@ -1,5 +1,6 @@
 package utils;
 
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -17,7 +18,7 @@ public class FstStream {
   public static Object readObject(Socket socket) throws IOException, ClassNotFoundException {
     DataInputStream stream = new DataInputStream(socket.getInputStream());
     int len = stream.readInt();
-    byte buffer[] = new byte[len]; // this could be reused !
+    byte buffer[] = new byte[len];
     while (len > 0) {
       len -= stream.read(buffer, buffer.length - len, len);
     }
