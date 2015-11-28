@@ -75,7 +75,7 @@ public class PartitionerSettings {
     restream = settings.restream;
     shuffle = settings.shuffle;
     srcGrouping = settings.srcGrouping;
-    single = settings.srcGrouping;
+    single = settings.single;
   }
 
   /**
