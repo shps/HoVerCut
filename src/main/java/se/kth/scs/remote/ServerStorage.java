@@ -14,7 +14,8 @@ import se.kth.scs.partitioning.Vertex;
  */
 public class ServerStorage {
 
-  final ConcurrentHashMap<Integer, ConcurrentVertex> vertices = new ConcurrentHashMap<>(); // Holds partial degree of each vertex.
+  private final static short NUM_TRIES = 5;
+  private final ConcurrentHashMap<Integer, ConcurrentVertex> vertices = new ConcurrentHashMap<>(); // Holds partial degree of each vertex.
   private final ConcurrentHashMap<Short, ConcurrentPartition> partitions;
   private final short k;
 
@@ -43,16 +44,26 @@ public class ServerStorage {
   /**
    * Order of number of vertices. It serializes for efficiency.
    *
+   * @param expectedSize
    * @return
    */
-  public int[] getAllVertices() {
-    Collection<ConcurrentVertex> vs = vertices.values();
-    // The usage of list is to work around the concurrenthashmap's weak consistency,
-    // that affects inconsistent results bttween values().size() and the iterator over the valus.
-    LinkedList<ConcurrentVertex> list = new LinkedList<>(vs);
-    int[] array = new int[list.size() * 3];
+  public int[] getAllVertices(int expectedSize) {
+
+    // To work-around the concurrenthashmap's weak consistency,
+    // that affects inconsistent results between values().size() and the iterator over the valus.
+    int count = 1;
+    while (vertices.size() < expectedSize && count <= NUM_TRIES) {
+      try {
+        Thread.sleep(1);
+        System.out.println(String.format("Try number %d failed to collect expected number of vertices.", count));
+      } catch (InterruptedException ex) {
+        ex.printStackTrace();
+      }
+      count++;
+    }
+    int[] array = new int[vertices.size() * 3];
     int i = 0;
-    for (ConcurrentVertex v : list) {
+    for (ConcurrentVertex v : vertices.values()) {
       array[i] = v.getId();
       array[i + 1] = v.getpDegree();
       array[i + 2] = v.getPartitions();

@@ -5,9 +5,7 @@ import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Collection;
 import java.util.LinkedList;
-import se.kth.scs.partitioning.ConcurrentVertex;
 import se.kth.scs.partitioning.Vertex;
 import se.kth.scs.remote.messages.Protocol;
 import se.kth.scs.remote.messages.Serializer;
@@ -47,7 +45,8 @@ public class QueryHandler implements Runnable {
           int[] partitions = Serializer.deserializeRequest(input);
           state.putPartitions(partitions);
         } else if (request == Protocol.ALL_VERTICES_REQUEST) {
-          int[] response = state.getAllVertices();
+          int expectedSize = Serializer.deserializeAllVerticesRequest(input);
+          int[] response = state.getAllVertices(expectedSize);
           Serializer.serializeAllVerticesReadResponse(output, response);
         } else if (request == Protocol.CLOSE_SESSION_REQUEST) {
           System.out.println("A close-session request is received.");

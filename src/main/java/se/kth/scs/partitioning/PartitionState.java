@@ -11,31 +11,31 @@ import java.util.Set;
  */
 public interface PartitionState {
 
-    public short getNumberOfPartitions();
+  public short getNumberOfPartitions();
 
-    public void applyState();
+  public void applyState();
 
-    public void releaseResources();
-    
-    public void releaseTaskResources();
+  public void releaseResources();
 
-    public Vertex getVertex(int vid);
+  public void releaseTaskResources();
 
-    public Map<Integer, Vertex> getAllVertices();
+  public Vertex getVertex(int vid);
 
-    public Map<Integer, Vertex> getVertices(Set<Integer> vids);
+  public Map<Integer, Vertex> getAllVertices(int expectedSize);
 
-    public void putVertex(Vertex v);
+  public Map<Integer, Vertex> getVertices(Set<Integer> vids);
 
-    public void putVertices(Collection<Vertex> vs);
+  public void putVertex(Vertex v);
 
-    public Partition getPartition(short pid);
+  public void putVertices(Collection<Vertex> vs);
 
-    public List<Partition> getPartions(short[] pids);
+  public Partition getPartition(short pid);
 
-    public List<Partition> getAllPartitions();
+  public List<Partition> getPartions(short[] pids);
 
-    public void putPartition(Partition p);
+  public List<Partition> getAllPartitions();
 
-    public void putPartitions(List<Partition> p);
+  public void putPartition(Partition p);
+
+  public void putPartitions(List<Partition> p);
 }

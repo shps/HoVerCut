@@ -159,7 +159,7 @@ public class GraphPartitioner {
         settings.frequency,
         srcGrouping);
       int duration = (int) ((System.currentTimeMillis() - start) / 1000);
-      ps = new PartitionsStatistics(state);
+      ps = new PartitionsStatistics(state, nVertices);
       output.addResults(settings.window, settings.tasks, duration, ps.replicationFactor(), ps.loadRelativeStandardDeviation());
       OutputManager.printResults(settings.k, ps, String.format("HdrfPartitioner lambda=%f\tepsilon=%f", settings.lambda, settings.epsilon));
       if (ps.getNVertices() != nVertices) {

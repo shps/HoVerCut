@@ -94,4 +94,8 @@ public class Serializer {
     }
     write(output, size, response);
   }
+
+  public static int deserializeAllVerticesRequest(DataInputStream input) throws IOException {
+    return input.readInt();
+  }
 }

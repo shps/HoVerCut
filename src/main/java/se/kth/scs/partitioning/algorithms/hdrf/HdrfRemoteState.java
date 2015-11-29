@@ -81,23 +81,6 @@ public class HdrfRemoteState implements PartitionState {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 
-  @Override
-  public Map<Integer, Vertex> getAllVertices() {
-    Map<Integer, Vertex> vertices = null;
-    try {
-      Socket c = getClient();
-      DataInputStream input = new DataInputStream(c.getInputStream());
-      DataOutputStream output = new DataOutputStream(c.getOutputStream());
-      output.writeByte(Protocol.ALL_VERTICES_REQUEST);
-      output.flush();
-      int[] response = Serializer.deserializeRequest(input);
-      vertices = deserializeVertices(response);
-    } catch (IOException ex) {
-      ex.printStackTrace();
-    }
-    return vertices;
-  }
-
   private Map<Integer, Vertex> deserializeVertices(int[] r) {
     Map<Integer, Vertex> vertices = new HashMap<>();
     for (int i = 0; i < r.length; i = i + 3) {
@@ -222,6 +205,24 @@ public class HdrfRemoteState implements PartitionState {
     }
 
     return partitions;
+  }
+
+  @Override
+  public Map<Integer, Vertex> getAllVertices(int expectedSize) {
+    Map<Integer, Vertex> vertices = null;
+    try {
+      Socket c = getClient();
+      DataInputStream input = new DataInputStream(c.getInputStream());
+      DataOutputStream output = new DataOutputStream(c.getOutputStream());
+      output.writeByte(Protocol.ALL_VERTICES_REQUEST);
+      output.writeInt(expectedSize);
+      output.flush();
+      int[] response = Serializer.deserializeRequest(input);
+      vertices = deserializeVertices(response);
+    } catch (IOException ex) {
+      ex.printStackTrace();
+    }
+    return vertices;
   }
 
 }

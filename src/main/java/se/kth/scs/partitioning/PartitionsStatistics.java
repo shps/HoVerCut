@@ -23,9 +23,10 @@ public class PartitionsStatistics {
    * Eagerly calculates some metrics about a list of partitions.
    *
    * @param state
+   * @param expectedVertices
    */
-  public PartitionsStatistics(PartitionState state) {
-    vertices = state.getAllVertices();
+  public PartitionsStatistics(PartitionState state, int expectedVertices) {
+    vertices = state.getAllVertices(expectedVertices);
     List<Partition> partitions = state.getAllPartitions();
     state.releaseTaskResources();
     nEdgePartitions = new int[partitions.size()];

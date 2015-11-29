@@ -47,7 +47,7 @@ public class URState implements PartitionState {
   }
 
   @Override
-  public Map<Integer, Vertex> getAllVertices() {
+  public Map<Integer, Vertex> getAllVertices(int expectedSize) {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 

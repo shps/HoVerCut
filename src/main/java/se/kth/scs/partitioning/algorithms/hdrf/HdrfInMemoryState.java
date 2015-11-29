@@ -58,21 +58,6 @@ public class HdrfInMemoryState implements PartitionState {
     }
   }
 
-  /**
-   * Order of number of vertices.
-   *
-   * @return
-   */
-  @Override
-  public Map<Integer, Vertex> getAllVertices() {
-    Map<Integer, Vertex> copy = new HashMap<>();
-    for (ConcurrentVertex v : vertices.values()) {
-      copy.put(v.getId(), v.clone());
-    }
-
-    return copy;
-  }
-
   @Override
   public Map<Integer, Vertex> getVertices(Set<Integer> vids) {
     Map<Integer, Vertex> someVertices = new HashMap<>();
@@ -153,6 +138,16 @@ public class HdrfInMemoryState implements PartitionState {
   @Override
   public void releaseTaskResources() {
     // No data is stored per thread.
+  }
+
+  @Override
+  public Map<Integer, Vertex> getAllVertices(int expectedSize) {
+    Map<Integer, Vertex> copy = new HashMap<>();
+    for (ConcurrentVertex v : vertices.values()) {
+      copy.put(v.getId(), v.clone());
+    }
+
+    return copy;
   }
 
 }

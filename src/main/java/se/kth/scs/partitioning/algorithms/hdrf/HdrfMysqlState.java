@@ -109,7 +109,7 @@ public class HdrfMysqlState implements PartitionState {
   }
 
   @Override
-  public Map<Integer, Vertex> getAllVertices() {
+  public Map<Integer, Vertex> getAllVertices(int expectedSize) {
     Map<Integer, Vertex> vertices = null;
     try {
       Connection con = getConnection();
