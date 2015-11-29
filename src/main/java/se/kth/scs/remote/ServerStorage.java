@@ -1,6 +1,5 @@
 package se.kth.scs.remote;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 import se.kth.scs.partitioning.ConcurrentPartition;
@@ -10,11 +9,12 @@ import se.kth.scs.partitioning.Vertex;
 
 /**
  *
+ * The thread-safe in-memory storage for the remote state storage.
+ *
  * @author Hooman
  */
 public class ServerStorage {
 
-  private final static short NUM_TRIES = 5;
   private final ConcurrentHashMap<Integer, ConcurrentVertex> vertices = new ConcurrentHashMap<>(); // Holds partial degree of each vertex.
   private final ConcurrentHashMap<Short, ConcurrentPartition> partitions;
   private final short k;

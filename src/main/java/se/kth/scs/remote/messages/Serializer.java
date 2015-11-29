@@ -5,9 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.Collection;
 import java.util.LinkedList;
-import se.kth.scs.partitioning.ConcurrentVertex;
 import se.kth.scs.partitioning.Vertex;
 
 /**
@@ -16,6 +14,12 @@ import se.kth.scs.partitioning.Vertex;
  */
 public class Serializer {
 
+  /**
+   * 
+   * @param input
+   * @return
+   * @throws IOException 
+   */
   public static int[] deserializeRequest(DataInputStream input) throws IOException {
     int n = input.readInt();
     byte[] buffer = readNexBytes(input, n);
@@ -25,6 +29,13 @@ public class Serializer {
     return array;
   }
 
+  /**
+   * 
+   * @param output
+   * @param type
+   * @param request
+   * @throws IOException 
+   */
   public static void serializeRequest(DataOutputStream output, byte type, int[] request) throws IOException {
     int size = request.length * 4;
     byte[] bytes = new byte[size];
@@ -45,8 +56,13 @@ public class Serializer {
     return buffer;
   }
 
+  /**
+   * 
+   * @param output
+   * @param vertices
+   * @throws IOException 
+   */
   public static void serializeVerticesReadResponse(DataOutputStream output, LinkedList<Vertex> vertices) throws IOException {
-//    byte type = Protocol.VERTICES_READ_RESPONSE;
     int size = vertices.size() * 3 * 4;
     byte[] response = new byte[size];
     IntBuffer buffer = ByteBuffer.wrap(response).asIntBuffer();
@@ -58,8 +74,13 @@ public class Serializer {
     write(output, size, response);
   }
 
+  /**
+   * 
+   * @param output
+   * @param edgeSizes
+   * @throws IOException 
+   */
   public static void serializePartitionsReadResponse(DataOutputStream output, int[] edgeSizes) throws IOException {
-//    byte type = Protocol.PARTITIONS_RESPONSE;
     int size = edgeSizes.length * 4;
     byte[] response = new byte[size];
     IntBuffer buffer = ByteBuffer.wrap(response).asIntBuffer();
@@ -82,6 +103,12 @@ public class Serializer {
     output.flush();
   }
 
+  /**
+   * 
+   * @param output
+   * @param array
+   * @throws IOException 
+   */
   public static void serializeAllVerticesReadResponse(DataOutputStream output, int[] array) throws IOException {
     // this is a reduntant version of serializeVerticesReadResponse but only not to duplicate the memory usage.
     int size = array.length * 4;
@@ -95,6 +122,12 @@ public class Serializer {
     write(output, size, response);
   }
 
+  /**
+   * 
+   * @param input
+   * @return
+   * @throws IOException 
+   */
   public static int deserializeAllVerticesRequest(DataInputStream input) throws IOException {
     return input.readInt();
   }

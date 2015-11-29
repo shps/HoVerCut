@@ -15,6 +15,7 @@ import java.util.List;
 import se.kth.scs.partitioning.Edge;
 
 /**
+ * A Utility to read graph edges separated with a specific delimiters.
  *
  * @author Hooman
  */

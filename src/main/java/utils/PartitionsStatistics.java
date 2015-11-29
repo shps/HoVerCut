@@ -1,9 +1,13 @@
-package se.kth.scs.partitioning;
+package utils;
 
 import java.util.List;
 import java.util.Map;
+import se.kth.scs.partitioning.Partition;
+import se.kth.scs.partitioning.PartitionState;
+import se.kth.scs.partitioning.Vertex;
 
 /**
+ * This class provides useful statistics about partitions.
  *
  * @author Hooman
  */

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package utils;
 
 import com.beust.jcommander.IParameterValidator;
@@ -10,6 +5,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 
 /**
+ * Available commands to run the remote state storage.
  *
  * @author Hooman
  */

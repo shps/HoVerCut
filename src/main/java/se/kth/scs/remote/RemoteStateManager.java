@@ -10,7 +10,10 @@ import java.util.Arrays;
 import utils.StorageInputCommands;
 
 /**
- *
+ * The main class to run the remote state storage. The remote state storage,
+ * is a fast and efficient storage, with customized serializations for communication
+ * with the clients.
+ * 
  * @author Hooman
  */
 public class RemoteStateManager {

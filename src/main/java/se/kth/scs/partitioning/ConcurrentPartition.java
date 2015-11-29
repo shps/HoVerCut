@@ -3,6 +3,8 @@ package se.kth.scs.partitioning;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
+ * This class is used to keep global state of a partition between multiple
+ * loaders.
  *
  * @author Hooman
  */

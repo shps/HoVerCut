@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.scs;
 
 import java.io.IOException;
@@ -22,7 +17,7 @@ public class Test {
       "-p", "4",
       "-t", "2", "3", "4",
       //            "-reset", "true",
-      "-s", "remote",
+      "-s", "memory",
       "-db", "localhost:4444",
       "-user", "root",
       "-pass", "",

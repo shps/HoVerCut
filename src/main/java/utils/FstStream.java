@@ -1,6 +1,5 @@
 package utils;
 
-import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,6 +7,7 @@ import java.net.Socket;
 import org.nustaq.serialization.FSTConfiguration;
 
 /**
+ * To use Fast-Serialization framework for serialization of messages.
  *
  * @author Hooman
  */

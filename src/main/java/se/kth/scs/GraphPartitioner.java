@@ -5,13 +5,12 @@ import com.beust.jcommander.ParameterException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import se.kth.scs.partitioning.Edge;
 import se.kth.scs.partitioning.PartitionState;
-import se.kth.scs.partitioning.PartitionsStatistics;
+import utils.PartitionsStatistics;
 import se.kth.scs.partitioning.algorithms.hdrf.HdrfInMemoryState;
 import se.kth.scs.partitioning.algorithms.hdrf.HdrfMysqlState;
 import se.kth.scs.partitioning.algorithms.hdrf.HdrfPartitioner;
@@ -22,6 +21,7 @@ import utils.PartitionerInputCommands;
 import utils.PartitionerSettings;
 
 /**
+ * This class is the main class to run the graph partitioning loader.
  *
  * @author Hooman
  */
@@ -54,30 +54,8 @@ public class GraphPartitioner {
     int minT = commands.nTasks.get(1);
     int maxT = commands.nTasks.get(2);
     PartitionerSettings settings = new PartitionerSettings(tb, minT, maxT, wb, minW, maxW);
-    settings.k = (short) commands.nPartitions;
-    settings.file = commands.file;
-    settings.output = commands.output;
-    settings.storage = commands.storage;
-    settings.dbUrl = commands.dbUrl;
-    settings.user = commands.user;
-    settings.pass = commands.pass;
-    settings.method = commands.method;
-    settings.lambda = commands.lambda;
-    settings.epsilon = commands.epsilon;
-    settings.delay = commands.delay;
-    if (settings.delay == null || settings.delay.size() != 2) {
-      settings.delay = new ArrayList<>(2);
-      settings.delay.add(0);
-      settings.delay.add(0);
-    }
-    settings.append = commands.append;
-    settings.reset = commands.reset;
-    settings.delimiter = commands.delimiter;
-    settings.frequency = commands.partitionsUpdateFrequency;
-    settings.restream = commands.restreaming;
-    settings.shuffle = commands.shuffle;
-    settings.srcGrouping = commands.srcGrouping;
-    settings.single = commands.single;
+    settings.setSettings(commands);
+
     if (settings.single) {
       runSingleExperiment(settings);
     }

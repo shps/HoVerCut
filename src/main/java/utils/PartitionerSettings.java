@@ -1,10 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -76,6 +72,33 @@ public class PartitionerSettings {
     shuffle = settings.shuffle;
     srcGrouping = settings.srcGrouping;
     single = settings.single;
+  }
+
+  public void setSettings(PartitionerInputCommands commands) {
+    k = (short) commands.nPartitions;
+    file = commands.file;
+    output = commands.output;
+    storage = commands.storage;
+    dbUrl = commands.dbUrl;
+    user = commands.user;
+    pass = commands.pass;
+    method = commands.method;
+    lambda = commands.lambda;
+    epsilon = commands.epsilon;
+    delay = commands.delay;
+    if (delay == null || delay.size() != 2) {
+      delay = new ArrayList<>(2);
+      delay.add(0);
+      delay.add(0);
+    }
+    append = commands.append;
+    reset = commands.reset;
+    delimiter = commands.delimiter;
+    frequency = commands.partitionsUpdateFrequency;
+    restream = commands.restreaming;
+    shuffle = commands.shuffle;
+    srcGrouping = commands.srcGrouping;
+    single = commands.single;
   }
 
   /**

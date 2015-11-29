@@ -6,6 +6,8 @@ import com.beust.jcommander.ParameterException;
 import java.util.List;
 
 /**
+ * This class provides all the commands available to user to run the
+ * multi-loader HDRFS application.
  *
  * @author Hooman
  */
@@ -16,8 +18,6 @@ public class PartitionerInputCommands {
   public final static String MYSQL = "mysql";
   public final static String REMOTE = "remote";
 
-//    @Parameter
-//    private List<String> parameters = new ArrayList<>();
   @Parameter(names = {"-file", "-f"}, description = "Directoy of the graph file.", required = true)
   public String file;
 
@@ -78,6 +78,7 @@ public class PartitionerInputCommands {
   @Parameter(names = {"-single"}, description = "Run a single thread experiment as a base for comparison.", arity = 1)
   public boolean single = true;
 
+  //It's not implemented yet. It was implemented but removed.
   @Parameter(names = {"-delay"}, description = "Delay to add after every transaction with storage.", arity = 2)
   public List<Integer> delay;
 
