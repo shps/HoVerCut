@@ -52,7 +52,7 @@ public class ServerStorage {
     // To work-around the concurrenthashmap's weak consistency,
     // that affects inconsistent results between values().size() and the iterator over the valus.
     int count = 1;
-    while (vertices.size() < expectedSize && count <= NUM_TRIES) {
+    while (vertices.size() < expectedSize) {
       try {
         Thread.sleep(1);
         System.out.println(String.format("Try number %d failed to collect expected number of vertices.", count));
