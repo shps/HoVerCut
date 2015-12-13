@@ -78,7 +78,8 @@ public class HdrfMysqlState implements PartitionState {
   }
 
   @Override
-  public void releaseResources() {
+  public void releaseResources(boolean clearAll) {
+    // TODO: implement clearAll.
     // No overall resource is used.
   }
 

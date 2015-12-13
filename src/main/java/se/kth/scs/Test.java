@@ -26,7 +26,7 @@ public class Test {
       "-d", "\" \"",
       "-puf", "1",
       "-rs", "2",
-      "-shuffle", "false",
+      "-shuffle", "true",
       "-grouping", "false",
       "-single", "false"};
 

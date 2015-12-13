@@ -66,4 +66,10 @@ public class ConcurrentVertex {
     return clone;
   }
 
+  /**
+   * Clears partitions. Not thread-safe.
+   */
+  public void resetPartition() {
+    this.partitions = 0;
+  }
 }

@@ -25,7 +25,8 @@ public class HdrfPartitioner {
     int minDelay,
     int maxDelay,
     int pUpdateFrequency,
-    boolean srcGrouping) {
+    boolean srcGrouping,
+    boolean restream) {
     System.out.println("Starts partitioning...");
     int nTasks = edges.length;
     HdrfPartitionerTask[] tasks = new HdrfPartitionerTask[nTasks];
@@ -40,7 +41,8 @@ public class HdrfPartitioner {
         minDelay,
         maxDelay,
         pUpdateFrequency,
-        srcGrouping);
+        srcGrouping,
+        restream);
       threads[i] = new Thread(tasks[i]);
     }
 

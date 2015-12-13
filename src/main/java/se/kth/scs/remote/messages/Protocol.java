@@ -17,5 +17,6 @@ public class Protocol {
   public final static byte VERTICES_READ_REQUEST = 6;
   public final static byte VERTICES_READ_RESPONSE = 7;
   public final static byte VERTICES_WRITE_REQUEST = 8;
+  public final static byte CLEAR_ALL_BUT_DEGREE_REQUEST = 9;
 
 }

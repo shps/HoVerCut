@@ -25,6 +25,10 @@ public class HdrfInMemoryState implements PartitionState {
 
   public HdrfInMemoryState(short k) {
     this.k = k;
+    initPartitions();
+  }
+
+  private void initPartitions() {
     partitions = new ConcurrentHashMap();
     for (short i = 0; i < k; i++) {
       partitions.put(i, new ConcurrentPartition(i));
@@ -42,9 +46,15 @@ public class HdrfInMemoryState implements PartitionState {
   }
 
   @Override
-  public void releaseResources() {
-    vertices.clear();
-    partitions.clear();
+  public void releaseResources(boolean clearAll) {
+    if (clearAll) {
+      vertices.clear();
+    } else {
+      for (ConcurrentVertex v : vertices.values()) {
+        v.resetPartition();
+      }
+    }
+    initPartitions();
   }
 
   @Override
@@ -70,18 +80,22 @@ public class HdrfInMemoryState implements PartitionState {
 
   @Override
   public void putVertex(Vertex v) {
-    ConcurrentVertex newVertex = new ConcurrentVertex(v.getId());
-    newVertex.accumulate(v);
-    ConcurrentVertex previous = vertices.putIfAbsent(v.getId(), newVertex);
-    // Double check if the entry does not exist.
-    if (previous != null) {
-      previous.accumulate(v);
+    ConcurrentVertex shared = vertices.get(v.getId());
+    if (shared != null) {
+      shared.accumulate(v);
+    } else {
+      shared = new ConcurrentVertex(v.getId(), 0);
+      shared.accumulate(v);
+      shared = vertices.putIfAbsent(v.getId(), shared);
+      // Double check if the entry does not exist.
+      if (shared != null) {
+        shared.accumulate(v);
+      }
     }
   }
 
   @Override
   public void putVertices(Collection<Vertex> vs) {
-    // TODO: update should be accumulated in the multi-threaded version.
     for (Vertex v : vs) {
       putVertex(v);
     }
@@ -142,6 +156,16 @@ public class HdrfInMemoryState implements PartitionState {
 
   @Override
   public Map<Integer, Vertex> getAllVertices(int expectedSize) {
+    int count = 1;
+    while (vertices.size() < expectedSize) {
+      try {
+        Thread.sleep(1);
+        System.out.println(String.format("Try number %d failed to collect expected number of vertices.", count));
+      } catch (InterruptedException ex) {
+        ex.printStackTrace();
+      }
+      count++;
+    }
     Map<Integer, Vertex> copy = new HashMap<>();
     for (ConcurrentVertex v : vertices.values()) {
       copy.put(v.getId(), v.clone());

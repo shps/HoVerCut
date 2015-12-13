@@ -93,10 +93,16 @@ public class GraphPartitioner {
     LinkedList<Edge>[][] outputAssignments = null;
     PartitionsStatistics ps = null;
     boolean srcGrouping = settings.srcGrouping;
+    boolean restream = false;
     for (int i = 0; i <= settings.restream; i++) {
       switch (settings.storage) {
         case PartitionerInputCommands.IN_MEMORY:
-          state = new HdrfInMemoryState(settings.k);
+          if (!restream) {
+            state = new HdrfInMemoryState(settings.k);
+          } else
+          {
+            state.releaseResources(false);
+          }
           break;
         case PartitionerInputCommands.MYSQL:
           state = new HdrfMysqlState(
@@ -108,7 +114,7 @@ public class GraphPartitioner {
           break;
         case PartitionerInputCommands.REMOTE:
           String[] url = settings.dbUrl.split(":");
-          state = new HdrfRemoteState(settings.k, url[0], Integer.valueOf(url[1]));
+          state = new HdrfRemoteState(settings.k, url[0], Integer.valueOf(url[1]), restream);
           break;
         default:
           throw new ParameterException("");
@@ -135,7 +141,8 @@ public class GraphPartitioner {
         settings.delay.get(0),
         settings.delay.get(1),
         settings.frequency,
-        srcGrouping);
+        srcGrouping,
+        restream);
       int duration = (int) ((System.currentTimeMillis() - start) / 1000);
       ps = new PartitionsStatistics(state, nVertices);
       output.addResults(settings.window, settings.tasks, duration, ps.replicationFactor(), ps.loadRelativeStandardDeviation());
@@ -143,6 +150,7 @@ public class GraphPartitioner {
       if (ps.getNVertices() != nVertices) {
         throw new Exception(String.format("Inconsistent number of vertices file=%d\tstorage=%d.", nVertices, ps.getNVertices()));
       }
+      restream = true;
     }
     if (!settings.output.isEmpty()) {
       try {
@@ -152,7 +160,7 @@ public class GraphPartitioner {
       }
     }
 
-    state.releaseResources();
+    state.releaseResources(true);
   }
 
   private static void runSingleExperiment(PartitionerSettings settings) throws SQLException, IOException, Exception {

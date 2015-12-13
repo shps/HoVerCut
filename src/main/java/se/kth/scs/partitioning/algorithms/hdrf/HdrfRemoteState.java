@@ -28,13 +28,17 @@ public class HdrfRemoteState implements PartitionState {
   private final int port;
   private final ThreadLocal<Socket> clients = new ThreadLocal<>();
 
-  public HdrfRemoteState(short k, String ip, int port) throws IOException {
+  public HdrfRemoteState(short k, String ip, int port, boolean restream) throws IOException {
     this.k = k;
     this.ip = ip;
     this.port = port;
     try (Socket client = new Socket(ip, port)) {
       DataOutputStream output = new DataOutputStream(client.getOutputStream());
-      output.writeByte(Protocol.CLEAR_ALL_REQUEST);
+      if (!restream) {
+        output.writeByte(Protocol.CLEAR_ALL_REQUEST);
+      } else {
+        output.writeByte(Protocol.CLEAR_ALL_BUT_DEGREE_REQUEST);
+      }
       output.flush();
       output.writeByte(Protocol.CLOSE_SESSION_REQUEST);
       output.flush();
@@ -52,7 +56,7 @@ public class HdrfRemoteState implements PartitionState {
   }
 
   @Override
-  public void releaseResources() {
+  public void releaseResources(boolean clearAll) {
     //
   }
 

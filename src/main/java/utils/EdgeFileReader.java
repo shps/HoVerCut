@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -36,10 +35,9 @@ public class EdgeFileReader {
   }
 
   public LinkedHashSet<Edge> read(String file) {
-    // TODO: investigate about the ordering of edges.
     HashSet<Integer> vertices = new HashSet<>();
     LinkedHashSet<Edge> edges = new LinkedHashSet<>();
-    HashMap<Integer, Integer> degrees = new HashMap<>();
+//    HashMap<Integer, Integer> degrees = new HashMap<>();
     try {
       FileInputStream fis = new FileInputStream(new File(file));
       InputStreamReader isr = new InputStreamReader(fis);
@@ -65,15 +63,15 @@ public class EdgeFileReader {
             if (vertices.add(v)) {
               nVertices++;
             }
-
-            if (!degrees.containsKey(u)) {
-              degrees.put(u, 0);
-            }
-            degrees.put(u, degrees.get(u) + 1);
-            if (!degrees.containsKey(v)) {
-              degrees.put(v, 0);
-            }
-            degrees.put(v, degrees.get(v) + 1);
+//
+//            if (!degrees.containsKey(u)) {
+//              degrees.put(u, 0);
+//            }
+//            degrees.put(u, degrees.get(u) + 1);
+//            if (!degrees.containsKey(v)) {
+//              degrees.put(v, 0);
+//            }
+//            degrees.put(v, degrees.get(v) + 1);
           }
         }
       }

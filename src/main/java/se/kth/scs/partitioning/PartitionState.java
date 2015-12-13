@@ -30,8 +30,9 @@ public interface PartitionState {
    * This method can be implemented to release all the resources created by the
    * loaders. E.g., closing a session to the database.
    *
+   * @param releaseAll If it's false, it keeps the partial degree of the vertices.
    */
-  public void releaseResources();
+  public void releaseResources(boolean releaseAll);
 
   /**
    * This method can be used in the scope of loaders, to release the resources

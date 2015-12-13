@@ -36,8 +36,14 @@ public class ServerStorage {
     return k;
   }
 
-  public void releaseResources() {
-    vertices.clear();
+  public void releaseResources(boolean clearAll) {
+    if (clearAll) {
+      vertices.clear();
+    } else {
+      for (ConcurrentVertex v : vertices.values()) {
+        v.resetPartition();
+      }
+    }
     initPartitions(partitions, k);
   }
 

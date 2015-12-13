@@ -53,7 +53,9 @@ public class QueryHandler implements Runnable {
           System.out.println("A close-session request is received.");
           break;
         } else if (request == Protocol.CLEAR_ALL_REQUEST) {
-          state.releaseResources();
+          state.releaseResources(true);
+        } else if (request == Protocol.CLEAR_ALL_BUT_DEGREE_REQUEST) {
+          state.releaseResources(false);
         } else {
           throw new Exception(String.format("Request type %d is not found.", request));
         }
