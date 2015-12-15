@@ -99,8 +99,7 @@ public class GraphPartitioner {
         case PartitionerInputCommands.IN_MEMORY:
           if (!restream) {
             state = new HdrfInMemoryState(settings.k);
-          } else
-          {
+          } else {
             state.releaseResources(false);
           }
           break;
@@ -120,7 +119,7 @@ public class GraphPartitioner {
           throw new ParameterException("");
       }
 
-      if (outputAssignments != null) {
+      if (settings.pGrouping && outputAssignments != null) {
         for (int j = 0; j < splits.length; j++) {
           splits[j] = new LinkedHashSet();
           for (LinkedList l : outputAssignments[j]) {
@@ -128,7 +127,6 @@ public class GraphPartitioner {
           }
         }
         outputAssignments = null;
-        srcGrouping = false;
       }
 
       long start = System.currentTimeMillis();
@@ -151,6 +149,7 @@ public class GraphPartitioner {
         throw new Exception(String.format("Inconsistent number of vertices file=%d\tstorage=%d.", nVertices, ps.getNVertices()));
       }
       restream = true;
+      srcGrouping = false;
     }
     if (!settings.output.isEmpty()) {
       try {

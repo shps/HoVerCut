@@ -36,6 +36,7 @@ public class PartitionerSettings {
   public boolean shuffle;
   public boolean srcGrouping;
   public boolean single;
+  public boolean pGrouping;
 
   public PartitionerSettings(int tb, int minT, int maxT, int wb, int minW, int maxW) {
     this.tb = tb;
@@ -98,6 +99,7 @@ public class PartitionerSettings {
     restream = commands.restreaming;
     shuffle = commands.shuffle;
     srcGrouping = commands.srcGrouping;
+    pGrouping = commands.pGrouping;
     single = commands.single;
   }
 

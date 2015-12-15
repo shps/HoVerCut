@@ -6,8 +6,7 @@ import com.beust.jcommander.ParameterException;
 import java.util.List;
 
 /**
- * This class provides all the commands available to user to run the
- * multi-loader HDRFS application.
+ * This class provides all the commands available to user to run the multi-loader HDRFS application.
  *
  * @author Hooman
  */
@@ -72,8 +71,11 @@ public class PartitionerInputCommands {
   @Parameter(names = {"-shuffle"}, description = "Shuffle the input edges randomly.", arity = 1)
   public boolean shuffle = true;
 
-  @Parameter(names = {"-grouping"}, description = "Grouping edges based on their source ids.", arity = 1)
-  public boolean srcGrouping = true;
+  @Parameter(names = {"-sg"}, description = "Grouping edges based on their source ids.", arity = 1)
+  public boolean srcGrouping = false;
+
+  @Parameter(names = {"-pg"}, description = "Grouping edges based on their partitions after one iteration of streaming.", arity = 1)
+  public boolean pGrouping = false;
 
   @Parameter(names = {"-single"}, description = "Run a single thread experiment as a base for comparison.", arity = 1)
   public boolean single = true;
