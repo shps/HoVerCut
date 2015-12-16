@@ -56,20 +56,25 @@ public class GraphPartitioner {
     PartitionerSettings settings = new PartitionerSettings(tb, minT, maxT, wb, minW, maxW);
     settings.setSettings(commands);
 
+    System.out.println(String.format("Reading file %s", settings.file));
+    long start = System.currentTimeMillis();
+    EdgeFileReader reader = new EdgeFileReader(settings.delimiter);
+    LinkedHashSet<Edge>[] splits = reader.readSplitFile(settings.file, 1, settings.shuffle);
+    System.out.println(String.format("Finished reading in %d seconds.", (System.currentTimeMillis() - start) / 1000));
+
     if (settings.single) {
-      runSingleExperiment(settings);
+      runSingleExperiment(settings, splits, reader.getnVertices());
     }
 
     for (int i = minT; i <= maxT; i++) {
       int t = (int) Math.pow(tb, i);
       int j = minW;
       int w;
-      System.out.println(String.format("Reading file %s", settings.file));
-      long start = System.currentTimeMillis();
-      EdgeFileReader reader = new EdgeFileReader(settings.delimiter);
-      LinkedHashSet<Edge>[] splits = reader.readSplitFile(settings.file, t, settings.shuffle);
+      System.out.println(String.format("Re-splitting file %s", settings.file));
+      start = System.currentTimeMillis();
+      splits = EdgeFileReader.resplit(splits, t, reader.getnEdges());
       int nEdges = reader.getnEdges();
-      System.out.println(String.format("Finished reading in %d seconds.", (System.currentTimeMillis() - start) / 1000));
+      System.out.println(String.format("Finished resplitting in %d seconds.", (System.currentTimeMillis() - start) / 1000));
       while (true) {
         w = (int) Math.pow(wb, j);
         if (w * t > nEdges) {
@@ -162,7 +167,7 @@ public class GraphPartitioner {
     state.releaseResources(true);
   }
 
-  private static void runSingleExperiment(PartitionerSettings settings) throws SQLException, IOException, Exception {
+  private static void runSingleExperiment(PartitionerSettings settings, LinkedHashSet<Edge>[] splits, int nVertices) throws SQLException, IOException, Exception {
     PartitionerSettings singleSettings = new PartitionerSettings();
     singleSettings.setSettings(settings);
     singleSettings.srcGrouping = false;
@@ -170,11 +175,6 @@ public class GraphPartitioner {
     singleSettings.window = 1;
     singleSettings.tasks = 1;
     singleSettings.frequency = 1;
-    System.out.println(String.format("Reading file %s", singleSettings.file));
-    long start = System.currentTimeMillis();
-    EdgeFileReader reader = new EdgeFileReader(singleSettings.delimiter);
-    LinkedHashSet<Edge>[] splits = reader.readSplitFile(singleSettings.file, singleSettings.tasks, singleSettings.shuffle);
-    System.out.println(String.format("Finished reading in %d seconds.", (System.currentTimeMillis() - start) / 1000));
-    runPartitioner(singleSettings, splits, reader.getnVertices());
+    runPartitioner(singleSettings, splits, nVertices);
   }
 }

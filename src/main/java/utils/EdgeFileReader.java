@@ -113,6 +113,25 @@ public class EdgeFileReader {
     return splits;
   }
 
+  public static LinkedHashSet<Edge>[] resplit(LinkedHashSet<Edge>[] splits, int nSplit, int eSize) {
+    LinkedHashSet<Edge>[] newSplits = new LinkedHashSet[nSplit];
+    int splitSize = eSize / nSplit + 1;
+    int j = -1;
+    int i = 0;
+    for (LinkedHashSet<Edge> l : splits) {
+      for (Edge e : l) {
+        if (i % splitSize == 0) {
+          j++;
+          newSplits[j] = new LinkedHashSet<>();
+        }
+        newSplits[j].add(e);
+        i++;
+      }
+    }
+
+    return newSplits;
+  }
+
   /**
    * @return the nEdges
    */
