@@ -25,7 +25,7 @@ public class ConcurrentPartition {
     return id;
   }
 
-  public synchronized void accumulate(Partition p) {
+  public void accumulate(Partition p) {
     eSize.addAndGet(p.getESizeDelta());
   }
 
@@ -56,7 +56,7 @@ public class ConcurrentPartition {
   }
 
   @Override
-  public synchronized Partition clone() {
+  public Partition clone() {
     Partition clone = new Partition(id);
     clone.setESize(this.getESize());
     return clone;

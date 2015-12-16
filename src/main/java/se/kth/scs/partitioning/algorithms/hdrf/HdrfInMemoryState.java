@@ -133,12 +133,17 @@ public class HdrfInMemoryState implements PartitionState {
 
   @Override
   public void putPartition(Partition p) {
-    ConcurrentPartition newPartition = new ConcurrentPartition(p.getId());
-    newPartition.accumulate(p);
-    ConcurrentPartition previous = partitions.putIfAbsent(p.getId(), newPartition);
-    // Double check if the entry does not exist.
-    if (previous != null) {
-      previous.accumulate(p);
+    ConcurrentPartition shared = partitions.get(p.getId());
+    if (shared != null) {
+      shared.accumulate(p);
+    } else {
+      shared = new ConcurrentPartition(p.getId());
+      shared.accumulate(p);
+      shared = partitions.putIfAbsent(p.getId(), shared);
+      // Double check if the entry does not exist.
+      if (shared != null) {
+        shared.accumulate(p);
+      }
     }
   }
 

@@ -45,20 +45,11 @@ public class ConcurrentVertex {
     return pDegree.get();
   }
 
-//  /**
-//   * @param pDegree the pDegree to set
-//   */
-//  public void setpDegree(int pDegree) {
-//    this.pDegree.set(pDegree);
-//  }
   public synchronized void accumulate(Vertex v) {
     this.pDegree.addAndGet(v.getDegreeDelta());
     this.partitions = (this.partitions | v.getPartitionsDelta());
   }
 
-//  public synchronized boolean containsPartition(short pid) {
-//    return ((partitions >> pid) & 1) == 1;
-//  }
   @Override
   public synchronized Vertex clone() {
     Vertex clone = new Vertex(id, getPartitions());
