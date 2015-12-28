@@ -28,7 +28,7 @@ public class HdrfPartitionerTask implements Runnable {
   private final int maxDelay;
   private final int pUpdateFrequency;
   private final boolean srcGrouping;
-  private final boolean restream;
+  private final boolean exactDegree;
 
   private final LinkedList<Edge>[] assignments;
 
@@ -60,7 +60,7 @@ public class HdrfPartitionerTask implements Runnable {
     int maxDelay,
     int pUpdateFrequency,
     boolean srcGrouping,
-    boolean restream) {
+    boolean exactDegree) {
     this.edges = edges;
     this.lambda = lambda;
     this.epsilon = epsilon;
@@ -70,7 +70,7 @@ public class HdrfPartitionerTask implements Runnable {
     this.maxDelay = maxDelay;
     this.pUpdateFrequency = pUpdateFrequency;
     this.srcGrouping = srcGrouping;
-    this.restream = restream;
+    this.exactDegree = exactDegree;
     this.assignments = new LinkedList[state.getNumberOfPartitions()];
     for (int i = 0; i < state.getNumberOfPartitions(); i++) {
       this.assignments[i] = new LinkedList<>();
@@ -133,7 +133,7 @@ public class HdrfPartitionerTask implements Runnable {
         v = new Vertex(e.getDst());
         vertices.put(v.getId(), v);
       }
-      if (!restream) {
+      if (!exactDegree) {
         u.incrementDegree();
         v.incrementDegree();
       }
@@ -157,7 +157,7 @@ public class HdrfPartitionerTask implements Runnable {
     int deltaV2 = v2.getpDegree();
     if (deltaV1 == 0 || deltaV2 == 0)
     {
-      System.out.println();
+      System.err.println("Warning, vertex degree is zero!");
     }
     double thetaV1 = (double) deltaV1 / (double) (deltaV1 + deltaV2);
     double thetaV2 = 1 - thetaV1;

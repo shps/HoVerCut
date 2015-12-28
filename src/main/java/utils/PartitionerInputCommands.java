@@ -77,6 +77,9 @@ public class PartitionerInputCommands {
   @Parameter(names = {"-pg"}, description = "Grouping edges based on their partitions after one iteration of streaming.", arity = 1)
   public boolean pGrouping = false;
 
+  @Parameter(names = {"-ed"}, description = "Compute the exact degree of vertices before partitioning the graph.", arity = 1)
+  public boolean exactDegree = false;
+
   @Parameter(names = {"-single"}, description = "Run a single thread experiment as a base for comparison.", arity = 1)
   public boolean single = true;
 

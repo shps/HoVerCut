@@ -37,6 +37,7 @@ public class PartitionerSettings {
   public boolean srcGrouping;
   public boolean single;
   public boolean pGrouping;
+  public boolean exactDegree;
 
   public PartitionerSettings(int tb, int minT, int maxT, int wb, int minW, int maxW) {
     this.tb = tb;
@@ -73,6 +74,7 @@ public class PartitionerSettings {
     shuffle = settings.shuffle;
     srcGrouping = settings.srcGrouping;
     single = settings.single;
+    exactDegree = settings.exactDegree;
   }
 
   public void setSettings(PartitionerInputCommands commands) {
@@ -101,6 +103,7 @@ public class PartitionerSettings {
     srcGrouping = commands.srcGrouping;
     pGrouping = commands.pGrouping;
     single = commands.single;
+    exactDegree = commands.exactDegree;
   }
 
   /**

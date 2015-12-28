@@ -14,8 +14,8 @@ public class Test {
       "-f", "./data/datasets/twitter_combined.txt",
       "-w", "10", "3", "3",
       "-m", "hdrf",
-      "-p", "4",
-      "-t", "2", "2", "3",
+      "-p", "16",
+      "-t", "2", "3", "3",
       //            "-reset", "true",
       "-s", "memory",
       "-db", "localhost:4444",
@@ -29,6 +29,7 @@ public class Test {
       "-shuffle", "true",
       "-sg", "false",
       "-pg", "false",
+      "-ed", "true",
       "-single", "false"};
 
     GraphPartitioner.main(args);

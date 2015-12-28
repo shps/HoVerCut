@@ -262,6 +262,7 @@ public class OutputManager {
     sb.append("shuffle input:\t").append(settings.shuffle).append(newLine);
     sb.append("source grouping:\t").append(settings.srcGrouping).append(newLine);
     sb.append("partition grouping:\t").append(settings.pGrouping).append(newLine);
+    sb.append("ccompute exact degree:\t").append(settings.exactDegree).append(newLine);
     sb.append("+single experiment:\t").append(settings.single).append(newLine);
     System.out.println(sb.toString());
   }
