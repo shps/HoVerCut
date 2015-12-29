@@ -22,10 +22,10 @@ public class Test {
       "-user", "root",
       "-pass", "",
       "-output", "/Users/Ganymedian/Desktop/results/hdrf",
-      "-append", "true", //FIXME: if appends is true it throws exception.
+      "-append", "false", //FIXME: if appends is true it throws exception.
       "-d", "\" \"",
       "-puf", "1",
-      "-rs", "0",
+      "-rs", "2",
       "-shuffle", "true",
       "-sg", "false",
       "-pg", "false",

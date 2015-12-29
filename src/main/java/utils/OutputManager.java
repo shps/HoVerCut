@@ -175,6 +175,10 @@ public class OutputManager {
         }
         for (int i = minP; i <= maxP; i++) {
           int taskId = (int) Math.pow(base, i);
+          if (settings.exactDegree)
+          {
+            writer.append(String.format("%s%d-%s,", secondHeader, taskId, "ed"));
+          }
           for (int j = 0; j <= settings.restream; j++) {
             writer.append(String.format("%s%d-%d,", secondHeader, taskId, j));
           }

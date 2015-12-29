@@ -101,7 +101,9 @@ public class GraphPartitioner {
       HdrfPartitioner.computeExactDegrees(state, splits);
       //TODO: push the consistency to the state.
       state.getAllVertices(nVertices);
-      long end = (System.currentTimeMillis() - start) / 1000;
+      int end = (int) ((System.currentTimeMillis() - start) / 1000);
+      output.addDurationToWindow(end, settings.window, settings.tasks);
+      output.addDurationToTask(end, settings.tasks, settings.window);
       System.out.println(String.format("******** Exact degree computation finished in %d seconds **********", end));
     }
 
