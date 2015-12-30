@@ -27,10 +27,16 @@ public class OutputManager {
   private final Map<Integer, Map<Integer, List<Number>>> windowTime = new LinkedHashMap<>();
   private final Map<Integer, Map<Integer, List<Number>>> taskTime = new LinkedHashMap<>();
 
+  private final List<PartitioningResult> results = new LinkedList<>();
+
   private final List<Long> seeds = new LinkedList<>();
 
   public void addSeed(long seed) {
     seeds.add(seed);
+  }
+
+  public void addResult(final PartitioningResult r) {
+    results.add(r);
   }
 
   /**
