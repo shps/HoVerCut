@@ -2,7 +2,6 @@ package se.kth.scs;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -10,7 +9,6 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import se.kth.scs.partitioning.Edge;
 import se.kth.scs.partitioning.PartitionState;
-import utils.PartitionsStatistics;
 import se.kth.scs.partitioning.algorithms.hdrf.HdrfInMemoryState;
 import se.kth.scs.partitioning.algorithms.hdrf.HdrfMysqlState;
 import se.kth.scs.partitioning.algorithms.hdrf.HdrfPartitioner;
@@ -19,6 +17,7 @@ import utils.EdgeFileReader;
 import utils.OutputManager;
 import utils.PartitionerInputCommands;
 import utils.PartitionerSettings;
+import utils.PartitionsStatistics;
 
 /**
  * This class is the main class to run the graph partitioning loader.
@@ -46,21 +45,30 @@ public class GraphPartitioner {
     if (!commands.method.equals(PartitionerInputCommands.HDRF)) {
       throw new ParameterException("");
     }
+    for (int i = 0; i < commands.numExperiments; i++) {
+      runExperiments(commands, i);
+    }
+//    output.writeToFile(settings);
+  }
 
+  private static void runExperiments(PartitionerInputCommands commands, int num) throws IOException, Exception {
     int wb = commands.window.get(0);
     int minW = commands.window.get(1);
     int maxW = commands.window.get(2);
     int tb = commands.nTasks.get(0);
     int minT = commands.nTasks.get(1);
     int maxT = commands.nTasks.get(2);
+    int minRestream = commands.restreaming.get(0);
+    int maxRestream = commands.restreaming.get(1);
     PartitionerSettings settings = new PartitionerSettings(tb, minT, maxT, wb, minW, maxW);
     settings.setSettings(commands);
 
     System.out.println(String.format("Reading file %s", settings.file));
     long start = System.currentTimeMillis();
     EdgeFileReader reader = new EdgeFileReader(settings.delimiter);
-    LinkedHashSet<Edge>[] splits = reader.readSplitFile(settings.file, 1, settings.shuffle);
+    LinkedHashSet<Edge>[] splits = reader.readSplitFile(settings.file, 1, settings.shuffle, start);
     System.out.println(String.format("Finished reading in %d seconds.", (System.currentTimeMillis() - start) / 1000));
+    output.addSeed(start);
 
     if (settings.single) {
       runSingleExperiment(settings, splits, reader.getnVertices());
@@ -74,6 +82,7 @@ public class GraphPartitioner {
       start = System.currentTimeMillis();
       splits = EdgeFileReader.resplit(splits, t, reader.getnEdges());
       int nEdges = reader.getnEdges();
+      int nVertices = reader.getnVertices();
       System.out.println(String.format("Finished resplitting in %d seconds.", (System.currentTimeMillis() - start) / 1000));
       while (true) {
         w = (int) Math.pow(wb, j);
@@ -84,35 +93,46 @@ public class GraphPartitioner {
         }
         settings.window = w;
         settings.tasks = t;
-        runPartitioner(settings, splits, reader.getnVertices());
+        for (int rs = minRestream; rs <= maxRestream; rs++) {
+          settings.restream = rs;
+          OutputManager.printCommandSetup(settings);
+          start = System.currentTimeMillis();
+          PartitionState state = runPartitioner(settings, splits, nVertices);
+          int duration = (int) ((System.currentTimeMillis() - start) / 1000);
+          PartitionsStatistics ps = new PartitionsStatistics(state, nVertices);
+          output.addResults(settings.window, settings.tasks, duration, ps.replicationFactor(), ps.loadRelativeStandardDeviation());
+          OutputManager.printResults(settings.k, ps, String.format("HdrfPartitioner lambda=%f\tepsilon=%f", settings.lambda, settings.epsilon));
+          if (ps.getNVertices() != nVertices) {
+            //To check the correctness.
+            throw new Exception(String.format("Inconsistent number of vertices file=%d\tstorage=%d.", nVertices, ps.getNVertices()));
+          }
+          state.releaseResources(true);
+        }
         j++;
       }
     }
-    output.writeToFile(settings);
   }
 
-  private static void runPartitioner(PartitionerSettings settings, LinkedHashSet<Edge>[] splits, int nVertices) throws SQLException, IOException, Exception {
-    OutputManager.printCommandSetup(settings);
+  private static PartitionState runPartitioner(PartitionerSettings settings, LinkedHashSet<Edge>[] splits, int nVertices) throws SQLException, IOException, Exception {
     PartitionState state = null;
     if (settings.exactDegree) {
       System.out.println("Starts exact degree computation...");
       long start = System.currentTimeMillis();
       state = prepareState(settings, state, false);
       HdrfPartitioner.computeExactDegrees(state, splits);
-      //TODO: push the consistency to the state.
-      state.getAllVertices(nVertices);
+      //TODO: This should be removed.
+      state.waitForAllUpdates(nVertices);
+      state.releaseTaskResources();
       int end = (int) ((System.currentTimeMillis() - start) / 1000);
-      output.addDurationToWindow(end, settings.window, settings.tasks);
-      output.addDurationToTask(end, settings.tasks, settings.window);
+//      output.addDurationToWindow(end, settings.window, settings.tasks);
+//      output.addDurationToTask(end, settings.tasks, settings.window);
       System.out.println(String.format("******** Exact degree computation finished in %d seconds **********", end));
     }
 
     LinkedList<Edge>[][] outputAssignments = null;
-    PartitionsStatistics ps = null;
     boolean srcGrouping = settings.srcGrouping;
     boolean exactDegree = settings.exactDegree;
     for (int i = 0; i <= settings.restream; i++) {
-      long start = System.currentTimeMillis();
       state = prepareState(settings, state, exactDegree);
 
       if (settings.pGrouping && outputAssignments != null) {
@@ -135,26 +155,22 @@ public class GraphPartitioner {
         settings.frequency,
         srcGrouping,
         exactDegree);
-      int duration = (int) ((System.currentTimeMillis() - start) / 1000);
-      ps = new PartitionsStatistics(state, nVertices);
-      output.addResults(settings.window, settings.tasks, duration, ps.replicationFactor(), ps.loadRelativeStandardDeviation());
-      OutputManager.printResults(settings.k, ps, String.format("HdrfPartitioner lambda=%f\tepsilon=%f", settings.lambda, settings.epsilon));
-      if (ps.getNVertices() != nVertices) {
-        throw new Exception(String.format("Inconsistent number of vertices file=%d\tstorage=%d.", nVertices, ps.getNVertices()));
+      if (exactDegree == false && i == 0) {
+        state.waitForAllUpdates(nVertices);
+        state.releaseTaskResources();
       }
       exactDegree = true;
       srcGrouping = false;
     }
 
-    if (!settings.output.isEmpty()) {
-      try {
-        output.writeToFile(ps, settings);
-      } catch (FileNotFoundException ex) {
-        ex.printStackTrace();
-      }
-    }
-
-    state.releaseResources(true);
+//    if (!settings.output.isEmpty()) {
+//      try {
+//        output.writeToFile(ps, settings);
+//      } catch (FileNotFoundException ex) {
+//        ex.printStackTrace();
+//      }
+//    }
+    return state;
   }
 
   private static PartitionState prepareState(PartitionerSettings settings, PartitionState state, boolean exactDegree) throws SQLException, IOException {

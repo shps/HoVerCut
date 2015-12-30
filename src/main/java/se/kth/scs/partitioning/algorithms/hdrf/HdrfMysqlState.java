@@ -210,4 +210,9 @@ public class HdrfMysqlState implements PartitionState {
       ex.printStackTrace();
     }
   }
+
+  @Override
+  public void waitForAllUpdates(int expectedSize) {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
 }

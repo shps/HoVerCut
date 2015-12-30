@@ -16,19 +16,19 @@ import se.kth.scs.partitioning.Vertex;
 public class ServerStorage {
 
   private final ConcurrentHashMap<Integer, ConcurrentVertex> vertices = new ConcurrentHashMap<>(); // Holds partial degree of each vertex.
-  private final ConcurrentHashMap<Short, ConcurrentPartition> partitions;
+  private final ConcurrentHashMap<Short, ConcurrentPartition> partitions = new ConcurrentHashMap();
   private final short k;
 
   public ServerStorage(short k) {
     this.k = k;
-    partitions = new ConcurrentHashMap();
     initPartitions(partitions, this.k);
   }
 
-  private void initPartitions(ConcurrentHashMap<Short, ConcurrentPartition> partitions, short k) {
+  private void initPartitions(final ConcurrentHashMap<Short, ConcurrentPartition> partitions, short k) {
     partitions.clear();
     for (short i = 0; i < k; i++) {
-      partitions.put(i, new ConcurrentPartition(i));
+      final ConcurrentPartition p = new ConcurrentPartition(i);
+      partitions.put(i, p);
     }
   }
 
@@ -36,7 +36,7 @@ public class ServerStorage {
     return k;
   }
 
-  public void releaseResources(boolean clearAll) {
+  public void releaseResources(final boolean clearAll) {
     if (clearAll) {
       vertices.clear();
     } else {
@@ -53,20 +53,8 @@ public class ServerStorage {
    * @param expectedSize
    * @return
    */
-  public int[] getAllVertices(int expectedSize) {
-
-    // To work-around the concurrenthashmap's weak consistency,
-    // that affects inconsistent results between values().size() and the iterator over the valus.
-    int count = 1;
-    while (vertices.size() < expectedSize) {
-      try {
-        Thread.sleep(1);
-        System.out.println(String.format("Try number %d failed to collect expected number of vertices.", count));
-      } catch (InterruptedException ex) {
-        ex.printStackTrace();
-      }
-      count++;
-    }
+  public int[] getAllVertices(final int expectedSize) {
+    waitForAllUpdates(expectedSize);
     int[] array = new int[vertices.size() * 3];
     int i = 0;
     for (ConcurrentVertex v : vertices.values()) {
@@ -79,7 +67,22 @@ public class ServerStorage {
     return array;
   }
 
-  public Vertex getVertex(int vid) {
+  public void waitForAllUpdates(int expectedSize) {
+    // To work-around the concurrenthashmap's weak consistency,
+    // that affects inconsistent results between values().size() and the iterator over the valus.
+    int count = 1;
+    while (vertices.size() < expectedSize) {
+      try {
+        Thread.sleep(1);
+        System.out.println(String.format("Try number %d failed to collect expected number of vertices.", count));
+      } catch (InterruptedException ex) {
+        ex.printStackTrace();
+      }
+      count++;
+    }
+  }
+
+  public Vertex getVertex(final int vid) {
     //TODO: a clone should be sent in multi-threaded version.
     ConcurrentVertex v = vertices.get(vid);
     if (v != null) {
@@ -89,7 +92,7 @@ public class ServerStorage {
     }
   }
 
-  public LinkedList<Vertex> getVertices(int[] vids) {
+  public LinkedList<Vertex> getVertices(final int[] vids) {
     LinkedList<Vertex> vs = new LinkedList<>();
     for (int vid : vids) {
       Vertex v = getVertex(vid);
@@ -100,14 +103,14 @@ public class ServerStorage {
     return vs;
   }
 
-  public void putVertex(Vertex v) {
+  public void putVertex(final Vertex v) {
     ConcurrentVertex shared = vertices.get(v.getId());
     if (shared != null) {
       shared.accumulate(v);
     } else {
-      shared = new ConcurrentVertex(v.getId(), 0);
-      shared.accumulate(v);
-      shared = vertices.putIfAbsent(v.getId(), shared);
+      final ConcurrentVertex newVertex = new ConcurrentVertex(v.getId(), 0);
+      newVertex.accumulate(v);
+      shared = vertices.putIfAbsent(v.getId(), newVertex);
       // Double check if the entry does not exist.
       if (shared != null) {
         shared.accumulate(v);
@@ -115,7 +118,7 @@ public class ServerStorage {
     }
   }
 
-  public void putVertices(int[] vertices) {
+  public void putVertices(final int[] vertices) {
     for (int i = 0; i < vertices.length; i = i + 3) {
       Vertex v = new Vertex(vertices[i]);
       v.setDegreeDelta(vertices[i + 1]);
@@ -124,7 +127,7 @@ public class ServerStorage {
     }
   }
 
-  public Partition getPartition(short pid) {
+  public Partition getPartition(final short pid) {
     ConcurrentPartition p = partitions.get(pid);
     if (p != null) {
       return p.clone();
@@ -148,21 +151,21 @@ public class ServerStorage {
   }
 
   public void putPartition(Partition p) {
-    ConcurrentPartition shared = partitions.get(p.getId());
-    if (shared != null) {
-      shared.accumulate(p);
-    } else {
-      shared = new ConcurrentPartition(p.getId());
-      shared.accumulate(p);
-      shared = partitions.putIfAbsent(p.getId(), shared);
-      // Double check if the entry does not exist.
-      if (shared != null) {
-        shared.accumulate(p);
-      }
-    }
+    final ConcurrentPartition shared = partitions.get(p.getId());
+//    if (shared != null) {
+    shared.accumulate(p); // It shoudl exists. Because it is always initialized.
+//    } else {
+//      shared = new ConcurrentPartition(p.getId());
+//      shared.accumulate(p);
+//      shared = partitions.putIfAbsent(p.getId(), shared);
+//      // Double check if the entry does not exist.
+//      if (shared != null) {
+//        shared.accumulate(p);
+//      }
+//    }
   }
 
-  public void putPartitions(int[] eSizes) {
+  public void putPartitions(final int[] eSizes) {
     for (short i = 0; i < eSizes.length; i++) {
       Partition p = new Partition(i);
       p.seteSizeDelta(eSizes[i]);

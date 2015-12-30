@@ -27,6 +27,12 @@ public class OutputManager {
   private final Map<Integer, Map<Integer, List<Number>>> windowTime = new LinkedHashMap<>();
   private final Map<Integer, Map<Integer, List<Number>>> taskTime = new LinkedHashMap<>();
 
+  private final List<Long> seeds = new LinkedList<>();
+
+  public void addSeed(long seed) {
+    seeds.add(seed);
+  }
+
   /**
    *
    * @param w window size
@@ -175,8 +181,7 @@ public class OutputManager {
         }
         for (int i = minP; i <= maxP; i++) {
           int taskId = (int) Math.pow(base, i);
-          if (settings.exactDegree)
-          {
+          if (settings.exactDegree) {
             writer.append(String.format("%s%d-%s,", secondHeader, taskId, "ed"));
           }
           for (int j = 0; j <= settings.restream; j++) {
@@ -266,7 +271,7 @@ public class OutputManager {
     sb.append("shuffle input:\t").append(settings.shuffle).append(newLine);
     sb.append("source grouping:\t").append(settings.srcGrouping).append(newLine);
     sb.append("partition grouping:\t").append(settings.pGrouping).append(newLine);
-    sb.append("ccompute exact degree:\t").append(settings.exactDegree).append(newLine);
+    sb.append("compute exact degree:\t").append(settings.exactDegree).append(newLine);
     sb.append("+single experiment:\t").append(settings.single).append(newLine);
     System.out.println(sb.toString());
   }

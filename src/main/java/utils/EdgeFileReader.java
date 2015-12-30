@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Random;
 import se.kth.scs.partitioning.Edge;
 
 /**
@@ -86,7 +87,7 @@ public class EdgeFileReader {
     return edges;
   }
 
-  public LinkedHashSet[] readSplitFile(String file, int nSplit, boolean shuffle) {
+  public LinkedHashSet[] readSplitFile(String file, int nSplit, boolean shuffle, long seed) {
     LinkedHashSet<Edge> allEdges = read(file);
     nEdges = allEdges.size();
     LinkedHashSet<Edge>[] splits = new LinkedHashSet[nSplit];
@@ -94,7 +95,7 @@ public class EdgeFileReader {
     Iterator<Edge> it;
     if (shuffle) {
       List<Edge> shuffled = new ArrayList<>(allEdges);
-      Collections.shuffle(shuffled);
+      Collections.shuffle(shuffled, new Random(seed));
       it = shuffled.iterator();
     } else {
       it = allEdges.iterator();

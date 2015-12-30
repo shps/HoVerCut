@@ -13,7 +13,7 @@ public class ConcurrentPartition {
   private final short id;
   private final AtomicInteger eSize;
 
-  public ConcurrentPartition(short id) {
+  public ConcurrentPartition(final short id) {
     eSize = new AtomicInteger();
     this.id = id;
   }
@@ -25,7 +25,7 @@ public class ConcurrentPartition {
     return id;
   }
 
-  public void accumulate(Partition p) {
+  public void accumulate(final Partition p) {
     eSize.addAndGet(p.getESizeDelta());
   }
 

@@ -56,6 +56,12 @@ public class QueryHandler implements Runnable {
           state.releaseResources(true);
         } else if (request == Protocol.CLEAR_ALL_BUT_DEGREE_REQUEST) {
           state.releaseResources(false);
+        } else if (request == Protocol.WAIT_FOR_ALL_UPDATES_REQUEST)
+        {
+          int expectedSize = Serializer.deserializeAllVerticesRequest(input);
+          state.waitForAllUpdates(expectedSize);
+          output.writeByte(Protocol.WAIT_FOR_ALL_UPDATES_RESPONSE);
+          output.flush();
         } else {
           throw new Exception(String.format("Request type %d is not found.", request));
         }

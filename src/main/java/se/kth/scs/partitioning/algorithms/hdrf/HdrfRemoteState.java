@@ -225,4 +225,22 @@ public class HdrfRemoteState implements PartitionState {
     return vertices;
   }
 
+  @Override
+  public void waitForAllUpdates(int expectedSize) {
+    try {
+      Socket c = getClient();
+      DataInputStream input = new DataInputStream(c.getInputStream());
+      DataOutputStream output = new DataOutputStream(c.getOutputStream());
+      output.writeByte(Protocol.WAIT_FOR_ALL_UPDATES_REQUEST);
+      output.writeInt(expectedSize);
+      output.flush();
+      byte response = input.readByte();
+      if (response != Protocol.WAIT_FOR_ALL_UPDATES_RESPONSE) {
+        throw new Exception("wrong response from the storage server!");
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
 }

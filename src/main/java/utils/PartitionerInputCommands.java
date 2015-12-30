@@ -6,7 +6,8 @@ import com.beust.jcommander.ParameterException;
 import java.util.List;
 
 /**
- * This class provides all the commands available to user to run the multi-loader HDRFS application.
+ * This class provides all the commands available to user to run the
+ * multi-loader HDRFS application.
  *
  * @author Hooman
  */
@@ -26,8 +27,11 @@ public class PartitionerInputCommands {
   @Parameter(names = {"-puf"}, description = "Partitions update frequency comparing to the window size.")
   public int partitionsUpdateFrequency = 1;
 
-  @Parameter(names = {"-rs"}, description = "Number of restreamings.")
-  public int restreaming = 0;
+  @Parameter(names = {"-ne"}, description = "Number of experiments.")
+  public int numExperiments = 1;
+
+  @Parameter(names = {"-rs"}, description = "Number of restreamings.", arity = 2)
+  public List<Integer> restreaming;
 
   @Parameter(names = {"-tasks", "-t"}, description = "Number of tasks (threads): (1)base (2)min exponent (3)max exponent.", arity = 3, required = true)
   public List<Integer> nTasks;

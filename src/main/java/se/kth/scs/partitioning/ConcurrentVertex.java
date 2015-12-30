@@ -14,11 +14,11 @@ public class ConcurrentVertex {
   private final int id;
   private final AtomicInteger pDegree;
 
-  public ConcurrentVertex(int id) {
+  public ConcurrentVertex(final int id) {
     this(id, 0);
   }
 
-  public ConcurrentVertex(int id, int partitions) {
+  public ConcurrentVertex(final int id, final int partitions) {
     this.partitions = partitions;
     pDegree = new AtomicInteger();
     this.id = id;
@@ -45,7 +45,7 @@ public class ConcurrentVertex {
     return pDegree.get();
   }
 
-  public synchronized void accumulate(Vertex v) {
+  public synchronized void accumulate(final Vertex v) {
     this.pDegree.addAndGet(v.getDegreeDelta());
     this.partitions = (this.partitions | v.getPartitionsDelta());
   }

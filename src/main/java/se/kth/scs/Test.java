@@ -25,11 +25,12 @@ public class Test {
       "-append", "false", //FIXME: if appends is true it throws exception.
       "-d", "\" \"",
       "-puf", "1",
-      "-rs", "2",
+      "-rs", "2", "3",
       "-shuffle", "true",
       "-sg", "false",
       "-pg", "false",
       "-ed", "true",
+      "-ne", "2",
       "-single", "false"};
 
     GraphPartitioner.main(args);

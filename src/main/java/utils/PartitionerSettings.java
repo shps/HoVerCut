@@ -27,6 +27,7 @@ public class PartitionerSettings {
   public boolean append;
   public List<Integer> delay;
   public int restream;
+  public int numExperiments;
   public final int tb;
   public final int minT;
   public final int maxT;
@@ -75,6 +76,7 @@ public class PartitionerSettings {
     srcGrouping = settings.srcGrouping;
     single = settings.single;
     exactDegree = settings.exactDegree;
+    numExperiments = settings.numExperiments;
   }
 
   public void setSettings(PartitionerInputCommands commands) {
@@ -98,12 +100,12 @@ public class PartitionerSettings {
     reset = commands.reset;
     delimiter = commands.delimiter;
     frequency = commands.partitionsUpdateFrequency;
-    restream = commands.restreaming;
     shuffle = commands.shuffle;
     srcGrouping = commands.srcGrouping;
     pGrouping = commands.pGrouping;
     single = commands.single;
     exactDegree = commands.exactDegree;
+    numExperiments = commands.numExperiments;
   }
 
   /**

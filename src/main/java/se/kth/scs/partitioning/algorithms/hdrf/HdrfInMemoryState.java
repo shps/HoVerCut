@@ -19,17 +19,16 @@ import se.kth.scs.partitioning.Vertex;
  */
 public class HdrfInMemoryState implements PartitionState {
 
-  final ConcurrentHashMap<Integer, ConcurrentVertex> vertices = new ConcurrentHashMap<>(); // Holds partial degree of each vertex.
-  ConcurrentHashMap<Short, ConcurrentPartition> partitions;
+  private final ConcurrentHashMap<Integer, ConcurrentVertex> vertices = new ConcurrentHashMap<>(); // Holds partial degree of each vertex.
+  private final ConcurrentHashMap<Short, ConcurrentPartition> partitions = new ConcurrentHashMap<>();
   private final short k;
 
-  public HdrfInMemoryState(short k) {
+  public HdrfInMemoryState(final short k) {
     this.k = k;
     initPartitions();
   }
 
   private void initPartitions() {
-    partitions = new ConcurrentHashMap();
     for (short i = 0; i < k; i++) {
       partitions.put(i, new ConcurrentPartition(i));
     }
@@ -46,7 +45,7 @@ public class HdrfInMemoryState implements PartitionState {
   }
 
   @Override
-  public void releaseResources(boolean clearAll) {
+  public void releaseResources(final boolean clearAll) {
     if (clearAll) {
       vertices.clear();
     } else {
@@ -69,7 +68,7 @@ public class HdrfInMemoryState implements PartitionState {
   }
 
   @Override
-  public Map<Integer, Vertex> getVertices(Set<Integer> vids) {
+  public Map<Integer, Vertex> getVertices(final Set<Integer> vids) {
     Map<Integer, Vertex> someVertices = new HashMap<>();
     for (int vid : vids) {
       someVertices.put(vid, getVertex(vid));
@@ -79,14 +78,14 @@ public class HdrfInMemoryState implements PartitionState {
   }
 
   @Override
-  public void putVertex(Vertex v) {
+  public void putVertex(final Vertex v) {
     ConcurrentVertex shared = vertices.get(v.getId());
     if (shared != null) {
       shared.accumulate(v);
     } else {
-      shared = new ConcurrentVertex(v.getId(), 0);
-      shared.accumulate(v);
-      shared = vertices.putIfAbsent(v.getId(), shared);
+      final ConcurrentVertex newVertex = new ConcurrentVertex(v.getId(), 0);
+      newVertex.accumulate(v);
+      shared = vertices.putIfAbsent(v.getId(), newVertex);
       // Double check if the entry does not exist.
       if (shared != null) {
         shared.accumulate(v);
@@ -95,7 +94,7 @@ public class HdrfInMemoryState implements PartitionState {
   }
 
   @Override
-  public void putVertices(Collection<Vertex> vs) {
+  public void putVertices(final Collection<Vertex> vs) {
     for (Vertex v : vs) {
       putVertex(v);
     }
@@ -132,19 +131,19 @@ public class HdrfInMemoryState implements PartitionState {
   }
 
   @Override
-  public void putPartition(Partition p) {
-    ConcurrentPartition shared = partitions.get(p.getId());
-    if (shared != null) {
-      shared.accumulate(p);
-    } else {
-      shared = new ConcurrentPartition(p.getId());
-      shared.accumulate(p);
-      shared = partitions.putIfAbsent(p.getId(), shared);
-      // Double check if the entry does not exist.
-      if (shared != null) {
-        shared.accumulate(p);
-      }
-    }
+  public void putPartition(final Partition p) {
+    final ConcurrentPartition shared = partitions.get(p.getId());
+//    if (shared != null) {
+    shared.accumulate(p); //It shoudl always exist.
+//    } else {
+//      shared = new ConcurrentPartition(p.getId());
+//      shared.accumulate(p);
+//      shared = partitions.putIfAbsent(p.getId(), shared);
+//      // Double check if the entry does not exist.
+//      if (shared != null) {
+//        shared.accumulate(p);
+//      }
+//    }
   }
 
   @Override
@@ -161,6 +160,17 @@ public class HdrfInMemoryState implements PartitionState {
 
   @Override
   public Map<Integer, Vertex> getAllVertices(int expectedSize) {
+    waitForAllUpdates(expectedSize);
+    Map<Integer, Vertex> copy = new HashMap<>();
+    for (ConcurrentVertex v : vertices.values()) {
+      copy.put(v.getId(), v.clone());
+    }
+
+    return copy;
+  }
+
+  @Override
+  public void waitForAllUpdates(int expectedSize) {
     int count = 1;
     while (vertices.size() < expectedSize) {
       try {
@@ -171,12 +181,6 @@ public class HdrfInMemoryState implements PartitionState {
       }
       count++;
     }
-    Map<Integer, Vertex> copy = new HashMap<>();
-    for (ConcurrentVertex v : vertices.values()) {
-      copy.put(v.getId(), v.clone());
-    }
-
-    return copy;
   }
 
 }

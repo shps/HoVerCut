@@ -25,6 +25,13 @@ public interface PartitionState {
    *
    */
   public void applyState();
+  
+  /**
+   * 
+   * 
+   * @param expectedSize
+   */
+  public void waitForAllUpdates(int expectedSize); //TODO: This will be removed.
 
   /**
    * This method can be implemented to release all the resources created by the
