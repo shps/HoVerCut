@@ -49,8 +49,7 @@ public class GraphPartitioner {
     for (int i = 0; i < commands.numExperiments; i++) {
       runExperiments(commands, i);
     }
-//    output.writeToFile(settings);
-    System.out.println();
+    output.writeToFile(commands.output, commands.append);
   }
 
   private static void runExperiments(PartitionerInputCommands commands, int num) throws IOException, Exception {
@@ -71,7 +70,6 @@ public class GraphPartitioner {
     EdgeFileReader reader = new EdgeFileReader(settings.delimiter);
     LinkedHashSet<Edge>[] splits = reader.readSplitFile(settings.file, 1, settings.shuffle, seed);
     System.out.println(String.format("Finished reading in %d seconds.", (System.currentTimeMillis() - start) / 1000));
-    output.addSeed(start);
 
 //    if (settings.single) {
 //      //TODO: add results
