@@ -12,7 +12,7 @@ public class Test {
   public static void main(String[] args) throws SQLException, IOException, Exception {
     args = new String[]{
       "-f", "./data/datasets/twitter_combined.txt",
-      "-w", "10", "3", "3",
+      "-w", "10", "2", "3",
       "-m", "hdrf",
       "-p", "16",
       "-t", "2", "3", "3",
@@ -25,11 +25,11 @@ public class Test {
       "-append", "false", //FIXME: if appends is true it throws exception.
       "-d", "\" \"",
       "-puf", "1",
-      "-rs", "2", "3",
+      "-rs", "0", "0",
       "-shuffle", "true",
       "-sg", "false",
       "-pg", "false",
-      "-ed", "true",
+      "-ed", "false",
       "-ne", "2",
       "-single", "false"};
 

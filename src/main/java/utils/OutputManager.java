@@ -4,8 +4,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -20,54 +23,90 @@ public class OutputManager {
 //  private final Map<Integer, Map<Integer, List<Number>>> taskLb = new LinkedHashMap<>();
 //  private final Map<Integer, Map<Integer, List<Number>>> windowTime = new LinkedHashMap<>();
 //  private final Map<Integer, Map<Integer, List<Number>>> taskTime = new LinkedHashMap<>();
-  private final List<PartitioningResult> results = new LinkedList<>();
+  private final Map<PartitioningResult, List<PartitioningResult>> results = new LinkedHashMap<>();
 
 //  private final List<Long> seeds = new LinkedList<>();
-
 //  public void addSeed(long seed) {
 //    seeds.add(seed);
 //  }
-
   /**
    * Preservers order of the results.
    *
    * @param r
    */
   public void addResult(final PartitioningResult r) {
-    results.add(r);
+    List<PartitioningResult> list;
+    if (results.containsKey(r)) {
+      list = results.get(r);
+    } else {
+      list = new LinkedList<>();
+      results.put(r, list);
+    }
+    list.add(r);
   }
 
   public void writeToFile(
     String output, boolean append) throws FileNotFoundException {
-    String file = output + "-result.csv";
-    File f2 = new File(file);
+    String file1 = output + "-result.csv";
+    String file2 = output + "-avg.csv";
+    File f1 = new File(file1);
+    File f2 = new File(file2);
     boolean shouldAppend = false;
-    if (f2.exists() && !f2.isDirectory()) {
+    if (f1.exists() && !f1.isDirectory()) {
       shouldAppend = append;
     }
-    try (PrintWriter writer = new PrintWriter(new FileOutputStream(
-      f2,
-      shouldAppend))) {
+    try (PrintWriter writer1 = new PrintWriter(new FileOutputStream(f1, shouldAppend));
+      PrintWriter writer2 = new PrintWriter(new FileOutputStream(f2, shouldAppend))) {
       if (!shouldAppend) {
-        writer.write("expriment,task,window,rs,seed,rf,lrsd,time,mvc,mec\n");
+        writer1.write("expriment,task,window,rs,seed,rf,lrsd,time,mvc,mec\n");
+        writer2.write("task,window,rs,rf,lrsd,time,mvc,mec\n");
       }
-      for (PartitioningResult r : results) {
-        writer.append(String.format("%d,%d,%d,%d,%d,%f,%f,%d,%d,%d",
-          r.experimentNumber,
+      for (List<PartitioningResult> list : results.values()) {
+        float rf = 0;
+        float lrsd = 0;
+        float time = 0;
+        int mvc = 0;
+        int mec = 0;
+        for (PartitioningResult r : list) {
+          writer1.append(String.format("%d,%d,%d,%d,%d,%f,%f,%f,%d,%d",
+            r.experimentNumber,
+            r.task,
+            r.window,
+            r.restreaming,
+            r.seed,
+            r.avgReplicationFactor,
+            r.loadRelativeStandardDeviation,
+            r.totalTime,
+            r.maxVertexCardinality,
+            r.maxEdgeCardinality));
+          writer1.append("\n");
+          rf += r.avgReplicationFactor;
+          lrsd += r.loadRelativeStandardDeviation;
+          time += r.totalTime;
+          mvc += r.maxVertexCardinality;
+          mec += r.maxEdgeCardinality;
+        }
+        int size = list.size();
+        rf = rf / size;
+        lrsd = lrsd / size;
+        time = time / size;
+        mvc = mvc / size;
+        mec = mec / size;
+        PartitioningResult r = list.get(0);
+        writer2.append(String.format("%d,%d,%d,%f,%f,%f,%d,%d",
           r.task,
           r.window,
           r.restreaming,
-          r.seed,
-          r.avgReplicationFactor,
-          r.loadRelativeStandardDeviation,
-          r.totalTime,
-          r.maxVertexCardinality,
-          r.maxEdgeCardinality));
-        writer.append("\n");
+          rf,
+          lrsd,
+          time,
+          mvc,
+          mec));
+        writer2.append("\n");
       }
-      writer.flush();
+      writer1.flush();
+      writer2.flush();
     }
-
   }
 
 //  /**
@@ -130,18 +169,18 @@ public class OutputManager {
 //
 //  public void writeToFile(PartitionsStatistics ps, PartitionerSettings settings) throws FileNotFoundException {
 //    boolean shouldAppend = false;
-//    String file = settings.output + "-result.csv";
-//    File f2 = new File(file);
-//    if (f2.exists() && !f2.isDirectory()) {
+//    String file1 = settings.output + "-result.csv";
+//    File f1 = new File(file1);
+//    if (f1.exists() && !f1.isDirectory()) {
 //      shouldAppend = settings.shouldAppend;
 //    }
-//    try (PrintWriter writer = new PrintWriter(new FileOutputStream(
-//      f2,
+//    try (PrintWriter writer1 = new PrintWriter(new FileOutputStream(
+//      f1,
 //      shouldAppend))) {
 //      if (!shouldAppend) {
-//        writer.write("nTasks,nPartitions,window,rf,lrsd,mec,mvc\n");
+//        writer1.write("nTasks,nPartitions,window,rf,lrsd,mec,mvc\n");
 //      }
-//      writer.shouldAppend(String.format("%d,%d,%d,%f,%f,%d,%d",
+//      writer1.shouldAppend(String.format("%d,%d,%d,%f,%f,%d,%d",
 //        settings.tasks,
 //        settings.k,
 //        settings.window,
@@ -149,8 +188,8 @@ public class OutputManager {
 //        ps.loadRelativeStandardDeviation(),
 //        ps.maxEdgeCardinality(),
 //        ps.maxVertexCardinality()));
-//      writer.shouldAppend("\n");
-//      writer.flush();
+//      writer1.shouldAppend("\n");
+//      writer1.flush();
 //    }
 //  }
 //  public void writeToFile(
@@ -185,7 +224,7 @@ public class OutputManager {
 //    if (f1.exists() && !f1.isDirectory()) {
 //      shouldAppend = settings.shouldAppend;
 //    }
-//    try (PrintWriter writer = new PrintWriter(new FileOutputStream(
+//    try (PrintWriter writer1 = new PrintWriter(new FileOutputStream(
 //      f1,
 //      shouldAppend))) {
 //      if (!shouldAppend) {
@@ -207,23 +246,23 @@ public class OutputManager {
 //          minP = settings.minW;
 //          maxP = settings.maxW;
 //        }
-//        writer.write(firstHeader);
+//        writer1.write(firstHeader);
 //        if (settings.single) {
 //          int taskId = 1;
 //          for (int j = 0; j <= settings.restream; j++) {
-//            writer.shouldAppend(String.format("%s%d-%d,", secondHeader, taskId, j));
+//            writer1.shouldAppend(String.format("%s%d-%d,", secondHeader, taskId, j));
 //          }
 //        }
 //        for (int i = minP; i <= maxP; i++) {
 //          int taskId = (int) Math.pow(base, i);
 //          if (settings.exactDegree) {
-//            writer.shouldAppend(String.format("%s%d-%s,", secondHeader, taskId, "ed"));
+//            writer1.shouldAppend(String.format("%s%d-%s,", secondHeader, taskId, "ed"));
 //          }
 //          for (int j = 0; j <= settings.restream; j++) {
-//            writer.shouldAppend(String.format("%s%d-%d,", secondHeader, taskId, j));
+//            writer1.shouldAppend(String.format("%s%d-%d,", secondHeader, taskId, j));
 //          }
 //        }
-//        writer.println();
+//        writer1.println();
 //      }
 //      StringBuilder sd = new StringBuilder();
 //      if (settings.single) {
@@ -235,22 +274,22 @@ public class OutputManager {
 //      Iterator<Map.Entry<Integer, Map<Integer, List<Number>>>> it1 = result.entrySet().iterator();
 //      while (it1.hasNext()) {
 //        Map.Entry<Integer, Map<Integer, List<Number>>> entry = it1.next();
-//        writer.shouldAppend(entry.getKey().toString()).shouldAppend(",");
+//        writer1.shouldAppend(entry.getKey().toString()).shouldAppend(",");
 //        Iterator<Map.Entry<Integer, List<Number>>> it2 = entry.getValue().entrySet().iterator();
 //        if (!firstRound) {
-//          writer.shouldAppend(sd.toString());
+//          writer1.shouldAppend(sd.toString());
 //        }
 //        firstRound = false;
 //        while (it2.hasNext()) {
 //          Map.Entry<Integer, List<Number>> entry2 = it2.next();
 //          for (Number rf : entry2.getValue()) {
-//            writer.shouldAppend(String.valueOf(rf)).shouldAppend(",");
+//            writer1.shouldAppend(String.valueOf(rf)).shouldAppend(",");
 //          }
 //        }
-//        writer.shouldAppend("\n");
+//        writer1.shouldAppend("\n");
 //      }
 //
-//      writer.flush();
+//      writer1.flush();
 //    } catch (FileNotFoundException ex) {
 //      Logger.getLogger(GraphPartitioner.class.getName()).log(Level.SEVERE, null, ex);
 //    }

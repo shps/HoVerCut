@@ -99,7 +99,7 @@ public class GraphPartitioner {
           OutputManager.printCommandSetup(settings);
           start = System.currentTimeMillis();
           PartitionState state = runPartitioner(settings, splits, nVertices);
-          int duration = (int) ((System.currentTimeMillis() - start) / 1000);
+          float duration = (float)(System.currentTimeMillis() - start) / (float)1000;
           PartitionsStatistics ps = new PartitionsStatistics(state, nVertices);
           OutputManager.printResults(settings.k, ps, String.format("HdrfPartitioner lambda=%f\tepsilon=%f", settings.lambda, settings.epsilon));
           if (ps.getNVertices() != nVertices) {
