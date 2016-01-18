@@ -1,25 +1,25 @@
 package se.kth.scs.partitioning;
 
+import java.util.BitSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * This class is used to keep a global state of a Vertex between multiple
- * loaders.
+ * This class is used to keep a global state of a Vertex between multiple loaders.
  *
  * @author Hooman
  */
 public class ConcurrentVertex {
 
-  private int partitions;
+  private BitSet partitions;
   private final int id;
   private final AtomicInteger pDegree;
 
-  public ConcurrentVertex(final int id) {
-    this(id, 0);
-  }
+//  public ConcurrentVertex(final int id) {
+//    this(id, new BitSet());
+//  }
 
-  public ConcurrentVertex(final int id, final int partitions) {
-    this.partitions = partitions;
+  public ConcurrentVertex(final int id, final int partitionSize) {
+    this.partitions = new BitSet(partitionSize);
     pDegree = new AtomicInteger();
     this.id = id;
   }
@@ -27,7 +27,7 @@ public class ConcurrentVertex {
   /**
    * @return the partitions
    */
-  public synchronized int getPartitions() {
+  public synchronized BitSet getPartitions() {
     return partitions;
   }
 
@@ -47,7 +47,7 @@ public class ConcurrentVertex {
 
   public synchronized void accumulate(final Vertex v) {
     this.pDegree.addAndGet(v.getDegreeDelta());
-    this.partitions = (this.partitions | v.getPartitionsDelta());
+    this.partitions.or(v.getPartitionsDelta());
   }
 
   @Override
@@ -61,6 +61,6 @@ public class ConcurrentVertex {
    * Clears partitions. Not thread-safe.
    */
   public void resetPartition() {
-    this.partitions = 0;
+    this.partitions = new BitSet(partitions.size());
   }
 }

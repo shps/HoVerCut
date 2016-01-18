@@ -1,5 +1,6 @@
 package utils;
 
+import java.util.BitSet;
 import java.util.List;
 import java.util.Map;
 import se.kth.scs.partitioning.Partition;
@@ -39,13 +40,12 @@ public class PartitionsStatistics {
     int totalReplicas = 0;
     nVertices = vertices.size();
     for (Vertex v : vertices.values()) {
-      int ps = v.getPartitions();
+      BitSet ps = v.getPartitions();
       for (Partition p : partitions) {
-        if ((ps & 1) == 1) {
+        if (ps.get(p.getId())) {
           totalReplicas++;
           nVertexPartitions[p.getId()] += 1;
         }
-        ps = ps >> 1;
       }
     }
     avgReplicationFactor = calculateReplicationFactor(totalReplicas, nVertices);
@@ -106,8 +106,7 @@ public class PartitionsStatistics {
   }
 
   /**
-   * Relative standard deviation of the number of edges hosted in the
-   * partitions.
+   * Relative standard deviation of the number of edges hosted in the partitions.
    *
    * @return
    */
@@ -125,8 +124,7 @@ public class PartitionsStatistics {
   }
 
   /**
-   * ** The number of vertices in the Partition with the max vertex
-   * cardinality.
+   * ** The number of vertices in the Partition with the max vertex cardinality.
    *
    * @return
    */

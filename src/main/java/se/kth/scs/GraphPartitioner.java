@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import se.kth.scs.partitioning.Edge;
 import se.kth.scs.partitioning.PartitionState;
 import se.kth.scs.partitioning.algorithms.hdrf.HdrfInMemoryState;
-import se.kth.scs.partitioning.algorithms.hdrf.HdrfMysqlState;
+//import se.kth.scs.partitioning.algorithms.hdrf.HdrfMysqlState;
 import se.kth.scs.partitioning.algorithms.hdrf.HdrfPartitioner;
 import se.kth.scs.partitioning.algorithms.hdrf.HdrfRemoteState;
 import utils.EdgeFileReader;
@@ -192,14 +192,14 @@ public class GraphPartitioner {
           state.releaseResources(false);
         }
         break;
-      case PartitionerInputCommands.MYSQL:
-        state = new HdrfMysqlState(
-          settings.k,
-          settings.dbUrl,
-          settings.user,
-          settings.pass,
-          settings.reset);
-        break;
+//      case PartitionerInputCommands.MYSQL:
+//        state = new HdrfMysqlState(
+//          settings.k,
+//          settings.dbUrl,
+//          settings.user,
+//          settings.pass,
+//          settings.reset);
+//        break;
       case PartitionerInputCommands.REMOTE:
         String[] url = settings.dbUrl.split(":");
         state = new HdrfRemoteState(settings.k, url[0], Integer.valueOf(url[1]), exactDegree);

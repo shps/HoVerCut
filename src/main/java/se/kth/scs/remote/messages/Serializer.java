@@ -69,7 +69,7 @@ public class Serializer {
     for (Vertex v : vertices) {
       buffer.put(v.getId());
       buffer.put(v.getpDegree());
-      buffer.put(v.getPartitions());
+//      buffer.put(v.getPartitions());
     }
     write(output, size, response);
   }

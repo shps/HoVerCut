@@ -1,26 +1,28 @@
 package se.kth.scs.partitioning;
 
+import java.util.BitSet;
+
 /**
- * This class is used to keep track of local state of a vertex in
- * a loader.
+ * This class is used to keep track of local state of a vertex in a loader.
  *
  * @author Hooman
  */
 public class Vertex {
 
-  private int partitions;
+  private BitSet partitions;
   private final int id;
   private int pDegree;
   private int degreeDelta = 0;
-  private int partitionsDelta;
+  private BitSet partitionsDelta;
 
-  public Vertex(int id, int partitions) {
+  public Vertex(int id, BitSet partitions) {
     this.partitions = partitions;
+    this.partitionsDelta = new BitSet(partitions.size());
     this.id = id;
   }
 
   public Vertex(int id) {
-    this(id, 0);
+    this(id, new BitSet());
   }
 
   /**
@@ -30,7 +32,8 @@ public class Vertex {
    */
   public boolean addPartition(short p) {
     if (!this.containsPartition(p)) {
-      setPartitionsDelta(partitionsDelta | (1 << p));
+      partitionsDelta.set(p);
+      setPartitionsDelta(partitionsDelta);
       return true;
     }
 
@@ -40,8 +43,11 @@ public class Vertex {
   /**
    * @return the partitions
    */
-  public int getPartitions() {
-    return (partitions | partitionsDelta);
+  public BitSet getPartitions() {
+    BitSet bs = new BitSet();
+    bs.or(partitions);
+    bs.or(partitionsDelta);
+    return bs;
   }
 
   /**
@@ -79,12 +85,12 @@ public class Vertex {
   /**
    * @return the partitionsDelta
    */
-  public int getPartitionsDelta() {
+  public BitSet getPartitionsDelta() {
     return partitionsDelta;
   }
 
   public boolean containsPartition(short pid) {
-    return (((partitions | partitionsDelta) >> pid) & 1) == 1;
+    return partitions.get(pid) | partitionsDelta.get(pid);
   }
 
   /**
@@ -97,14 +103,14 @@ public class Vertex {
   /**
    * @param partitionsDelta the partitionsDelta to set
    */
-  public void setPartitionsDelta(int partitionsDelta) {
+  public void setPartitionsDelta(BitSet partitionsDelta) {
     this.partitionsDelta = partitionsDelta;
   }
 
   /**
    * @param partitions the partitions to set
    */
-  public void setPartitions(int partitions) {
+  public void setPartitions(BitSet partitions) {
     this.partitions = partitions;
   }
 }

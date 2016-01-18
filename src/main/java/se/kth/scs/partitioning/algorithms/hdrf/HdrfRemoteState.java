@@ -86,7 +86,7 @@ public class HdrfRemoteState implements PartitionState {
     for (int i = 0; i < r.length; i = i + 3) {
       Vertex v = new Vertex(r[i]);
       v.setpDegree(r[i + 1]);
-      v.setPartitions(r[i + 2]);
+//      v.setPartitions(r[i + 2]);
       vertices.put(v.getId(), v);
     }
     return vertices;
@@ -129,7 +129,7 @@ public class HdrfRemoteState implements PartitionState {
       for (Vertex v : vs) {
         vertices[i] = v.getId();
         vertices[i + 1] = v.getDegreeDelta();
-        vertices[i + 2] = v.getPartitionsDelta();
+//        vertices[i + 2] = v.getPartitionsDelta();
         i = i + 3;
       }
       Serializer.serializeRequest(output, Protocol.VERTICES_WRITE_REQUEST, vertices);

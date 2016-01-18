@@ -60,7 +60,7 @@ public class ServerStorage {
     for (ConcurrentVertex v : vertices.values()) {
       array[i] = v.getId();
       array[i + 1] = v.getpDegree();
-      array[i + 2] = v.getPartitions();
+//      array[i + 2] = v.getPartitions();
       i = i + 3;
     }
 
@@ -122,7 +122,7 @@ public class ServerStorage {
     for (int i = 0; i < vertices.length; i = i + 3) {
       Vertex v = new Vertex(vertices[i]);
       v.setDegreeDelta(vertices[i + 1]);
-      v.setPartitionsDelta(vertices[i + 2]);
+//      v.setPartitionsDelta(vertices[i + 2]);
       putVertex(v);
     }
   }
