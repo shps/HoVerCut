@@ -188,7 +188,7 @@ public class HdrfRemoteState implements PartitionState {
 
   private Socket getClient() throws IOException {
     Socket c = clients.get();
-    if (c == null) {
+    if (c == null || c.isClosed()) {
       c = new Socket(ip, port);
       clients.set(c);
     }
