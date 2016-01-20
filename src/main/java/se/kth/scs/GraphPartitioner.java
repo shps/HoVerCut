@@ -187,7 +187,7 @@ public class GraphPartitioner {
     switch (settings.storage) {
       case PartitionerInputCommands.IN_MEMORY:
         if (state == null || !exactDegree) {
-          state = new HdrfInMemoryState(settings.k);
+          state = new HdrfInMemoryState(settings.k, settings.tasks);
         } else {
           state.releaseResources(false);
         }

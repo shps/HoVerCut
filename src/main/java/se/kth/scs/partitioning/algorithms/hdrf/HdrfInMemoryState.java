@@ -19,12 +19,16 @@ import se.kth.scs.partitioning.Vertex;
  */
 public class HdrfInMemoryState implements PartitionState {
 
-  private final ConcurrentHashMap<Integer, ConcurrentVertex> vertices = new ConcurrentHashMap<>(); // Holds partial degree of each vertex.
-  private final ConcurrentHashMap<Short, ConcurrentPartition> partitions = new ConcurrentHashMap<>();
+  private final int INIT_CAPACITY = 12000000;
+  private final float LOAD_FACTOR = 0.75f;
+  private final ConcurrentHashMap<Integer, ConcurrentVertex> vertices; // Holds partial degree of each vertex.
+  private final ConcurrentHashMap<Short, ConcurrentPartition> partitions;
   private final short k;
 
-  public HdrfInMemoryState(final short k) {
+  public HdrfInMemoryState(final short k, final int nThreads) {
     this.k = k;
+    vertices = new ConcurrentHashMap<>(INIT_CAPACITY, LOAD_FACTOR, nThreads);
+    partitions = new ConcurrentHashMap<>(k, 1, nThreads);
     initPartitions();
   }
 
