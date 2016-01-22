@@ -19,11 +19,11 @@ public class EdgefileMaker {
   private static final String OUTPUT_DELIMITER = "\t";
 
   public static void main(String args[]) throws FileNotFoundException, IOException {
-//    String input = args[0];
-//    String output = args[1];
+    String input = args[0];
+    String output = args[1];
 
-    String input = "/home/ganymedian/Desktop/kdd-results/samples/g220";
-    String output = "/home/ganymedian/Desktop/kdd-results/samples/graph220.txt";
+//    String input = "/home/ganymedian/Desktop/kdd-results/samples/g220";
+//    String output = "/home/ganymedian/Desktop/kdd-results/samples/graph220.txt";
     InputStreamReader isr;
     try (PrintWriter writer = new PrintWriter(new FileOutputStream(new File(output)))) {
       FileInputStream fis = new FileInputStream(new File(input));
