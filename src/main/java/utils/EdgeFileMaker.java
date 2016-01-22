@@ -13,7 +13,7 @@ import java.io.PrintWriter;
  *
  * @author Hooman
  */
-public class EdgefileMaker {
+public class EdgeFileMaker {
 
   private static final String INPUT_DELIMITER = " ";
   private static final String OUTPUT_DELIMITER = "\t";
