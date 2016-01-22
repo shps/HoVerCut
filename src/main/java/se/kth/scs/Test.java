@@ -17,7 +17,7 @@ public class Test {
       "-p", "16",
       "-t", "2", "3", "3",
       //            "-reset", "true",
-      "-s", "memory",
+      "-s", "remote",
       "-db", "localhost:4444",
       "-user", "root",
       "-pass", "",
