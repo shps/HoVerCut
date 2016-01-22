@@ -1,4 +1,4 @@
-package utils;
+package se.kth.scs.utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;

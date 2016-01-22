@@ -1,4 +1,4 @@
-package utils;
+package se.kth.scs.utils;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

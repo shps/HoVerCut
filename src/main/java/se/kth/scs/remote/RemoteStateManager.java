@@ -7,7 +7,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
-import utils.StorageInputCommands;
+import se.kth.scs.utils.StorageInputCommands;
 
 /**
  * The main class to run the remote state storage. The remote state storage,

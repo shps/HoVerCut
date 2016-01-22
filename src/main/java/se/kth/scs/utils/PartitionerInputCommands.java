@@ -1,4 +1,4 @@
-package utils;
+package se.kth.scs.utils;
 
 import com.beust.jcommander.IParameterValidator;
 import com.beust.jcommander.Parameter;

@@ -13,12 +13,12 @@ import se.kth.scs.partitioning.algorithms.hdrf.HdrfInMemoryState;
 import se.kth.scs.partitioning.algorithms.hdrf.HdrfMysqlState;
 import se.kth.scs.partitioning.algorithms.hdrf.HdrfPartitioner;
 import se.kth.scs.partitioning.algorithms.hdrf.HdrfRemoteState;
-import utils.EdgeFileReader;
-import utils.OutputManager;
-import utils.PartitionerInputCommands;
-import utils.PartitionerSettings;
-import utils.PartitioningResult;
-import utils.PartitionsStatistics;
+import se.kth.scs.utils.EdgeFileReader;
+import se.kth.scs.utils.OutputManager;
+import se.kth.scs.utils.PartitionerInputCommands;
+import se.kth.scs.utils.PartitionerSettings;
+import se.kth.scs.utils.PartitioningResult;
+import se.kth.scs.utils.PartitionsStatistics;
 
 /**
  * This class is the main class to run the graph partitioning loader.
