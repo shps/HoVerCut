@@ -1,4 +1,4 @@
-package se.kth.scs.partitioning.algorithms.hdrf;
+package se.kth.scs.partitioning.algorithms.hovercut;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;

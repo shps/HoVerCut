@@ -1,4 +1,4 @@
-package se.kth.scs.partitioning.algorithms.hdrf;
+package se.kth.scs.partitioning.algorithms.hovercut;
 
 import com.mysql.jdbc.Connection;
 import java.sql.PreparedStatement;
@@ -19,15 +19,15 @@ import se.kth.scs.partitioning.Vertex;
  *
  * @author Hooman
  */
-public class HdrfMySqlQueries {
+public class HovercutMySqlQueries {
 
   public static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-  public static final String DEFAULT_DB_URL = "jdbc:mysql://localhost/hdrf";
+  public static final String DEFAULT_DB_URL = "jdbc:mysql://localhost/hovercut";
   public static final String DEFAULT_USER = "root";
   public static final String DEFAULT_PASS = "";
   // Database structure
 
-  public static final String DB = "hdrf";
+  public static final String DB = "hovercut";
   public static final String VERTEX_PARTITION = "vertex_partition";
   public static final String PARTITIONS = "partitions";
   public static final String VERTICES = "vertices";

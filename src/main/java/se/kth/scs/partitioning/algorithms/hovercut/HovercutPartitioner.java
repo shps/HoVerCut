@@ -1,4 +1,4 @@
-package se.kth.scs.partitioning.algorithms.hdrf;
+package se.kth.scs.partitioning.algorithms.hovercut;
 
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -6,12 +6,13 @@ import se.kth.scs.partitioning.Edge;
 import se.kth.scs.partitioning.PartitionState;
 
 /**
- * This class is an implementation of a multi-loader HDRF. The first HDRF partitioning method is a single loader, and it
+ * This class is an implementation of HoVerCut(A Horizontally and Vertically scalable streaming graph Vertex-Cut partitioner). 
+ * To implement HoVerCut we inspire a greedy heuristic from HDRF partitioning algorithm that 
  * is published as: Petroni, Fabio, et al. "HDRF: Stream-Based Partitioning for Power-Law Graphs."
  *
  * @author Hooman
  */
-public class HdrfPartitioner {
+public class HovercutPartitioner {
 
   public static final double DEFAULT_LAMBDA = 1;
   public static final double DEFAULT_EPSILON = 1;
@@ -42,10 +43,10 @@ public class HdrfPartitioner {
     boolean exactDegree) {
     System.out.println("Starts partitioning...");
     int nTasks = edges.length;
-    HdrfPartitionerTask[] tasks = new HdrfPartitionerTask[nTasks];
+    Subpartitioner[] tasks = new Subpartitioner[nTasks];
     Thread[] threads = new Thread[nTasks];
     for (int i = 0; i < nTasks; i++) {
-      tasks[i] = new HdrfPartitionerTask(
+      tasks[i] = new Subpartitioner(
         hState,
         edges[i],
         lambda,

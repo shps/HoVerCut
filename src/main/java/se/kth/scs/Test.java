@@ -13,7 +13,6 @@ public class Test {
     args = new String[]{
       "-f", "./data/datasets/twitter_combined.txt",
       "-w", "10", "2", "3",
-      "-m", "hdrf",
       "-p", "16",
       "-t", "2", "3", "3",
       //            "-reset", "true",

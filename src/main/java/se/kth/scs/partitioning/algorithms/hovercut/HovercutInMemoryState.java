@@ -1,4 +1,4 @@
-package se.kth.scs.partitioning.algorithms.hdrf;
+package se.kth.scs.partitioning.algorithms.hovercut;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,13 +17,13 @@ import se.kth.scs.partitioning.Vertex;
  *
  * @author Hooman
  */
-public class HdrfInMemoryState implements PartitionState {
+public class HovercutInMemoryState implements PartitionState {
 
   private final ConcurrentHashMap<Integer, ConcurrentVertex> vertices = new ConcurrentHashMap<>(); // Holds partial degree of each vertex.
   private final ConcurrentHashMap<Short, ConcurrentPartition> partitions = new ConcurrentHashMap<>();
   private final short k;
 
-  public HdrfInMemoryState(final short k) {
+  public HovercutInMemoryState(final short k) {
     this.k = k;
     initPartitions();
   }

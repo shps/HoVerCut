@@ -6,14 +6,12 @@ import com.beust.jcommander.ParameterException;
 import java.util.List;
 
 /**
- * This class provides all the commands available to user to run the
- * multi-loader HDRFS application.
+ * This class provides all the commands available to user to run HoVerCut partitioner.
  *
  * @author Hooman
  */
 public class PartitionerInputCommands {
 
-  public final static String HDRF = "hdrf";
   public final static String IN_MEMORY = "memory";
   public final static String MYSQL = "mysql";
   public final static String REMOTE = "remote";
@@ -36,13 +34,10 @@ public class PartitionerInputCommands {
   @Parameter(names = {"-tasks", "-t"}, description = "Number of tasks (threads): (1)base (2)min exponent (3)max exponent.", arity = 3, required = true)
   public List<Integer> nTasks;
 
-  @Parameter(names = {"-method", "-m"}, description = "Partitioning method.", validateWith = PartitionerValidator.class, required = true)
-  public String method;
-
-  @Parameter(names = {"-lambda"}, description = "Lambda value for HDRF strategy.")
+  @Parameter(names = {"-lambda"}, description = "Lambda value for Balance Score.")
   public double lambda = 1;
 
-  @Parameter(names = {"-epsilon"}, description = "Epsilon value for HDRF strategy.")
+  @Parameter(names = {"-epsilon"}, description = "Epsilon value for Epsilon for Balance Score.")
   public double epsilon = 1;
 
   @Parameter(names = {"-partitions", "-p"}, description = "Number of partitions.", required = true)
@@ -90,20 +85,6 @@ public class PartitionerInputCommands {
   //It's not implemented yet. It was implemented but removed.
   @Parameter(names = {"-delay"}, description = "Delay to add after every transaction with storage.", arity = 2)
   public List<Integer> delay;
-
-  public static class PartitionerValidator implements IParameterValidator {
-
-    @Override
-    public void validate(String name, String value) throws ParameterException {
-      switch (value) {
-        case HDRF:
-          break;
-        default:
-          throw new ParameterException(String.format("Partitioning method %s is not supported!", value));
-
-      }
-    }
-  }
 
   public static class StateStorageValidator implements IParameterValidator {
 

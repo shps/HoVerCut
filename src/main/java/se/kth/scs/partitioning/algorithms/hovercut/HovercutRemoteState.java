@@ -1,4 +1,4 @@
-package se.kth.scs.partitioning.algorithms.hdrf;
+package se.kth.scs.partitioning.algorithms.hovercut;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -21,14 +21,14 @@ import se.kth.scs.remote.messages.Serializer;
  *
  * @author Hooman
  */
-public class HdrfRemoteState implements PartitionState {
+public class HovercutRemoteState implements PartitionState {
 
   private final short k;
   private final String ip;
   private final int port;
   private final ThreadLocal<Socket> clients = new ThreadLocal<>();
 
-  public HdrfRemoteState(short k, String ip, int port, boolean exactDegree) throws IOException {
+  public HovercutRemoteState(short k, String ip, int port, boolean exactDegree) throws IOException {
     this.k = k;
     this.ip = ip;
     this.port = port;

@@ -1,4 +1,4 @@
-package se.kth.scs.partitioning.algorithms.hdrf;
+package se.kth.scs.partitioning.algorithms.hovercut;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,7 +17,7 @@ import se.kth.scs.partitioning.Vertex;
  *
  * @author Ganymedian
  */
-public class HdrfPartitionerTask implements Runnable {
+public class Subpartitioner implements Runnable {
 
   private LinkedHashSet<Edge> edges;
   private final double lambda;
@@ -32,11 +32,11 @@ public class HdrfPartitionerTask implements Runnable {
 
   private final LinkedList<Edge>[] assignments;
 
-  public HdrfPartitionerTask(PartitionState state, LinkedHashSet<Edge> edges, double lambda, double epsilon, int windowSize) {
+  public Subpartitioner(PartitionState state, LinkedHashSet<Edge> edges, double lambda, double epsilon, int windowSize) {
     this(state, edges, lambda, epsilon, windowSize, 0, 0, false, false);
   }
 
-  public HdrfPartitionerTask(
+  public Subpartitioner(
     PartitionState state,
     LinkedHashSet<Edge> edges,
     double lambda,
@@ -50,7 +50,7 @@ public class HdrfPartitionerTask implements Runnable {
 
   }
 
-  public HdrfPartitionerTask(
+  public Subpartitioner(
     PartitionState state,
     LinkedHashSet<Edge> edges,
     double lambda,
@@ -78,7 +78,7 @@ public class HdrfPartitionerTask implements Runnable {
   }
 
   /**
-   * HDRF (High-Degree Replicated First) partitioning.
+   * 
    *
    * @return
    */
@@ -163,7 +163,7 @@ public class HdrfPartitionerTask implements Runnable {
     double thetaV2 = 1 - thetaV1;
 
     // Compute C score for each partition.
-    double maxChdrf = Long.MIN_VALUE;
+    double maxScore = Long.MIN_VALUE;
     Partition maxPartition = null;
 
     int maxSize = Integer.MIN_VALUE;
@@ -179,12 +179,12 @@ public class HdrfPartitionerTask implements Runnable {
     }
 
     for (Partition p : partitions) {
-      double cRep = computeCReplication(p, v1, v2, thetaV1, thetaV2);
-      double cBal = computeCBalance(p, maxSize, minSize, lambda, epsilon);
+      double sRep = computeReplicationScore(p, v1, v2, thetaV1, thetaV2);
+      double sBal = computeBalanceScore(p, maxSize, minSize, lambda, epsilon);
 
-      double cHdrf = cRep + cBal;
-      if (cHdrf > maxChdrf) {
-        maxChdrf = cHdrf;
+      double score = sRep + sBal;
+      if (score > maxScore) {
+        maxScore = score;
         maxPartition = p;
       }
     }
@@ -200,19 +200,19 @@ public class HdrfPartitionerTask implements Runnable {
     return maxPartition;
   }
 
-  public static double computeCReplication(Partition p, Vertex v1, Vertex v2, double thetaV1, double thetaV2) {
-    return g(p, v1, thetaV1) + g(p, v2, thetaV2);
+  public static double computeReplicationScore(Partition p, Vertex v, Vertex u, double thetaV, double thetaU) {
+    return g(p, v, thetaV) + g(p, u, thetaU);
   }
 
-  private static double g(Partition p, Vertex v1, double thetaV1) {
-    if (!v1.containsPartition(p.getId())) {
+  private static double g(Partition p, Vertex v, double thetaV) {
+    if (!v.containsPartition(p.getId())) {
       return 0;
     }
 
-    return 1 + (1 - thetaV1);
+    return 1 + (1 - thetaV);
   }
 
-  private static double computeCBalance(Partition p, int maxSize, int minSize, double lambda, double epsilon) {
+  private static double computeBalanceScore(Partition p, int maxSize, int minSize, double lambda, double epsilon) {
     int edgeSize = p.getESize();
     return lambda * (maxSize - edgeSize) / (epsilon + maxSize - minSize);
   }

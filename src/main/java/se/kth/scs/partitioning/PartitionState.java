@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * The interface for maintaining state of the multi-loader HDRF.
+ * The interface for maintaining state of the HoVerCut.
  *
  * @author Hooman
  */

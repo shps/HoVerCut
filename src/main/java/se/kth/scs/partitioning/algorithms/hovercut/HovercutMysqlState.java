@@ -1,4 +1,4 @@
-package se.kth.scs.partitioning.algorithms.hdrf;
+package se.kth.scs.partitioning.algorithms.hovercut;
 
 import com.mysql.jdbc.Connection;
 import java.sql.DriverManager;
@@ -16,7 +16,7 @@ import se.kth.scs.partitioning.Vertex;
  *
  * @author Hooman
  */
-public class HdrfMysqlState implements PartitionState {
+public class HovercutMysqlState implements PartitionState {
 
 //    private final Connection con; // TODO: Support for multiple connections, one per thread.
   private final short k; // Number of partitions. The partition ID must be from 0 up to k.
@@ -25,7 +25,7 @@ public class HdrfMysqlState implements PartitionState {
   private final String dbPass;
   private final ThreadLocal<Connection> cons = new ThreadLocal<>();
 
-  public HdrfMysqlState(short k, String dbUrl, String dbUser, String dbPass, boolean clearDb) throws SQLException {
+  public HovercutMysqlState(short k, String dbUrl, String dbUser, String dbPass, boolean clearDb) throws SQLException {
     this.k = k;
     this.dbUrl = dbUrl;
     this.dbUser = dbUser;
@@ -33,13 +33,13 @@ public class HdrfMysqlState implements PartitionState {
     Connection con = createConnection(dbUrl, dbUser, dbPass);
 //        con.setAutoCommit(false);
     if (clearDb) {
-      HdrfMySqlQueries.clearAllTables(con);
+      HovercutMySqlQueries.clearAllTables(con);
       List<Partition> partitions = new ArrayList<>(k);
       for (short i = 0; i < k; i++) {
         Partition p = new Partition(i);
         partitions.add(p);
       }
-      HdrfMySqlQueries.putPartitions(partitions, con);
+      HovercutMySqlQueries.putPartitions(partitions, con);
       con.close();
 //            con.commit();
     }
@@ -88,7 +88,7 @@ public class HdrfMysqlState implements PartitionState {
     Vertex v = null;
     try {
       Connection con = getConnection();
-      v = HdrfMySqlQueries.getVertex(vid, con);
+      v = HovercutMySqlQueries.getVertex(vid, con);
     } catch (SQLException ex) {
       ex.printStackTrace();
     }
@@ -101,7 +101,7 @@ public class HdrfMysqlState implements PartitionState {
     Map<Integer, Vertex> vertices = null;
     try {
       Connection con = getConnection();
-      vertices = HdrfMySqlQueries.getVertices(vids, con);
+      vertices = HovercutMySqlQueries.getVertices(vids, con);
     } catch (SQLException ex) {
       ex.printStackTrace();
     }
@@ -114,7 +114,7 @@ public class HdrfMysqlState implements PartitionState {
     Map<Integer, Vertex> vertices = null;
     try {
       Connection con = getConnection();
-      vertices = HdrfMySqlQueries.getAllVertices(con);
+      vertices = HovercutMySqlQueries.getAllVertices(con);
     } catch (SQLException ex) {
       ex.printStackTrace();
     }
@@ -126,7 +126,7 @@ public class HdrfMysqlState implements PartitionState {
   public void putVertex(Vertex v) {
     try {
       Connection con = getConnection();
-      HdrfMySqlQueries.putVertex(v, con);
+      HovercutMySqlQueries.putVertex(v, con);
     } catch (SQLException ex) {
       ex.printStackTrace();
     }
@@ -136,7 +136,7 @@ public class HdrfMysqlState implements PartitionState {
   public void putVertices(Collection<Vertex> vs) {
     try {
       Connection con = getConnection();
-      HdrfMySqlQueries.putVertices(vs, con);
+      HovercutMySqlQueries.putVertices(vs, con);
     } catch (SQLException ex) {
       ex.printStackTrace();
     }
@@ -147,7 +147,7 @@ public class HdrfMysqlState implements PartitionState {
     Partition p = null;
     try {
       Connection con = getConnection();
-      p = HdrfMySqlQueries.getPartition(pid, con);
+      p = HovercutMySqlQueries.getPartition(pid, con);
     } catch (SQLException ex) {
       ex.printStackTrace();
     }
@@ -160,7 +160,7 @@ public class HdrfMysqlState implements PartitionState {
     List<Partition> partitions = null;
     try {
       Connection con = getConnection();
-      partitions = HdrfMySqlQueries.getPartitions(pids, con);
+      partitions = HovercutMySqlQueries.getPartitions(pids, con);
     } catch (SQLException ex) {
       ex.printStackTrace();
     }
@@ -173,7 +173,7 @@ public class HdrfMysqlState implements PartitionState {
     List<Partition> partitions = null;
     try {
       Connection con = getConnection();
-      partitions = HdrfMySqlQueries.getAllPartitions(con);
+      partitions = HovercutMySqlQueries.getAllPartitions(con);
     } catch (SQLException ex) {
       ex.printStackTrace();
     }
@@ -185,7 +185,7 @@ public class HdrfMysqlState implements PartitionState {
   public void putPartition(Partition p) {
     try {
       Connection con = getConnection();
-      HdrfMySqlQueries.putPartition(p, con);
+      HovercutMySqlQueries.putPartition(p, con);
     } catch (SQLException ex) {
       ex.printStackTrace();
     }
@@ -195,7 +195,7 @@ public class HdrfMysqlState implements PartitionState {
   public void putPartitions(List<Partition> p) {
     try {
       Connection con = getConnection();
-      HdrfMySqlQueries.putPartitions(p, con);
+      HovercutMySqlQueries.putPartitions(p, con);
     } catch (SQLException ex) {
       ex.printStackTrace();
     }

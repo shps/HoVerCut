@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.6.27, for osx10.8 (x86_64)
 --
--- Host: localhost    Database: hdrf
+-- Host: localhost    Database: hovercut
 -- ------------------------------------------------------
 -- Server version	5.6.27
 
@@ -18,8 +18,8 @@
 --
 -- Table structure for table `partitions`
 --
-CREATE DATABASE hdrf;
-USE hdrf;
+CREATE DATABASE hovercut;
+USE hovercut;
 DROP TABLE IF EXISTS `partitions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;

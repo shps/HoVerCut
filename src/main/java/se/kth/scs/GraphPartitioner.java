@@ -9,10 +9,10 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import se.kth.scs.partitioning.Edge;
 import se.kth.scs.partitioning.PartitionState;
-import se.kth.scs.partitioning.algorithms.hdrf.HdrfInMemoryState;
-import se.kth.scs.partitioning.algorithms.hdrf.HdrfMysqlState;
-import se.kth.scs.partitioning.algorithms.hdrf.HdrfPartitioner;
-import se.kth.scs.partitioning.algorithms.hdrf.HdrfRemoteState;
+import se.kth.scs.partitioning.algorithms.hovercut.HovercutInMemoryState;
+import se.kth.scs.partitioning.algorithms.hovercut.HovercutMysqlState;
+import se.kth.scs.partitioning.algorithms.hovercut.HovercutPartitioner;
+import se.kth.scs.partitioning.algorithms.hovercut.HovercutRemoteState;
 import se.kth.scs.utils.EdgeFileReader;
 import se.kth.scs.utils.OutputManager;
 import se.kth.scs.utils.PartitionerInputCommands;
@@ -40,12 +40,10 @@ public class GraphPartitioner {
       commander = new JCommander(commands);
       commander.usage();
       System.out.println(String.format("A valid command is like: %s",
-        "-f ./data/datasets/Cit-HepTh.txt -w 10 0 5 -m hdrf -p 4 -t 2 0 6 -s remote -db localhost:4444"));
+        "-f ./data/datasets/Cit-HepTh.txt -w 10 0 5 -p 4 -t 2 0 6 -s remote -db localhost:4444"));
       System.exit(1);
     }
-    if (!commands.method.equals(PartitionerInputCommands.HDRF)) {
-      throw new ParameterException("");
-    }
+
     for (int i = 0; i < commands.numExperiments; i++) {
       runExperiments(commands, i);
     }
@@ -99,9 +97,9 @@ public class GraphPartitioner {
           OutputManager.printCommandSetup(settings);
           start = System.currentTimeMillis();
           PartitionState state = runPartitioner(settings, splits, nVertices);
-          float duration = (float)(System.currentTimeMillis() - start) / (float)1000;
+          float duration = (float) (System.currentTimeMillis() - start) / (float) 1000;
           PartitionsStatistics ps = new PartitionsStatistics(state, nVertices);
-          OutputManager.printResults(settings.k, ps, String.format("HdrfPartitioner lambda=%f\tepsilon=%f", settings.lambda, settings.epsilon));
+          OutputManager.printResults(settings.k, ps, String.format("HoVerCut lambda=%f\tepsilon=%f", settings.lambda, settings.epsilon));
           if (ps.getNVertices() != nVertices) {
             //To check the correctness.
             throw new Exception(String.format("Inconsistent number of vertices file=%d\tstorage=%d.", nVertices, ps.getNVertices()));
@@ -132,7 +130,7 @@ public class GraphPartitioner {
       System.out.println("Starts exact degree computation...");
       long edStart = System.currentTimeMillis();
       state = prepareState(settings, null, false);
-      HdrfPartitioner.computeExactDegrees(state, splits);
+      HovercutPartitioner.computeExactDegrees(state, splits);
       //TODO: This should be removed.
       state.waitForAllUpdates(nVertices);
       state.releaseTaskResources();
@@ -154,7 +152,7 @@ public class GraphPartitioner {
         }
         outputAssignments = null;
       }
-      outputAssignments = HdrfPartitioner.partitionWithWindow(
+      outputAssignments = HovercutPartitioner.partitionWithWindow(
         state,
         splits,
         settings.lambda,
@@ -187,13 +185,13 @@ public class GraphPartitioner {
     switch (settings.storage) {
       case PartitionerInputCommands.IN_MEMORY:
         if (state == null || !exactDegree) {
-          state = new HdrfInMemoryState(settings.k);
+          state = new HovercutInMemoryState(settings.k);
         } else {
           state.releaseResources(false);
         }
         break;
       case PartitionerInputCommands.MYSQL:
-        state = new HdrfMysqlState(
+        state = new HovercutMysqlState(
           settings.k,
           settings.dbUrl,
           settings.user,
@@ -202,7 +200,7 @@ public class GraphPartitioner {
         break;
       case PartitionerInputCommands.REMOTE:
         String[] url = settings.dbUrl.split(":");
-        state = new HdrfRemoteState(settings.k, url[0], Integer.valueOf(url[1]), exactDegree);
+        state = new HovercutRemoteState(settings.k, url[0], Integer.valueOf(url[1]), exactDegree);
         break;
       default:
         throw new ParameterException("");

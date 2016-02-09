@@ -13,7 +13,6 @@ public class PartitionerSettings {
   public String delimiter;
   public int window;
   public int frequency;
-  public String method;
   public double lambda;
   public double epsilon;
   public short k;
@@ -58,7 +57,6 @@ public class PartitionerSettings {
     delimiter = settings.delimiter;
     window = settings.window;
     frequency = settings.frequency;
-    method = settings.method;
     lambda = settings.lambda;
     epsilon = settings.lambda;
     k = settings.k;
@@ -87,7 +85,6 @@ public class PartitionerSettings {
     dbUrl = commands.dbUrl;
     user = commands.user;
     pass = commands.pass;
-    method = commands.method;
     lambda = commands.lambda;
     epsilon = commands.epsilon;
     delay = commands.delay;
@@ -139,23 +136,7 @@ public class PartitionerSettings {
     this.window = window;
     return this;
   }
-
-  /**
-   * @return the method
-   */
-  public String getMethod() {
-    return method;
-  }
-
-  /**
-   * @param method the method to set
-   * @return
-   */
-  public PartitionerSettings setMethod(String method) {
-    this.method = method;
-    return this;
-  }
-
+  
   /**
    * @return the lambda
    */
