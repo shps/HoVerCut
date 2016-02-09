@@ -16,11 +16,11 @@ public class Test {
       "-p", "16",
       "-t", "2", "3", "3",
       //            "-reset", "true",
-      "-s", "remote",
+      "-s", "memory",
       "-db", "localhost:4444",
       "-user", "root",
       "-pass", "",
-      "-output", "/Users/Ganymedian/Desktop/results/hdrf",
+      "-output", "/Users/Ganymedian/Desktop/results/hovercut",
       "-append", "false", //FIXME: if appends is true it throws exception.
       "-d", "\" \"",
       "-puf", "1",
