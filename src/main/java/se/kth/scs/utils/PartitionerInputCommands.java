@@ -12,12 +12,17 @@ import java.util.List;
  */
 public class PartitionerInputCommands {
 
+  public final static String HDRF = "hdrf";
+  public final static String GREEDY = "greedy";
   public final static String IN_MEMORY = "memory";
   public final static String MYSQL = "mysql";
   public final static String REMOTE = "remote";
 
   @Parameter(names = {"-file", "-f"}, description = "Directoy of the graph file.", required = true)
   public String file;
+  
+  @Parameter(names = {"-a"}, description = "Algorithm [hdrf, greedy].", required = false)
+  public String algorithm = HDRF;
 
   @Parameter(names = {"-window", "-w"}, description = "Window size: (1)base (2)min exponent (3)max exponent.", arity = 3, required = true)
   public List<Integer> window;

@@ -9,10 +9,13 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import se.kth.scs.partitioning.Edge;
 import se.kth.scs.partitioning.PartitionState;
-import se.kth.scs.partitioning.algorithms.hovercut.HovercutInMemoryState;
-import se.kth.scs.partitioning.algorithms.hovercut.HovercutMysqlState;
-import se.kth.scs.partitioning.algorithms.hovercut.HovercutPartitioner;
-import se.kth.scs.partitioning.algorithms.hovercut.HovercutRemoteState;
+import se.kth.scs.partitioning.heuristics.Hdrf;
+import se.kth.scs.partitioning.heuristics.Greedy;
+import se.kth.scs.partitioning.heuristics.Heuristic;
+import se.kth.scs.partitioning.hovercut.HovercutInMemoryState;
+import se.kth.scs.partitioning.hovercut.HovercutMysqlState;
+import se.kth.scs.partitioning.hovercut.HovercutPartitioner;
+import se.kth.scs.partitioning.hovercut.HovercutRemoteState;
 import se.kth.scs.utils.EdgeFileReader;
 import se.kth.scs.utils.OutputManager;
 import se.kth.scs.utils.PartitionerInputCommands;
@@ -99,7 +102,13 @@ public class GraphPartitioner {
           PartitionState state = runPartitioner(settings, splits, nVertices);
           float duration = (float) (System.currentTimeMillis() - start) / (float) 1000;
           PartitionsStatistics ps = new PartitionsStatistics(state, nVertices);
-          OutputManager.printResults(settings.k, ps, String.format("HoVerCut lambda=%f\tepsilon=%f", settings.lambda, settings.epsilon));
+          String message = null;
+          if (settings.algorithm.equalsIgnoreCase(PartitionerInputCommands.HDRF)) {
+            message = String.format("HoVerCut %s, lambda=%f\tepsilon=%f", settings.algorithm, settings.lambda, settings.epsilon);
+          } else if (settings.algorithm.equalsIgnoreCase(PartitionerInputCommands.GREEDY)) {
+            message = String.format("HoVerCut %s, epsilon=%f", settings.algorithm, settings.epsilon);
+          }
+          OutputManager.printResults(settings.k, ps, message);
           if (ps.getNVertices() != nVertices) {
             //To check the correctness.
             throw new Exception(String.format("Inconsistent number of vertices file=%d\tstorage=%d.", nVertices, ps.getNVertices()));
@@ -140,6 +149,7 @@ public class GraphPartitioner {
     LinkedList<Edge>[][] outputAssignments = null;
     boolean srcGrouping = settings.srcGrouping;
     boolean exactDegree = settings.exactDegree;
+    Heuristic heuristic = buildHeuristic(settings);
     for (int i = 0; i <= settings.restream; i++) {
       state = prepareState(settings, state, exactDegree);
 
@@ -155,8 +165,7 @@ public class GraphPartitioner {
       outputAssignments = HovercutPartitioner.partitionWithWindow(
         state,
         splits,
-        settings.lambda,
-        settings.epsilon,
+        heuristic,
         settings.window,
         settings.delay.get(0),
         settings.delay.get(1),
@@ -219,5 +228,18 @@ public class GraphPartitioner {
     singleSettings.frequency = 1;
     singleSettings.exactDegree = false;
     runPartitioner(singleSettings, splits, nVertices);
+  }
+
+  private static Heuristic buildHeuristic(PartitionerSettings settings) {
+    Heuristic h = null;
+    if (settings.algorithm.equalsIgnoreCase(PartitionerInputCommands.HDRF)) {
+      h = new Hdrf(settings.lambda, settings.epsilon);
+    } else if (settings.algorithm.equalsIgnoreCase(PartitionerInputCommands.GREEDY)) {
+      h = new Greedy(settings.epsilon);
+    } else {
+      h = null;
+    }
+
+    return h;
   }
 }

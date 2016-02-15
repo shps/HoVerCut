@@ -10,6 +10,7 @@ import java.util.List;
 public class PartitionerSettings {
 
   public String file;
+  public String algorithm;
   public String delimiter;
   public int window;
   public int frequency;
@@ -54,6 +55,7 @@ public class PartitionerSettings {
 
   public void setSettings(PartitionerSettings settings) {
     file = settings.file;
+    algorithm = settings.algorithm;
     delimiter = settings.delimiter;
     window = settings.window;
     frequency = settings.frequency;
@@ -80,6 +82,7 @@ public class PartitionerSettings {
   public void setSettings(PartitionerInputCommands commands) {
     k = (short) commands.nPartitions;
     file = commands.file;
+    algorithm = commands.algorithm;
     output = commands.output;
     storage = commands.storage;
     dbUrl = commands.dbUrl;
@@ -136,7 +139,7 @@ public class PartitionerSettings {
     this.window = window;
     return this;
   }
-  
+
   /**
    * @return the lambda
    */

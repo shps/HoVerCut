@@ -1,4 +1,4 @@
-package se.kth.scs.partitioning.algorithms.hovercut;
+package se.kth.scs.partitioning.hovercut;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

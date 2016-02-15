@@ -1,9 +1,10 @@
-package se.kth.scs.partitioning.algorithms.hovercut;
+package se.kth.scs.partitioning.hovercut;
 
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import se.kth.scs.partitioning.Edge;
 import se.kth.scs.partitioning.PartitionState;
+import se.kth.scs.partitioning.heuristics.Heuristic;
 
 /**
  * This class is an implementation of HoVerCut(A Horizontally and Vertically scalable streaming graph Vertex-Cut partitioner). 
@@ -21,8 +22,7 @@ public class HovercutPartitioner {
    *
    * @param hState
    * @param edges
-   * @param lambda
-   * @param epsilon
+   * @param heuristic
    * @param windowSize
    * @param minDelay
    * @param maxDelay
@@ -33,8 +33,7 @@ public class HovercutPartitioner {
    */
   public static LinkedList<Edge>[][] partitionWithWindow(
     PartitionState hState, LinkedHashSet<Edge> edges[],
-    double lambda,
-    double epsilon,
+    Heuristic heuristic,
     int windowSize,
     int minDelay,
     int maxDelay,
@@ -49,8 +48,7 @@ public class HovercutPartitioner {
       tasks[i] = new Subpartitioner(
         hState,
         edges[i],
-        lambda,
-        epsilon,
+        heuristic,
         windowSize,
         minDelay,
         maxDelay,

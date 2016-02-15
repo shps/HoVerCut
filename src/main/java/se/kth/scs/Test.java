@@ -1,5 +1,6 @@
 package se.kth.scs;
 
+
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -12,9 +13,10 @@ public class Test {
   public static void main(String[] args) throws SQLException, IOException, Exception {
     args = new String[]{
       "-f", "./data/datasets/twitter_combined.txt",
-      "-w", "10", "2", "3",
+      "-a", "greedy",
+      "-w", "10", "0", "0",
       "-p", "16",
-      "-t", "2", "3", "3",
+      "-t", "2", "0", "0",
       //            "-reset", "true",
       "-s", "memory",
       "-db", "localhost:4444",
@@ -29,7 +31,7 @@ public class Test {
       "-sg", "false",
       "-pg", "false",
       "-ed", "false",
-      "-ne", "2",
+      "-ne", "1",
       "-single", "false"};
 
     GraphPartitioner.main(args);

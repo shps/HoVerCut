@@ -1,4 +1,4 @@
-package se.kth.scs.partitioning.algorithms.hovercut;
+package se.kth.scs.partitioning.hovercut;
 
 import com.mysql.jdbc.Connection;
 import java.sql.PreparedStatement;
