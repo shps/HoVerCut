@@ -22,7 +22,7 @@ public class Greedy implements Heuristic {
   public Partition allocateNextEdge(Vertex v1, Vertex v2, List<Partition> partitions) {
     // Compute C score for each partition.
     double maxScore = Long.MIN_VALUE;
-//    Partition maxPartition = null;
+    Partition maxPartition = null;
 
     int maxSize = Integer.MIN_VALUE;
     int minSize = Integer.MAX_VALUE;
@@ -36,25 +36,26 @@ public class Greedy implements Heuristic {
       }
     }
 
-    List<Partition> pList = new LinkedList<>();
+//    List<Partition> pList = new LinkedList<>();
     for (Partition p : partitions) {
       double sRep = computeReplicationScore(p, v1, v2);
       double sBal = computeBalanceScore(p, maxSize, minSize, epsilon);
 
       double score = sRep + sBal;
-      if (score >= maxScore) {
-        if (score > maxScore) {
-          pList.clear();
-        }
+      if (score > maxScore) {
+//        if (score > maxScore) {
+//          pList.clear();
+//        }
         maxScore = score;
-//        maxPartition = p;
-        pList.add(p);
+        maxPartition = p;
+//        pList.add(p);
       }
     }
 
-    Random r = new Random();
-    int index = r.nextInt(pList.size());
-    return pList.get(index);
+//    Random r = new Random();
+//    int index = r.nextInt(pList.size());
+//    return pList.get(index);
+    return maxPartition;
   }
 
   public static double computeReplicationScore(Partition p, Vertex v, Vertex u) {
