@@ -32,22 +32,6 @@ public class Subpartitioner implements Runnable {
 
   private final LinkedList<Edge>[] assignments;
 
-//  public Subpartitioner(PartitionState state, LinkedHashSet<Edge> edges, double lambda, double epsilon, int windowSize) {
-//    this(state, edges, lambda, epsilon, windowSize, 0, 0, false, false);
-//  }
-//  public Subpartitioner(
-//    PartitionState state,
-//    LinkedHashSet<Edge> edges,
-//    double lambda,
-//    double epsilon,
-//    int windowSize,
-//    int minDelay,
-//    int maxDelay,
-//    boolean srcGrouping,
-//    boolean restream) {
-//    this(state, edges, lambda, epsilon, windowSize, minDelay, maxDelay, (short) 0, srcGrouping, restream);
-//
-//  }
   public Subpartitioner(
     PartitionState state,
     LinkedHashSet<Edge> edges,

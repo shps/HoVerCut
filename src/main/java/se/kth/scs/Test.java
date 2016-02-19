@@ -13,10 +13,10 @@ public class Test {
   public static void main(String[] args) throws SQLException, IOException, Exception {
     args = new String[]{
       "-f", "./data/datasets/twitter_combined.txt",
-      "-a", "greedy",
-      "-w", "10", "0", "0",
+      "-a", "hdrf",
+      "-w", "0", "3", "3",
       "-p", "16",
-      "-t", "2", "0", "0",
+      "-t", "2", "3", "3",
       //            "-reset", "true",
       "-s", "memory",
       "-db", "localhost:4444",

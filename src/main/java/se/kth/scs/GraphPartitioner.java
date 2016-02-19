@@ -86,12 +86,18 @@ public class GraphPartitioner {
       int nEdges = reader.getnEdges();
       int nVertices = reader.getnVertices();
       System.out.println(String.format("Finished resplitting in %d seconds.", (System.currentTimeMillis() - start) / 1000));
-      while (true) {
-        w = (int) Math.pow(wb, j);
-        if (w * t > nEdges) {
-          break;
-        } else if ((maxW >= 0) && (j > maxW)) {
-          break;
+      boolean stop = false;
+      while (!stop) {
+        if (wb <= 0) {
+          w = nEdges / t;
+          stop = true;
+        } else {
+          w = (int) Math.pow(wb, j);
+          if (w * t > nEdges) {
+            break;
+          } else if ((maxW >= 0) && (j > maxW)) {
+            break;
+          }
         }
         settings.window = w;
         settings.tasks = t;
@@ -218,18 +224,17 @@ public class GraphPartitioner {
     return state;
   }
 
-  private static void runSingleExperiment(PartitionerSettings settings, LinkedHashSet<Edge>[] splits, int nVertices) throws SQLException, IOException, Exception {
-    PartitionerSettings singleSettings = new PartitionerSettings();
-    singleSettings.setSettings(settings);
-    singleSettings.srcGrouping = false;
-    singleSettings.storage = PartitionerInputCommands.IN_MEMORY;
-    singleSettings.window = 1;
-    singleSettings.tasks = 1;
-    singleSettings.frequency = 1;
-    singleSettings.exactDegree = false;
-    runPartitioner(singleSettings, splits, nVertices);
-  }
-
+//  private static void runSingleExperiment(PartitionerSettings settings, LinkedHashSet<Edge>[] splits, int nVertices) throws SQLException, IOException, Exception {
+//    PartitionerSettings singleSettings = new PartitionerSettings();
+//    singleSettings.setSettings(settings);
+//    singleSettings.srcGrouping = false;
+//    singleSettings.storage = PartitionerInputCommands.IN_MEMORY;
+//    singleSettings.window = 1;
+//    singleSettings.tasks = 1;
+//    singleSettings.frequency = 1;
+//    singleSettings.exactDegree = false;
+//    runPartitioner(singleSettings, splits, nVertices);
+//  }
   private static Heuristic buildHeuristic(PartitionerSettings settings) {
     Heuristic h = null;
     if (settings.algorithm.equalsIgnoreCase(PartitionerInputCommands.HDRF)) {
