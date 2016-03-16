@@ -1,7 +1,5 @@
 # HoVerCut
-A Horizontally and Vertically scalable streaming graph Vertex-Cut partitioner
-
-HoVerCut enables to define different partitioning heuristics and executes them in a parallel scalable fashion.
+A Horizontally and Vertically scalable streaming graph Vertex-Cut partitioner. It enables to define different partitioning algorithms and executes them in a parallel scalable fashion.
 
 
 #### Input Parameters
@@ -31,3 +29,9 @@ to compute the exact degree before processing: -ed <true/false>
 delimiter of input file: -d <e.g., ",">
 
 append the results to output file: -append <true/false>
+
+
+#### Partition Selection Policy
+In HoVerCut, you can implement different partitioning algorithms as a partition selection policy. Currently, there are two partitions selection policies are implemented: HDRF and PowerGraph Greedy.
+
+In order to implement a new partition selection policy, you need to implement PartitionSelectionPolicy class.
