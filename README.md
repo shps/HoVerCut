@@ -34,4 +34,4 @@ append the results to output file: -append <true/false>
 #### Partition Selection Policy
 In HoVerCut, you can implement different partitioning algorithms as a partition selection policy. Currently, there are two partition selection policies are implemented: HDRF and PowerGraph Greedy.
 
-In order to implement a new partition selection policy, you need to implement PartitionSelectionPolicy class.
+In order to implement a new partition selection policy, you need to implement the PartitionSelectionPolicy interface.
