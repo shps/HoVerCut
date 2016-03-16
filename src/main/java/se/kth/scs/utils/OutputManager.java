@@ -56,11 +56,9 @@ public class OutputManager {
         int mvc = 0;
         int mec = 0;
         for (PartitioningResult r : list) {
-          writer1.append(String.format("%d,%d,%d,%d,%d,%f,%f,%f,%d,%d",
-            r.experimentNumber,
+          writer1.append(String.format("%d,%d,%d,%f,%f,%f,%d,%d",
             r.task,
             r.window,
-            r.restreaming,
             r.seed,
             r.avgReplicationFactor,
             r.loadRelativeStandardDeviation,
@@ -81,10 +79,9 @@ public class OutputManager {
         mvc = mvc / size;
         mec = mec / size;
         PartitioningResult r = list.get(0);
-        writer2.append(String.format("%d,%d,%d,%f,%f,%f,%d,%d",
+        writer2.append(String.format("%d,%d,%f,%f,%f,%d,%d",
           r.task,
           r.window,
-          r.restreaming,
           rf,
           lrsd,
           time,
@@ -125,7 +122,6 @@ public class OutputManager {
     sb.append("file:\t").append(settings.file).append(newLine);
     sb.append("window:\t").append(settings.window).append(newLine);
     sb.append("partitions update frequency:\t").append(settings.frequency).append(newLine);
-    sb.append("number of restreaming:\t").append(settings.restream).append(newLine);
     sb.append("partitions:\t").append(settings.k).append(newLine);
     sb.append("tasks(threads):\t").append(settings.tasks).append(newLine);
     sb.append("lambda:\t").append(settings.lambda).append(newLine);
@@ -138,13 +134,9 @@ public class OutputManager {
       sb.append("db pass:\t").append(settings.pass).append(newLine);
     }
     sb.append("output:\t").append(settings.output).append(newLine);
-    sb.append(String.format("Delay:\t min:%d\tmax=%d", settings.delay.get(0), settings.delay.get(1))).append(newLine);
     sb.append("append to output:\t").append(settings.append).append(newLine);
     sb.append("shuffle input:\t").append(settings.shuffle).append(newLine);
-    sb.append("source grouping:\t").append(settings.srcGrouping).append(newLine);
-    sb.append("partition grouping:\t").append(settings.pGrouping).append(newLine);
     sb.append("compute exact degree:\t").append(settings.exactDegree).append(newLine);
-    sb.append("+single experiment:\t").append(settings.single).append(newLine);
     System.out.println(sb.toString());
   }
 }

@@ -25,33 +25,8 @@ public class PartitionerSettings {
   public boolean reset;
   public String output;
   public boolean append;
-  public List<Integer> delay;
-  public int restream;
-  public int numExperiments;
-  public final int tb;
-  public final int minT;
-  public final int maxT;
-  public final int wb;
-  public final int minW;
-  public final int maxW;
   public boolean shuffle;
-  public boolean srcGrouping;
-  public boolean single;
-  public boolean pGrouping;
   public boolean exactDegree;
-
-  public PartitionerSettings(int tb, int minT, int maxT, int wb, int minW, int maxW) {
-    this.tb = tb;
-    this.minT = minT;
-    this.maxT = maxT;
-    this.wb = wb;
-    this.minW = minW;
-    this.maxW = maxW;
-  }
-
-  public PartitionerSettings() {
-    this(1, 1, 1, 1, 1, 1);
-  }
 
   public void setSettings(PartitionerSettings settings) {
     file = settings.file;
@@ -70,13 +45,10 @@ public class PartitionerSettings {
     reset = settings.reset;
     output = settings.output;
     append = settings.append;
-    delay = settings.delay;
-    restream = settings.restream;
     shuffle = settings.shuffle;
-    srcGrouping = settings.srcGrouping;
-    single = settings.single;
     exactDegree = settings.exactDegree;
-    numExperiments = settings.numExperiments;
+    window = settings.window;
+    tasks = settings.tasks;
   }
 
   public void setSettings(PartitionerInputCommands commands) {
@@ -90,22 +62,14 @@ public class PartitionerSettings {
     pass = commands.pass;
     lambda = commands.lambda;
     epsilon = commands.epsilon;
-    delay = commands.delay;
-    if (delay == null || delay.size() != 2) {
-      delay = new ArrayList<>(2);
-      delay.add(0);
-      delay.add(0);
-    }
     append = commands.append;
     reset = commands.reset;
     delimiter = commands.delimiter;
     frequency = commands.partitionsUpdateFrequency;
     shuffle = commands.shuffle;
-    srcGrouping = commands.srcGrouping;
-    pGrouping = commands.pGrouping;
-    single = commands.single;
     exactDegree = commands.exactDegree;
-    numExperiments = commands.numExperiments;
+    window = commands.window;
+    tasks = commands.nTasks;
   }
 
   /**
@@ -313,22 +277,6 @@ public class PartitionerSettings {
    */
   public PartitionerSettings setAppend(boolean append) {
     this.append = append;
-    return this;
-  }
-
-  /**
-   * @return the delay
-   */
-  public List<Integer> getDelay() {
-    return delay;
-  }
-
-  /**
-   * @param delay the delay to set
-   * @return
-   */
-  public PartitionerSettings setDelay(List<Integer> delay) {
-    this.delay = delay;
     return this;
   }
 

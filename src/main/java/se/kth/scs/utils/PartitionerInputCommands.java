@@ -24,20 +24,14 @@ public class PartitionerInputCommands {
   @Parameter(names = {"-a"}, description = "Algorithm [hdrf, greedy].", required = false)
   public String algorithm = HDRF;
 
-  @Parameter(names = {"-window", "-w"}, description = "Window size: (1)base (2)min exponent (3)max exponent.", arity = 3, required = true)
-  public List<Integer> window;
+  @Parameter(names = {"-window", "-w"}, description = "Window size. W <= 0 means an infinite window size.", required = true)
+  public int window;
 
   @Parameter(names = {"-puf"}, description = "Partitions update frequency comparing to the window size.")
   public int partitionsUpdateFrequency = 1;
 
-  @Parameter(names = {"-ne"}, description = "Number of experiments.")
-  public int numExperiments = 1;
-
-  @Parameter(names = {"-rs"}, description = "Number of restreamings.", arity = 2)
-  public List<Integer> restreaming;
-
-  @Parameter(names = {"-tasks", "-t"}, description = "Number of tasks (threads): (1)base (2)min exponent (3)max exponent.", arity = 3, required = true)
-  public List<Integer> nTasks;
+  @Parameter(names = {"-tasks", "-t"}, description = "Number of subpartitioners (threads).", required = true)
+  public int nTasks;
 
   @Parameter(names = {"-lambda"}, description = "Lambda value for Balance Score.")
   public double lambda = 1;
@@ -75,21 +69,8 @@ public class PartitionerInputCommands {
   @Parameter(names = {"-shuffle"}, description = "Shuffle the input edges randomly.", arity = 1)
   public boolean shuffle = true;
 
-  @Parameter(names = {"-sg"}, description = "Grouping edges based on their source ids.", arity = 1)
-  public boolean srcGrouping = false;
-
-  @Parameter(names = {"-pg"}, description = "Grouping edges based on their partitions after one iteration of streaming.", arity = 1)
-  public boolean pGrouping = false;
-
   @Parameter(names = {"-ed"}, description = "Compute the exact degree of vertices before partitioning the graph.", arity = 1)
   public boolean exactDegree = false;
-
-  @Parameter(names = {"-single"}, description = "Run a single thread experiment as a base for comparison.", arity = 1)
-  public boolean single = true;
-
-  //It's not implemented yet. It was implemented but removed.
-  @Parameter(names = {"-delay"}, description = "Delay to add after every transaction with storage.", arity = 2)
-  public List<Integer> delay;
 
   public static class StateStorageValidator implements IParameterValidator {
 

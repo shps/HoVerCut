@@ -14,25 +14,20 @@ public class Test {
     args = new String[]{
       "-f", "./data/datasets/twitter_combined.txt",
       "-a", "hdrf",
-      "-w", "0", "3", "3",
+      "-w", "10000",
       "-p", "16",
-      "-t", "2", "3", "3",
+      "-t", "2",
       //            "-reset", "true",
       "-s", "memory",
       "-db", "localhost:4444",
       "-user", "root",
       "-pass", "",
-      "-output", "/Users/Ganymedian/Desktop/results/hovercut",
-      "-append", "false", //FIXME: if appends is true it throws exception.
+//      "-output", "./results/hovercut",
+//      "-append", "false", 
       "-d", "\" \"",
       "-puf", "1",
-      "-rs", "0", "0",
-      "-shuffle", "true",
-      "-sg", "false",
-      "-pg", "false",
       "-ed", "false",
-      "-ne", "1",
-      "-single", "false"};
+      "-shuffle", "true"};
 
     GraphPartitioner.main(args);
   }

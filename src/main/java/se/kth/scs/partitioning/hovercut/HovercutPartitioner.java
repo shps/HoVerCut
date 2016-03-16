@@ -24,10 +24,7 @@ public class HovercutPartitioner {
    * @param edges
    * @param heuristic
    * @param windowSize
-   * @param minDelay
-   * @param maxDelay
    * @param pUpdateFrequency
-   * @param srcGrouping
    * @param exactDegree
    * @return
    */
@@ -35,10 +32,7 @@ public class HovercutPartitioner {
     PartitionState hState, LinkedHashSet<Edge> edges[],
     Heuristic heuristic,
     int windowSize,
-    int minDelay,
-    int maxDelay,
     int pUpdateFrequency,
-    boolean srcGrouping,
     boolean exactDegree) {
     System.out.println("Starts partitioning...");
     int nTasks = edges.length;
@@ -50,10 +44,7 @@ public class HovercutPartitioner {
         edges[i],
         heuristic,
         windowSize,
-        minDelay,
-        maxDelay,
         pUpdateFrequency,
-        srcGrouping,
         exactDegree);
       threads[i] = new Thread(tasks[i]);
     }
