@@ -4,7 +4,7 @@ A Horizontally and Vertically scalable streaming graph Vertex-Cut partitioner
 HoVerCut enables to define different partitioning heuristics and executes them in a parallel scalable fashion.
 
 
-#### Input parameters
+#### Input Parameters
 input edge file: -f <file>
 
 partitiong selection policy (partitioning algorithm): -a <e.g., hdrf or greedy>
