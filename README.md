@@ -1,5 +1,5 @@
 # HoVerCut
-A Horizontally and Vertically scalable streaming graph Vertex-Cut partitioner. It enables to define different partitioning algorithms and executes them in a parallel scalable fashion.
+A Horizontally and Vertically scalable streaming graph Vertex-Cut partitioner for boosting partitioning algorithms. It enables to define different partitioning algorithms and executes them in a parallel scalable fashion. You can deploy HoVerCut either on a single machine or across multiple machines in a distributed fashion.
 
 
 #### Input Parameters
