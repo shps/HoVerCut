@@ -10,7 +10,7 @@ import se.kth.scs.partitioning.Edge;
 import se.kth.scs.partitioning.Partition;
 import se.kth.scs.partitioning.PartitionState;
 import se.kth.scs.partitioning.Vertex;
-import se.kth.scs.partitioning.heuristics.Heuristic;
+import se.kth.scs.partitioning.policy.PartitionSelectionPolicy;
 
 /**
  * This is an implementation of a partitioning loader.
@@ -20,7 +20,7 @@ import se.kth.scs.partitioning.heuristics.Heuristic;
 public class Subpartitioner implements Runnable {
 
   private final LinkedHashSet<Edge> edges;
-  private final Heuristic heuristic;
+  private final PartitionSelectionPolicy heuristic;
   private final int windowSize;
   private final PartitionState state;
   private final int pUpdateFrequency;
@@ -31,7 +31,7 @@ public class Subpartitioner implements Runnable {
   public Subpartitioner(
     PartitionState state,
     LinkedHashSet<Edge> edges,
-    Heuristic heuristic,
+    PartitionSelectionPolicy heuristic,
     int windowSize,
     int pUpdateFrequency,
     boolean exactDegree) {

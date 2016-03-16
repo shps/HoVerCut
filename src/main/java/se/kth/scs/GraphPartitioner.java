@@ -8,9 +8,9 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import se.kth.scs.partitioning.Edge;
 import se.kth.scs.partitioning.PartitionState;
-import se.kth.scs.partitioning.heuristics.Hdrf;
-import se.kth.scs.partitioning.heuristics.Greedy;
-import se.kth.scs.partitioning.heuristics.Heuristic;
+import se.kth.scs.partitioning.policy.Hdrf;
+import se.kth.scs.partitioning.policy.Greedy;
+import se.kth.scs.partitioning.policy.PartitionSelectionPolicy;
 import se.kth.scs.partitioning.hovercut.HovercutInMemoryState;
 import se.kth.scs.partitioning.hovercut.HovercutMysqlState;
 import se.kth.scs.partitioning.hovercut.HovercutPartitioner;
@@ -114,7 +114,7 @@ public class GraphPartitioner {
       System.out.println(String.format("******** Exact degree computation finished in %d seconds **********", exactDegreeTime));
     }
     boolean exactDegree = settings.exactDegree;
-    Heuristic heuristic = buildHeuristic(settings);
+    PartitionSelectionPolicy heuristic = buildHeuristic(settings);
     state = prepareState(settings, state, exactDegree);
     HovercutPartitioner.partitionWithWindow(
       state,
@@ -158,14 +158,12 @@ public class GraphPartitioner {
     return state;
   }
 
-  private static Heuristic buildHeuristic(PartitionerSettings settings) {
-    Heuristic h = null;
+  private static PartitionSelectionPolicy buildHeuristic(PartitionerSettings settings) {
+    PartitionSelectionPolicy h = null;
     if (settings.algorithm.equalsIgnoreCase(PartitionerInputCommands.HDRF)) {
       h = new Hdrf(settings.lambda, settings.epsilon);
     } else if (settings.algorithm.equalsIgnoreCase(PartitionerInputCommands.GREEDY)) {
       h = new Greedy(settings.epsilon);
-    } else {
-      h = null;
     }
 
     return h;

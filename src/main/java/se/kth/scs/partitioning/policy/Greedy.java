@@ -1,4 +1,4 @@
-package se.kth.scs.partitioning.heuristics;
+package se.kth.scs.partitioning.policy;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -10,7 +10,7 @@ import se.kth.scs.partitioning.Vertex;
  *
  * @author Hooman
  */
-public class Greedy implements Heuristic {
+public class Greedy implements PartitionSelectionPolicy {
 
   private final double epsilon;
 

@@ -4,7 +4,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import se.kth.scs.partitioning.Edge;
 import se.kth.scs.partitioning.PartitionState;
-import se.kth.scs.partitioning.heuristics.Heuristic;
+import se.kth.scs.partitioning.policy.PartitionSelectionPolicy;
 
 /**
  * This class is an implementation of HoVerCut(A Horizontally and Vertically scalable streaming graph Vertex-Cut partitioner). 
@@ -30,7 +30,7 @@ public class HovercutPartitioner {
    */
   public static LinkedList<Edge>[][] partitionWithWindow(
     PartitionState hState, LinkedHashSet<Edge> edges[],
-    Heuristic heuristic,
+    PartitionSelectionPolicy heuristic,
     int windowSize,
     int pUpdateFrequency,
     boolean exactDegree) {

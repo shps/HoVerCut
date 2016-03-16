@@ -1,8 +1,6 @@
-package se.kth.scs.partitioning.heuristics;
+package se.kth.scs.partitioning.policy;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 import se.kth.scs.partitioning.Partition;
 import se.kth.scs.partitioning.Vertex;
 
@@ -10,7 +8,7 @@ import se.kth.scs.partitioning.Vertex;
  *
  * @author Hooman
  */
-public class Hdrf implements Heuristic {
+public class Hdrf implements PartitionSelectionPolicy {
 
   private final double lambda;
   private final double epsilon;
