@@ -19,9 +19,15 @@ Example: -f ./graph.txt -a greedy -p 16 -w 1000 -t 16
 
 #### Optional Parameters
 type of the shared state: -storage <e.g., memory or remote>
+
 address of remote shared state: -db <ip:port>
+
 output file: -output <file>
+
 shuffle the input edges: -shuffle <true/false>
+
 to compute the exact degree before processing: -ed <true/false>
+
 delimiter of input file: -d <e.g., ",">
+
 append the results to output file: -append <true/false>
