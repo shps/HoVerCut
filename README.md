@@ -6,9 +6,13 @@ HoVerCut enables to define different partitioning heuristics and executes them i
 
 #### Input parameters
 input edge file: -f <file>
+
 partitiong selection policy (partitioning algorithm): -a <e.g., hdrf or greedy>
+
 number of partitions: -p <number>
+
 window size: -w <size>
+
 number of subpartitioners (threads): -t <number>
 
 Example: -f ./graph.txt -a greedy -p 16 -w 1000 -t 16
