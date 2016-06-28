@@ -120,6 +120,7 @@ public class OutputManager {
     final String newLine = "\n";
     StringBuilder sb = new StringBuilder("Your partitionig configurations:\n");
     sb.append("file:\t").append(settings.file).append(newLine);
+    sb.append("Restreaming:\t").append(settings.rs).append(newLine);
     sb.append("window:\t").append(settings.window).append(newLine);
     sb.append("partitions update frequency:\t").append(settings.frequency).append(newLine);
     sb.append("partitions:\t").append(settings.k).append(newLine);

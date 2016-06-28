@@ -1,8 +1,5 @@
 package se.kth.scs.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  *
  * @author Hooman
@@ -12,6 +9,7 @@ public class PartitionerSettings {
   public String file;
   public String algorithm;
   public String delimiter;
+  public int rs;
   public int window;
   public int frequency;
   public double lambda;
@@ -32,6 +30,7 @@ public class PartitionerSettings {
     file = settings.file;
     algorithm = settings.algorithm;
     delimiter = settings.delimiter;
+    rs = settings.rs;
     window = settings.window;
     frequency = settings.frequency;
     lambda = settings.lambda;
@@ -68,6 +67,7 @@ public class PartitionerSettings {
     frequency = commands.partitionsUpdateFrequency;
     shuffle = commands.shuffle;
     exactDegree = commands.exactDegree;
+    rs = commands.rs;
     window = commands.window;
     tasks = commands.nTasks;
   }
@@ -93,6 +93,10 @@ public class PartitionerSettings {
    */
   public int getWindow() {
     return window;
+  }
+
+  public int getNumberOfRestreaming() {
+    return rs;
   }
 
   /**

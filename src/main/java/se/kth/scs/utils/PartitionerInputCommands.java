@@ -3,7 +3,6 @@ package se.kth.scs.utils;
 import com.beust.jcommander.IParameterValidator;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import java.util.List;
 
 /**
  * This class provides all the commands available to user to run HoVerCut partitioner.
@@ -23,6 +22,9 @@ public class PartitionerInputCommands {
   
   @Parameter(names = {"-a"}, description = "Algorithm [hdrf, greedy].", required = false)
   public String algorithm = HDRF;
+  
+  @Parameter(names = {"-restream", "-rs"}, description = "Number of restreaming.", required = false)
+  public int rs = 0;
 
   @Parameter(names = {"-window", "-w"}, description = "Window size. W <= 0 means an infinite window size.", required = true)
   public int window;

@@ -14,7 +14,7 @@ public class Test {
     args = new String[]{
       "-f", "./data/datasets/twitter_combined.txt",
       "-a", "hdrf",
-      "-w", "10000",
+      "-w", "32",
       "-p", "16",
       "-t", "2",
       //            "-reset", "true",
@@ -24,6 +24,7 @@ public class Test {
       "-pass", "",
 //      "-output", "./results/hovercut",
 //      "-append", "false", 
+      "-rs", "1",
       "-d", "\" \"",
       "-puf", "1",
       "-ed", "false",

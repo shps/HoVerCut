@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import se.kth.scs.partitioning.Edge;
 import se.kth.scs.partitioning.PartitionState;
 import se.kth.scs.partitioning.policy.Hdrf;
@@ -115,17 +116,24 @@ public class GraphPartitioner {
     }
     boolean exactDegree = settings.exactDegree;
     PartitionSelectionPolicy heuristic = buildHeuristic(settings);
-    state = prepareState(settings, state, exactDegree);
-    HovercutPartitioner.partitionWithWindow(
-      state,
-      splits,
-      heuristic,
-      settings.window,
-      settings.frequency,
-      exactDegree);
-    if (exactDegree == false) {
-      state.waitForAllUpdates(nVertices);
-      state.releaseTaskResources();
+    LinkedList<Edge> partitionSortedEdges = null;
+    for (int i = 0; i <= settings.rs; i++) {
+      state = prepareState(settings, state, exactDegree);
+      if (partitionSortedEdges != null) // if it's not the first round.
+      {
+        splits = assignEdgesToSubpartitioners(partitionSortedEdges, splits.length, splits[0].size());
+      }
+      partitionSortedEdges = HovercutPartitioner.partitionWithWindow(
+        state,
+        splits,
+        heuristic,
+        settings.window,
+        settings.frequency,
+        exactDegree);
+      if (exactDegree == false) {
+        state.waitForAllUpdates(nVertices);
+        state.releaseTaskResources();
+      }
     }
     return state;
   }
@@ -167,5 +175,30 @@ public class GraphPartitioner {
     }
 
     return h;
+  }
+
+  /**
+   * Allocates edges of partitions to the subpartitioners.
+   *
+   * @param partitions
+   * @param splits
+   * @return
+   */
+  private static LinkedHashSet<Edge>[] assignEdgesToSubpartitioners(LinkedList<Edge> partitionSortedEdges, int nTasks, int size) {
+    LinkedHashSet<Edge>[] newSplits = new LinkedHashSet[nTasks];
+
+    int counter = 0;
+    for (int i = 0; i < nTasks; i++) {
+      newSplits[i] = new LinkedHashSet<>();
+      for (int j = 0; j < size; j++) {
+        newSplits[i].add(partitionSortedEdges.get(counter));
+        counter++;
+        if (counter >= partitionSortedEdges.size()) {
+          break;
+        }
+      }
+    }
+
+    return newSplits;
   }
 }
