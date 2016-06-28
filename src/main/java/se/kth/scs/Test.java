@@ -24,7 +24,7 @@ public class Test {
       "-pass", "",
 //      "-output", "./results/hovercut",
 //      "-append", "false", 
-      "-rs", "1",
+      "-rs", "0",
       "-d", "\" \"",
       "-puf", "1",
       "-ed", "false",

@@ -64,6 +64,7 @@ public class HovercutPartitioner {
 
       }
     }
+//    System.out.println(String.format("******** edges after resplitting %d **********", outputAssignments.size()));
     return outputAssignments;
   }
 

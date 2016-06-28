@@ -123,6 +123,7 @@ public class GraphPartitioner {
       {
         splits = assignEdgesToSubpartitioners(partitionSortedEdges, splits.length, splits[0].size());
       }
+
       partitionSortedEdges = HovercutPartitioner.partitionWithWindow(
         state,
         splits,
@@ -187,13 +188,13 @@ public class GraphPartitioner {
   private static LinkedHashSet<Edge>[] assignEdgesToSubpartitioners(LinkedList<Edge> partitionSortedEdges, int nTasks, int size) {
     LinkedHashSet<Edge>[] newSplits = new LinkedHashSet[nTasks];
 
-    int counter = 0;
+//    int counter = 0;
     for (int i = 0; i < nTasks; i++) {
       newSplits[i] = new LinkedHashSet<>();
       for (int j = 0; j < size; j++) {
-        newSplits[i].add(partitionSortedEdges.get(counter));
-        counter++;
-        if (counter >= partitionSortedEdges.size()) {
+        newSplits[i].add(partitionSortedEdges.poll());
+//        counter++;
+        if (partitionSortedEdges.isEmpty()) {
           break;
         }
       }
