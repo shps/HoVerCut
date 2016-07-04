@@ -14,7 +14,7 @@ public class Test {
     args = new String[]{
       "-f", "./data/datasets/twitter_combined.txt",
       "-a", "hdrf",
-      "-w", "0", "3", "3",
+      "-w", "2", "5", "5",
       "-p", "16",
       "-t", "2", "3", "3",
       //            "-reset", "true",
@@ -26,7 +26,7 @@ public class Test {
       "-append", "false", //FIXME: if appends is true it throws exception.
       "-d", "\" \"",
       "-puf", "1",
-      "-rs", "0", "0",
+      "-rs", "0", "2",
       "-shuffle", "true",
       "-sg", "false",
       "-pg", "false",

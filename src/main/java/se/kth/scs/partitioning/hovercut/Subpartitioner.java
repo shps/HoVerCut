@@ -69,13 +69,13 @@ public class Subpartitioner implements Runnable {
     int counter = 1;
     List<Edge> edgeWindow = new LinkedList<>();
     Set<Integer> vertices = new HashSet();
-    int partitionsWindow = windowSize / pUpdateFrequency;
+//    int partitionsWindow = windowSize / pUpdateFrequency;
     for (Edge e : edges) {
       edgeWindow.add(e);
       vertices.add(e.getSrc());
       vertices.add(e.getDst());
       if (counter % windowSize == 0) {
-        allocateNextWindow(edgeWindow, vertices, state, partitionsWindow);
+        allocateNextWindow(edgeWindow, vertices, state, windowSize);
         edgeWindow.clear();
         vertices.clear();
       }
@@ -83,7 +83,7 @@ public class Subpartitioner implements Runnable {
     }
 
     if (!edgeWindow.isEmpty()) {
-      allocateNextWindow(edgeWindow, vertices, state, partitionsWindow);
+      allocateNextWindow(edgeWindow, vertices, state, windowSize);
       edgeWindow.clear();
       vertices.clear();
     }
@@ -98,8 +98,8 @@ public class Subpartitioner implements Runnable {
     final int partitionWindow) {
     Map<Integer, Vertex> vertices = state.getVertices(vIds);
     List<Partition> partitions = state.getAllPartitions();
-    int counter = 1;
-    int size = edgeWindow.size();
+//    int counter = 1;
+//    int size = edgeWindow.size();
     for (Edge e : edgeWindow) {
       Vertex u = vertices.get(e.getSrc());
       Vertex v = vertices.get(e.getDst());
@@ -120,11 +120,11 @@ public class Subpartitioner implements Runnable {
       v.addPartition(assignedPartition.getId());
       assignedPartition.incrementESize();
       this.assignments[assignedPartition.getId()].add(e);
-      if (counter % partitionWindow == 0 && counter < size) {
-        state.putPartitions(partitions);
-        partitions = state.getAllPartitions();
-      }
-      counter++;
+//      if (counter % partitionWindow == 0 && counter < size) {
+//        state.putPartitions(partitions);
+//        partitions = state.getAllPartitions();
+//      }
+//      counter++;
     }
 
     //TODO: Inconsistency if update partitions and vertices separately.
