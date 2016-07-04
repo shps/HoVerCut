@@ -152,23 +152,18 @@ public class GraphPartitioner {
       long exactDegreeTime = (int) ((System.currentTimeMillis() - edStart) / 1000);
       System.out.println(String.format("******** Exact degree computation finished in %d seconds **********", exactDegreeTime));
     }
-    LinkedList<Edge>[][] outputAssignments = null;
+    LinkedList<Edge> partitionSortedEdges = null;
     boolean srcGrouping = settings.srcGrouping;
     boolean exactDegree = settings.exactDegree;
     Heuristic heuristic = buildHeuristic(settings);
     for (int i = 0; i <= settings.restream; i++) {
       state = prepareState(settings, state, exactDegree);
 
-      if (settings.pGrouping && outputAssignments != null) {
-        for (int j = 0; j < splits.length; j++) {
-          splits[j] = new LinkedHashSet();
-          for (LinkedList l : outputAssignments[j]) {
-            splits[j].addAll(l);
-          }
-        }
-        outputAssignments = null;
+      if (settings.pGrouping && partitionSortedEdges != null) {
+        splits = assignEdgesToSubpartitioners(partitionSortedEdges, splits.length, splits[0].size());
+        partitionSortedEdges = null;
       }
-      outputAssignments = HovercutPartitioner.partitionWithWindow(
+      partitionSortedEdges = HovercutPartitioner.partitionWithWindow(
         state,
         splits,
         heuristic,
@@ -194,6 +189,22 @@ public class GraphPartitioner {
 //      }
 //    }
     return state;
+  }
+
+  private static LinkedHashSet<Edge>[] assignEdgesToSubpartitioners(LinkedList<Edge> partitionSortedEdges, int nTasks, int size) {
+    LinkedHashSet<Edge>[] newSplits = new LinkedHashSet[nTasks];
+
+    for (int i = 0; i < nTasks; i++) {
+      newSplits[i] = new LinkedHashSet<>();
+      for (int j = 0; j < size; j++) {
+        newSplits[i].add(partitionSortedEdges.poll());
+        if (partitionSortedEdges.isEmpty()) {
+          break;
+        }
+      }
+    }
+
+    return newSplits;
   }
 
   private static PartitionState prepareState(PartitionerSettings settings, PartitionState state, boolean exactDegree) throws SQLException, IOException {
@@ -236,7 +247,7 @@ public class GraphPartitioner {
 //    runPartitioner(singleSettings, splits, nVertices);
 //  }
   private static Heuristic buildHeuristic(PartitionerSettings settings) {
-    Heuristic h = null;
+    Heuristic h;
     if (settings.algorithm.equalsIgnoreCase(PartitionerInputCommands.HDRF)) {
       h = new Hdrf(settings.lambda, settings.epsilon);
     } else if (settings.algorithm.equalsIgnoreCase(PartitionerInputCommands.GREEDY)) {

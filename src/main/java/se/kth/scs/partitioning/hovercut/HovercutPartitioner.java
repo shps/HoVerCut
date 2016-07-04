@@ -7,9 +7,9 @@ import se.kth.scs.partitioning.PartitionState;
 import se.kth.scs.partitioning.heuristics.Heuristic;
 
 /**
- * This class is an implementation of HoVerCut(A Horizontally and Vertically scalable streaming graph Vertex-Cut partitioner). 
- * To implement HoVerCut we inspire a greedy heuristic from HDRF partitioning algorithm that 
- * is published as: Petroni, Fabio, et al. "HDRF: Stream-Based Partitioning for Power-Law Graphs."
+ * This class is an implementation of HoVerCut(A Horizontally and Vertically scalable streaming graph Vertex-Cut
+ * partitioner). To implement HoVerCut we inspire a greedy heuristic from HDRF partitioning algorithm that is published
+ * as: Petroni, Fabio, et al. "HDRF: Stream-Based Partitioning for Power-Law Graphs."
  *
  * @author Hooman
  */
@@ -31,7 +31,7 @@ public class HovercutPartitioner {
    * @param exactDegree
    * @return
    */
-  public static LinkedList<Edge>[][] partitionWithWindow(
+  public static LinkedList<Edge> partitionWithWindow(
     PartitionState hState, LinkedHashSet<Edge> edges[],
     Heuristic heuristic,
     int windowSize,
@@ -62,9 +62,12 @@ public class HovercutPartitioner {
     executeThreads(threads);
     System.out.println(String.format("******** Partitioning finished in %d seconds **********", (System.currentTimeMillis() - start) / 1000));
 
-    LinkedList<Edge>[][] outputAssignments = new LinkedList[nTasks][hState.getNumberOfPartitions()];
-    for (int i = 0; i < nTasks; i++) {
-      outputAssignments[i] = tasks[i].getAssignments();
+    LinkedList<Edge> outputAssignments = new LinkedList();
+    for (int i = 0; i < hState.getNumberOfPartitions(); i++) {
+      for (Subpartitioner task : tasks) {
+        outputAssignments.addAll(task.getAssignments()[i]);
+
+      }
     }
 
     return outputAssignments;
