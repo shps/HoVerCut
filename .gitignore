@@ -1,1 +1,17 @@
 /target/
+.idea
+*.iml
+workspace.xml
+
+# CMake
+cmake-build-debug/
+
+# Mongo Explorer plugin:
+
+## File-based project format:
+*.iws
+
+## Plugin-specific files:
+
+# IntelliJ
+out/
