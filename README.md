@@ -35,3 +35,15 @@ append the results to output file: -append <true/false>
 In HoVerCut, you can implement different partitioning algorithms as a partition selection policy. Currently, there are two partition selection policies are implemented: HDRF and PowerGraph Greedy.
 
 In order to implement a new partition selection policy, you need to implement the PartitionSelectionPolicy interface.
+
+#### Citing
+If you find HoVerCut useful, you may cite the paper as follows:
+
+        @inproceedings{sajjad2016boosting,
+          title={Boosting vertex-cut partitioning for streaming graphs},
+          author={Sajjad, Hooman Peiro and Payberah, Amir H and Rahimian, Fatemeh and Vlassov, Vladimir and Haridi, Seif},
+          booktitle={Big Data (BigData Congress), 2016 IEEE International Congress on},
+          pages={1--8},
+          year={2016},
+          organization={IEEE}
+        }
